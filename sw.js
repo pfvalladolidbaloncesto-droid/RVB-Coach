@@ -1,4 +1,3 @@
-// Cambia la versión cada vez que actualices el código de la app
 const CACHE_NAME = "coach-rvb-v3";
 
 const ASSETS = [
@@ -12,41 +11,45 @@ const ASSETS = [
   "./cbc.png"
 ];
 
-// Instalar y forzar el reemplazo del SW viejo sin esperar
-self.addEventListener("install", (e) => {
-  self.skipWaiting();
-  e.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => cache.addAll(ASSETS))
+// Instalación del Service Worker
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      console.log("Archivos almacenados en caché exitosamente");
+      return cache.addAll(ASSETS);
+    })
   );
+  self.skipWaiting();
 });
 
-// Activar, limpiar la caché anterior y reclamar el control de todas las pestañas abieras
-self.addEventListener("activate", (e) => {
-  e.waitUntil(
+// Activación y limpieza de cachés antiguas
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
-            return caches.delete(key); // Borra las cachés antiguas
+            return caches.delete(key);
           }
         })
       );
-    }).then(() => self.clients.claim()) // Toma control de todas las pestañas abiertas
+    })
   );
+  self.clients.claim();
 });
 
-// Estrategia Network-First para archivos HTML/JS
-self.addEventListener("fetch", (e) => {
-  e.respondWith(
-    fetch(e.request)
-      .then((networkResponse) => {
-        // Si hay red, actualiza la caché y devuelve la versión fresca
-        if (networkResponse && networkResponse.status === 200) {
-          const responseClone = networkResponse.clone();
-          caches.open(CACHE_NAME).then((cache) => cache.put(e.request, responseClone));
-        }
-        return networkResponse;
-      })
-      .catch(() => caches.match(e.request)) // Si falla la red, usa la caché
+// Intercepción de peticiones (Estrategia Network-First para la API)
+self.addEventListener("fetch", (event) => {
+  // Las llamadas a Google Script se procesan siempre por red
+  if (event.request.url.includes("script.google.com")) {
+    event.respondWith(fetch(event.request));
+    return;
+  }
+
+  // Para assets locales: Caché primero, con caída a red
+  event.respondWith(
+    caches.match(event.request).then((response) => {
+      return response || fetch(event.request);
+    })
   );
 });
