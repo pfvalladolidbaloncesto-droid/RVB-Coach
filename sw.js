@@ -4,8 +4,10 @@ const CACHE_NAME = "coach-rvb-v2";
 const ASSETS = [
   "./",
   "./index.html",
+  "./menu_principal.html",
   "./style.css",
   "./app.js",
+  "./menu_principal.js",
   "./manifest.json",
   "./cbc.png"
 ];
