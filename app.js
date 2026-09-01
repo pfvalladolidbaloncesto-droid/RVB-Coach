@@ -14,10 +14,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const passwordInput = document.getElementById("password");
   const recuerdameCheckbox = document.getElementById("recuerdame");
 
-  // URL correcta de tu Web App de Google Apps Script
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdPBRk_cUzzhT-NkjLkjTIuzs_YUAC3z-R88p7Nh-KZK6YxREiue0ctho1c1pNabndaQ/exec"; 
 
-  // Cargar credenciales guardadas
   const recordado = localStorage.getItem("Recuerdame") === "true";
   if (recordado) {
     usuarioInput.value = localStorage.getItem("Usuario") || "";
@@ -61,8 +59,20 @@ document.addEventListener("DOMContentLoaded", () => {
       const data = await response.json();
       let passRemota = "";
 
-      if (Array.isArray(data) && data.length > 0 && data[0].columna2 !== undefined) {
-        passRemota = String(data[0].columna2).trim();
+      if (Array.isArray(data) && data.length > 0) {
+        const registro = data[0];
+
+        if (registro.columna2 !== undefined && registro.columna2 !== null) {
+          passRemota = String(registro.columna2).trim();
+        }
+
+        // Guardar Rol y Equipo por defecto desde el servidor
+        if (registro.columna3) {
+          localStorage.setItem("RolPorDefecto", String(registro.columna3).trim());
+        }
+        if (registro.columna4) {
+          localStorage.setItem("EquipoPorDefecto", String(registro.columna4).trim());
+        }
       }
 
       if (passRemota === password) {
