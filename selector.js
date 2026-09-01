@@ -1,6 +1,7 @@
-// Quitamos "&num=" para traer toda la tabla
+// URL de tu Web App de Google Apps Script existente (sin modificar)
 const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxdPBRk_cUzzhT-NkjLkjTIuzs_YUAC3z-R88p7Nh-KZK6YxREiue0ctho1c1pNabndaQ/exec?accion=consultar";
 
+// Recuperar el equipo guardado en el Login
 const equipoSeleccionado = localStorage.getItem("equipo");
 
 document.addEventListener("DOMContentLoaded", async () => {
@@ -10,7 +11,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     const response = await fetch(URL_APPS_SCRIPT);
     const datos = await response.json();
 
-    // 1. Filtrar los jugadores excluyendo PF/Coach y limitando al equipo
+    // 1. Filtrar los jugadores por equipo excluyendo PF y Coach
     const jugadores = datos.filter(fila => {
       const col3 = (fila.columna3 || "").toString().toLowerCase().trim();
       const col4 = fila.columna4;
@@ -19,31 +20,34 @@ document.addEventListener("DOMContentLoaded", async () => {
       return !esStaff && col4 === equipoSeleccionado;
     });
 
-    // 2. Renderizar la plantilla dinámicamente
-    contenedor.innerHTML = jugadores.map((jugador, index) => `
-      <div class="tarjeta-jugador" data-posicion="${index + 1}" data-usuario="${jugador.num}">
-        <img src="${jugador.columna10 || 'assets/placeholder.png'}" alt="${jugador.num}" loading="lazy" />
-        <span>${jugador.columna9 || jugador.columna6 || jugador.num}</span>
-      </div>
-    `).join("");
+    // 2. Renderizar la cuadrícula cargando la foto según el ID (fila.num)
+    contenedor.innerHTML = jugadores.map((jugador, index) => {
+      const idUsuario = jugador.num; // Ej: "RAUPOPA"
+      const rutaFoto = `fotos/${idUsuario}.jpg`;
 
-    // 3. Capturar el clic en cualquier tarjeta del contenedor
+      return `
+        <div class="tarjeta-jugador" data-posicion="${index + 1}" data-usuario="${idUsuario}">
+          <img src="${rutaFoto}" alt="${idUsuario}" onerror="this.src='fotos/default.jpg'" loading="lazy" />
+          <span>${jugador.columna9 || jugador.columna6 || idUsuario}</span>
+        </div>
+      `;
+    }).join("");
+
+    // 3. Delegación de eventos para el Clic en cualquier jugador
     contenedor.addEventListener("click", (e) => {
       const tarjeta = e.target.closest(".tarjeta-jugador");
       if (!tarjeta) return;
 
       const posicion = tarjeta.dataset.posicion;
-      const usuarioJugador = tarjeta.dataset.usuario;
+      const usuarioSeleccionado = tarjeta.dataset.usuario;
 
-      // Guardar selección para usarla en la pantalla siguiente
       localStorage.setItem("posicionSeleccionada", posicion);
-      localStorage.setItem("jugadorSeleccionado", usuarioJugador);
+      localStorage.setItem("jugadorSeleccionado", usuarioSeleccionado);
 
-      // Redirigir a la siguiente vista
       window.location.href = "detalle.html";
     });
 
   } catch (error) {
-    console.error("Error al consultar Google Apps Script:", error);
+    console.error("Error al cargar los jugadores:", error);
   }
 });
