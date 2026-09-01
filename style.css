@@ -81,3 +81,80 @@ button {
 button:hover {
   background-color: #0056b3;
 }
+
+/* Estilos Menú Principal */
+.menu-container {
+  max-width: 480px;
+}
+
+.user-header {
+  width: 100%;
+  padding: 12px;
+  background-color: #007bff;
+  color: white;
+  border-radius: 8px;
+  text-align: center;
+  font-weight: bold;
+  font-size: 1.1rem;
+  margin-bottom: 20px;
+}
+
+.form-group {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  margin-bottom: 15px;
+}
+
+.form-group label {
+  font-weight: bold;
+  margin-bottom: 5px;
+}
+
+.form-group select {
+  padding: 10px;
+  border-radius: 6px;
+  border: 1px solid #ccc;
+  font-size: 16px;
+}
+
+.grid-buttons {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  width: 100%;
+  margin-top: 15px;
+}
+
+.btn-action {
+  padding: 14px 8px;
+  font-size: 14px;
+  background-color: #28a745;
+  color: white;
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  margin-top: 0;
+}
+
+.btn-action:hover {
+  background-color: #218838;
+}
+
+.btn-warning {
+  background-color: #dc3545;
+}
+
+.btn-warning:hover {
+  background-color: #c82333;
+}
+
+.btn-logout {
+  width: 100%;
+  margin-top: 25px;
+  background-color: #6c757d;
+}
+
+.btn-logout:hover {
+  background-color: #5a6268;
+}
