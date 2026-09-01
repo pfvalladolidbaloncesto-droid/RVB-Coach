@@ -1,42 +1,77 @@
-<!DOCTYPE html>
-<html lang="es">
-<head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Login - Coach RVB</title>
-  
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#007bff" />
-  <link rel="apple-touch-icon" href="cbc.png" />
-  
-  <link rel="stylesheet" href="style.css?v=3" />
-  <script src="app.js?v=3" defer></script>
-</head>
-<body>
-  <div class="main-container">
-    <div class="logo-container">
-      <img src="cbc.png" alt="Logo CBC" class="app-logo" />
-      <h1 class="app-title">Coach RVB</h1>
-    </div>
+// Registrar Service Worker para PWA
+if ("serviceWorker" in navigator) {
+  window.addEventListener("load", () => {
+    navigator.serviceWorker
+      .register("./sw.js")
+      .then((reg) => console.log("Service Worker registrado con éxito:", reg.scope))
+      .catch((err) => console.error("Error al registrar el Service Worker:", err));
+  });
+}
 
-    <form id="loginForm" class="login-form">
-      <div class="input-group">
-        <label for="usuario">Usuario</label>
-        <input type="text" id="usuario" placeholder="Ej: JESBAR" required />
-      </div>
+document.addEventListener("DOMContentLoaded", () => {
+  const loginForm = document.getElementById("loginForm");
+  const usuarioInput = document.getElementById("usuario");
+  const passwordInput = document.getElementById("password");
+  const recuerdameCheckbox = document.getElementById("recuerdame");
 
-      <div class="input-group">
-        <label for="password">Contraseña</label>
-        <input type="password" id="password" required />
-      </div>
+  // URL del Web App Executable de Google Apps Script
+  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbyfE74vQ5b_Dk744D6wO5xT2yR_e7X5sXy8x9/exec"; 
 
-      <div class="checkbox-group">
-        <input type="checkbox" id="recuerdame" />
-        <label for="recuerdame">Recuérdame</label>
-      </div>
+  // === CARGAR DATOS GUARDADOS (Si 'Recuérdame' estaba activo) ===
+  const recordado = localStorage.getItem("Recuerdame") === "true";
+  if (recordado) {
+    usuarioInput.value = localStorage.getItem("Usuario") || "";
+    passwordInput.value = localStorage.getItem("Password") || "";
+    recuerdameCheckbox.checked = true;
+  }
 
-      <button type="submit" id="btnAceptar" class="btn-primary">Aceptar</button>
-    </form>
-  </div>
-</body>
-</html>
+  // === EVENTO INICIO DE SESIÓN ===
+  loginForm.addEventListener("submit", async (e) => {
+    e.preventDefault();
+
+    const usuario = usuarioInput.value.trim().toUpperCase();
+    const password = passwordInput.value.trim();
+
+    if (!usuario || !password) {
+      alert("Por favor completa todos los campos");
+      return;
+    }
+
+    // Guardar o limpiar credenciales en LocalStorage según el checkbox
+    if (recuerdameCheckbox.checked) {
+      localStorage.setItem("Usuario", usuario);
+      localStorage.setItem("Password", password);
+      localStorage.setItem("Recuerdame", "true");
+    } else {
+      localStorage.removeItem("Usuario");
+      localStorage.removeItem("Password");
+      localStorage.removeItem("Recuerdame");
+    }
+
+    try {
+      // Petición a la API de Apps Script
+      const url = `${SCRIPT_URL}?accion=consultar&num=${encodeURIComponent(usuario)}`;
+      const response = await fetch(url);
+      const data = await response.json();
+
+      let passRemota = "not found";
+
+      // Obtener el valor de la contraseña del JSON recibido
+      if (Array.isArray(data) && data.length > 0 && data[0].columna2 !== undefined) {
+        // CONVERSIÓN CRÍTICA: Convertir a String para evitar fallos con números (ej: 1 vs "1")
+        passRemota = String(data[0].columna2).trim();
+      }
+
+      // Comparación exacta en formato String
+      if (passRemota === password) {
+        // Redirección a la pantalla de Menú Principal enviando el usuario activo
+        window.location.href = `menu_principal.html?startValue=${encodeURIComponent(usuario)}`;
+      } else {
+        alert("Verifica tus credenciales");
+      }
+    } catch (error) {
+      console.error("Error al consultar el servicio:", error);
+      alert("Error al conectar con el servidor. Revisa tu conexión a internet.");
+    }
+  });
+});
