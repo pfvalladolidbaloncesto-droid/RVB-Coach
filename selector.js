@@ -4,7 +4,7 @@ const equipoActual = localStorage.getItem("equipo") || "Junior A";
 // 2. Base de datos local de jugadores por equipo
 const EQUIPOS_DATA = {
   "Junior A": [
-    { id: 1, foto: "cbc.png", nombre: "Jugador 1" },
+    { id: 1, foto: "cbc.png", nombre: "Eustaquio" },
     { id: 2, foto: "cbc.png", nombre: "Jugador 2" }
     // ... completa los 16 aquí
   ],
