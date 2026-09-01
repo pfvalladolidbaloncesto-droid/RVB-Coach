@@ -1,4 +1,4 @@
-const CACHE_NAME = "coach-rvb-v4";
+const CACHE_NAME = "coach-rvb-v5";
 
 const ASSETS = [
   "./",
