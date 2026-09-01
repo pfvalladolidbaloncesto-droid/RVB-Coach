@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Coach RVB</title>
+  <link rel="stylesheet" href="style.css" />
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
+</head>
+<body>
+  <div class="main-container">
+    <img src="cbc.png" alt="Logo" class="app-logo" />
+
+    <form id="loginForm" class="login-form">
+      <label for="campoTexto">Usuario</label>
+      <input type="text" id="campoTexto" autocomplete="username" required />
+
+      <label for="campoPassword">Contraseña</label>
+      <input type="password" id="campoPassword" autocomplete="current-password" required />
+
+      <div class="checkbox-container">
+        <input type="checkbox" id="casillaVerificacion" />
+        <label for="casillaVerificacion">Recuérdame</label>
+      </div>
+
+      <button type="submit" id="btnEnviar">Enviar</button>
+    </form>
+  </div>
+
+  <script src="app.js"></script>
+</body>
+</html>
