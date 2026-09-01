@@ -1,81 +1,82 @@
-console.log("--> selector.js se ha cargado correctamente");
+// URL de tu nuevo Google Apps Script
+const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxRkqgMqJCQDpgb9lTEJZuVztt2XV3BE1vdqAd6QinTIi0ZXlBpRwqniKjFcMQru1NJVA/exec";
 
-const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxdPBRk_cUzzhT-NkjLkjTIuzs_YUAC3z-R88p7Nh-KZK6YxREiue0ctho1c1pNabndaQ/exec?accion=consultar";
-
-// Leer equipo del login
+// Recuperar el equipo guardado en el Login o Menú Principal
 const equipoSeleccionado = localStorage.getItem("equipo") || localStorage.getItem("equipoUsuario") || "Junior A";
 
-async function iniciarSelector() {
-  console.log("--> Iniciando carga para el equipo:", equipoSeleccionado);
-  
+document.addEventListener("DOMContentLoaded", async () => {
   const contenedor = document.getElementById("grid-jugadores");
   const tituloEquipo = document.getElementById("nombre-equipo");
+
+  // Mostrar el nombre del equipo en el encabezado
+  if (tituloEquipo) {
+    tituloEquipo.textContent = equipoSeleccionado;
+  }
+
+  // Configurar botón volver
   const btnVolver = document.getElementById("btn-volver");
-
-  if (tituloEquipo) tituloEquipo.textContent = equipoSeleccionado;
-
   if (btnVolver) {
-    btnVolver.onclick = () => { window.location.href = "menu_principal.html"; };
+    btnVolver.addEventListener("click", () => {
+      window.location.href = "menu_principal.html";
+    });
   }
 
   try {
-    console.log("--> Pidiendo datos a Google Sheets...");
+    // 1. Obtener los datos globales de la Hoja 1 desde el nuevo Apps Script
     const response = await fetch(URL_APPS_SCRIPT);
     const datos = await response.json();
 
-    console.log("--> Datos completos recibidos:", datos);
-
     const equipoBuscado = equipoSeleccionado.toString().toLowerCase().trim();
 
-    // Filtrar excluyendo PF y Coach
+    // 2. Filtrar los jugadores de la Columna 4 excluyendo los "PF" y "Coach" de la Columna 3
     const jugadores = datos.filter(fila => {
       const col3 = (fila.columna3 || "").toString().toLowerCase().trim();
       const col4 = (fila.columna4 || "").toString().toLowerCase().trim();
+
       const esStaff = col3 === "pf" || col3 === "coach";
       return !esStaff && col4 === equipoBuscado;
     });
 
-    console.log("--> Jugadores filtrados para la cuadrícula:", jugadores);
-
+    // Si no se encuentran jugadores, avisar en pantalla
     if (jugadores.length === 0) {
-      contenedor.innerHTML = `<p style="text-align:center;">No hay jugadores para <b>${equipoSeleccionado}</b></p>`;
+      contenedor.innerHTML = `<p style="text-align:center; grid-column: 1/-1;">No se encontraron jugadores para el equipo: <b>${equipoSeleccionado}</b></p>`;
       return;
     }
 
-    // Dibujar tarjetas
+    // 3. Renderizar las tarjetas
+    // Prioridad de foto: 1° Columna 10 (Google Sheets), 2° fotos/ID.jpg, 3° fotos/default.jpg
     contenedor.innerHTML = jugadores.map((jugador, index) => {
       const idUsuario = jugador.num;
-      const rutaFoto = `fotos/${idUsuario}.jpg`;
+      const fotoSheet = jugador.columna10;
+      const fotoLocal = `fotos/${idUsuario}.jpg`;
+      const fotoSrc = (fotoSheet && fotoSheet.toString().startsWith("http")) ? fotoSheet : fotoLocal;
 
       return `
-        <div class="tarjeta-jugador" data-posicion="${index + 1}" data-usuario="${idUsuario}" style="border: 1px solid #ccc; padding: 10px; margin: 5px; display: inline-block; text-align: center; cursor: pointer;">
-          <img src="${rutaFoto}" alt="${idUsuario}" onerror="this.src='https://via.placeholder.com/100'" style="width: 100px; height: 100px; object-fit: cover;" />
-          <br>
-          <span><b>${jugador.columna9 || jugador.columna6 || idUsuario}</b></span>
+        <div class="tarjeta-jugador" data-posicion="${index + 1}" data-usuario="${idUsuario}">
+          <img src="${fotoSrc}" alt="${idUsuario}" onerror="this.src='fotos/default.jpg'" loading="lazy" />
+          <span>${jugador.columna9 || jugador.columna6 || idUsuario}</span>
         </div>
       `;
     }).join("");
 
-    // Guardar selección al hacer clic
-    contenedor.onclick = (e) => {
+    // 4. Guardar selección al hacer clic en un jugador
+    contenedor.addEventListener("click", (e) => {
       const tarjeta = e.target.closest(".tarjeta-jugador");
       if (!tarjeta) return;
 
-      localStorage.setItem("posicionSeleccionada", tarjeta.dataset.posicion);
-      localStorage.setItem("jugadorSeleccionado", tarjeta.dataset.usuario);
+      const posicion = tarjeta.dataset.posicion;
+      const usuarioSeleccionado = tarjeta.dataset.usuario;
+
+      localStorage.setItem("posicionSeleccionada", posicion);
+      localStorage.setItem("jugadorSeleccionado", usuarioSeleccionado);
 
       window.location.href = "detalle.html";
-    };
+    });
 
   } catch (error) {
-    console.error("--> Error durante la ejecución:", error);
-    if (contenedor) contenedor.innerHTML = "<p style='color:red;'>Error al conectar con la base de datos.</p>";
+    console.error("Error al conectar con Google Apps Script:", error);
+    if (contenedor) {
+      contenedor.innerHTML = "<p style='text-align:center; color:red;'>Error al cargar los datos desde la plantilla.</p>";
+    }
   }
-}
-
-// Ejecutar automáticamente al cargar el DOM
-if (document.readyState === "loading") {
-  document.addEventListener("DOMContentLoaded", iniciarSelector);
-} else {
-  iniciarSelector();
-}
+});
