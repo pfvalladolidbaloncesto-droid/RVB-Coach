@@ -1,0 +1,20 @@
+{
+  "short_name": "Coach RVB",
+  "name": "Coach RVB App",
+  "icons": [
+    {
+      "src": "cbc.png",
+      "sizes": "192x192",
+      "type": "image/png"
+    },
+    {
+      "src": "cbc.png",
+      "sizes": "512x512",
+      "type": "image/png"
+    }
+  ],
+  "start_url": "./index.html",
+  "background_color": "#ffffff",
+  "theme_color": "#007bff",
+  "display": "standalone"
+}
