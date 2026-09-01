@@ -1,5 +1,5 @@
 // Cambia la versión cada vez que actualices el código de la app
-const CACHE_NAME = "coach-rvb-v2";
+const CACHE_NAME = "coach-rvb-v3";
 
 const ASSETS = [
   "./",
