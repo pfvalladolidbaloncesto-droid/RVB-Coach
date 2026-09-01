@@ -15,14 +15,33 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnLogOut = document.getElementById("btnLogOut");
 
   // === INITIALIZE ===
-  // 1. Extraer usuario de la URL o LocalStorage
+  // 1. Extraer usuario
   const urlParams = new URLSearchParams(window.location.search);
   let usuario = urlParams.get("startValue") || localStorage.getItem("Usuario") || "Usuario";
   
   etiquetaUsuario.textContent = usuario;
   localStorage.setItem("Usuario", usuario);
 
-  // 2. Guardar lista por defecto de Tests en LocalStorage (Equivalente al bloque Test)
+  // 2. Preseleccionar Rol por defecto si existe en localStorage
+  const rolDefecto = localStorage.getItem("RolPorDefecto");
+  if (rolDefecto) {
+    // Normalización por si en la base de datos viene 'Físico' / 'Pista' o 'PF' / 'Entrenador'
+    if (rolDefecto.toUpperCase().includes("FISICO") || rolDefecto.toUpperCase().includes("PF")) {
+      selectorRol.value = "PF";
+    } else if (rolDefecto.toUpperCase().includes("PISTA") || rolDefecto.toUpperCase().includes("ENTRENADOR")) {
+      selectorRol.value = "Entrenador";
+    } else {
+      selectorRol.value = rolDefecto;
+    }
+  }
+
+  // 3. Preseleccionar Equipo por defecto si existe en localStorage
+  const equipoDefecto = localStorage.getItem("EquipoPorDefecto");
+  if (equipoDefecto) {
+    selectorEquipo.value = equipoDefecto;
+  }
+
+  // 4. Guardar lista por defecto de Tests
   const listaTests = ["SLR", "ANKLE", "PESO", "30-15", "DJ", "CMJ", "ALTURA", "ENVERGADURA"];
   localStorage.setItem("Test", JSON.stringify(listaTests));
 
@@ -36,41 +55,33 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // === EVENTOS DE BOTONES ===
 
-  // Readiness
   btnReadiness.addEventListener("click", () => {
     guardarYRedirigir("Readiness", "selector.html");
   });
 
-  // RPE
   btnRPE.addEventListener("click", () => {
     guardarYRedirigir("RPE", "selector.html");
   });
 
-  // Registrar tests
   btnRegistrarTest.addEventListener("click", () => {
     guardarYRedirigir("Registrar test", "selector.html");
   });
 
-  // Consultar test
   btnConsultarTest.addEventListener("click", () => {
     guardarYRedirigir("Consultar test", "selector.html");
   });
 
-  // Carga Equipo
   btnCargaEquipo.addEventListener("click", () => {
     guardarYRedirigir("Carga Equipo", "carga.html");
   });
 
-  // Carga Jugador
   btnCargaJugador.addEventListener("click", () => {
     guardarYRedirigir("Carga Jugador", "selector.html");
   });
 
-  // Subir sesión
   btnSesion.addEventListener("click", () => {
     const rolSeleccionado = selectorRol.value;
     
-    // Guardar Rol específico según la lógica de App Inventor
     if (rolSeleccionado === "PF") {
       localStorage.setItem("Rol", "Físico");
     } else if (rolSeleccionado === "Entrenador") {
@@ -80,12 +91,10 @@ document.addEventListener("DOMContentLoaded", () => {
     guardarYRedirigir("Sesión", "sesion.html");
   });
 
-  // Registrar lesión (Abre Google Form)
   btnLesion.addEventListener("click", () => {
     window.open("https://docs.google.com/forms/d/e/1FAIpQLScLzsu7Ta7AZL7fojMHBcDcMAqpLKMrCHoHuftQUdOOpvlYZQ/viewform?usp=sf_link", "_blank");
   });
 
-  // Cerrar Sesión
   btnLogOut.addEventListener("click", () => {
     window.location.href = "index.html";
   });
