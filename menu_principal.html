@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Menú Principal - Coach RVB</title>
+  
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
+  
+  <link rel="stylesheet" href="style.css?v=2" />
+  <script src="menu_principal.js?v=2" defer></script>
+</head>
+<body>
+  <div class="main-container menu-container">
+    <header class="user-header">
+      <span id="etiquetaUsuario" class="user-name">Cargando usuario...</span>
+    </header>
+
+    <main class="menu-content">
+      <!-- Selección de Rol -->
+      <div class="form-group">
+        <label for="selectorRol">Rol</label>
+        <select id="selectorRol">
+          <option value="">Selecciona Rol</option>
+          <option value="PF">PF</option>
+          <option value="Entrenador">Entrenador</option>
+        </select>
+      </div>
+
+      <!-- Selección de Equipo -->
+      <div class="form-group">
+        <label for="selectorEquipo">Equipo</label>
+        <select id="selectorEquipo">
+          <option value="">Selecciona Equipo</option>
+          <option value="Infantil B">Infantil B</option>
+          <option value="Infantil A">Infantil A</option>
+          <option value="Cadete B">Cadete B</option>
+          <option value="Cadete A">Cadete A</option>
+          <option value="Junior B">Junior B</option>
+          <option value="Junior A">Junior A</option>
+          <option value="TERCERA">TERCERA</option>
+        </select>
+      </div>
+
+      <!-- Botones de Acción -->
+      <div class="grid-buttons">
+        <button id="btnReadiness" class="btn-action">Readiness</button>
+        <button id="btnRPE" class="btn-action">RPE</button>
+        <button id="btnRegistrarTest" class="btn-action">Registrar tests</button>
+        <button id="btnConsultarTest" class="btn-action">Consultar test</button>
+        <button id="btnSesion" class="btn-action">Subir sesión</button>
+        <button id="btnCargaEquipo" class="btn-action">Carga Equipo</button>
+        <button id="btnCargaJugador" class="btn-action">Carga jugador</button>
+        <button id="btnLesion" class="btn-action btn-warning">Registrar lesión</button>
+      </div>
+
+      <button id="btnLogOut" class="btn-logout">Cerrar sesión</button>
+    </main>
+  </div>
+</body>
+</html>
