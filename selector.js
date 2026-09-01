@@ -1,7 +1,7 @@
 // Quitamos "&num=" para traer toda la tabla
 const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxdPBRk_cUzzhT-NkjLkjTIuzs_YUAC3z-R88p7Nh-KZK6YxREiue0ctho1c1pNabndaQ/exec?accion=consultar";
 
-const equipoSeleccionado = localStorage.getItem("equipo") || "Junior A";
+const equipoSeleccionado = localStorage.getItem("equipo");
 
 document.addEventListener("DOMContentLoaded", async () => {
   const contenedor = document.getElementById("grid-jugadores");
