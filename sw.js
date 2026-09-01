@@ -1,4 +1,4 @@
-const CACHE_NAME = "coach-rvb-v5";
+const CACHE_NAME = "coach-rvb-v6";
 
 const ASSETS = [
   "./",
@@ -11,16 +11,24 @@ const ASSETS = [
   "./cbc.png"
 ];
 
+// Instalación: Fuerza el guardado de los nuevos assets
 self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) => {
+      return cache.addAll(ASSETS);
+    })
+  );
   self.skipWaiting();
 });
 
+// Activación: Purga CUALQUIER versión antigua de caché al instante
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
       return Promise.all(
         keys.map((key) => {
           if (key !== CACHE_NAME) {
+            console.log("Eliminando caché antigua:", key);
             return caches.delete(key);
           }
         })
@@ -29,32 +37,30 @@ self.addEventListener("activate", (event) => {
   );
 });
 
+// Intercepción de peticiones
 self.addEventListener("fetch", (event) => {
-  // Ignorar Google Apps Script
+  // 1. Ignorar llamadas a la API de Google Apps Script (Siempre por red)
   if (event.request.url.includes("script.google.com")) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // Estrategia Network-First para la página de inicio (rompe la caché definitivamente)
-  if (event.request.mode === "navigate" || event.request.url.endsWith("index.html")) {
-    event.respondWith(
-      fetch(event.request)
-        .then((networkResponse) => {
-          return caches.open(CACHE_NAME).then((cache) => {
-            cache.put(event.request, networkResponse.clone());
-            return networkResponse;
-          });
-        })
-        .catch(() => caches.match(event.request))
-    );
-    return;
-  }
-
-  // Para el resto de assets: Cache First
+  // 2. Estrategia Network-First para HTML y JS (Prioriza cambios nuevos)
   event.respondWith(
-    caches.match(event.request).then((response) => {
-      return response || fetch(event.request);
-    })
+    fetch(event.request)
+      .then((networkResponse) => {
+        // Guardar copia fresca en caché si la respuesta es válida
+        if (networkResponse && networkResponse.status === 200) {
+          const responseClone = networkResponse.clone();
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, responseClone);
+          });
+        }
+        return networkResponse;
+      })
+      .catch(() => {
+        // Si no hay conexión a internet, sirve desde la caché
+        return caches.match(event.request);
+      })
   );
 });
