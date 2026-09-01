@@ -1,51 +1,49 @@
-// 1. Obtener el equipo guardado en el Login
-const equipoActual = localStorage.getItem("equipo") || "Junior A";
+// Quitamos "&num=" para traer toda la tabla
+const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxdPBRk_cUzzhT-NkjLkjTIuzs_YUAC3z-R88p7Nh-KZK6YxREiue0ctho1c1pNabndaQ/exec?accion=consultar";
 
-// 2. Base de datos local de jugadores por equipo
-const EQUIPOS_DATA = {
-  "Junior A": [
-    { id: 1, foto: "cbc.png", nombre: "Eustaquio" },
-    { id: 2, foto: "cbc.png", nombre: "Jugador 2" }
-    // ... completa los 16 aquí
-  ],
-  "Cadete A": [
-    { id: 1, foto: "assets/cadete_a/1.jpg", nombre: "Jugador 1" }
-    // ... completa los 16 aquí
-  ]
-};
+const equipoSeleccionado = localStorage.getItem("equipo") || "Junior A";
 
-document.addEventListener("DOMContentLoaded", () => {
-  document.getElementById("nombre-equipo").textContent = equipoActual;
-  
+document.addEventListener("DOMContentLoaded", async () => {
   const contenedor = document.getElementById("grid-jugadores");
-  const listaJugadores = EQUIPOS_DATA[equipoActual] || [];
 
-  // Renderizar las 16 imágenes dinámicamente
-  contenedor.innerHTML = listaJugadores.map((jugador, index) => `
-    <div class="tarjeta-jugador" data-posicion="${index + 1}" data-id="${jugador.id}">
-      <img src="${jugador.foto}" alt="${jugador.nombre}" loading="lazy" />
-      <span>${jugador.nombre}</span>
-    </div>
-  `).join("");
+  try {
+    const response = await fetch(URL_APPS_SCRIPT);
+    const datos = await response.json();
 
-  // Evento Clic único para toda la cuadrícula (Delegación de Eventos)
-  contenedor.addEventListener("click", (e) => {
-    const tarjeta = e.target.closest(".tarjeta-jugador");
-    if (!tarjeta) return;
+    // 1. Filtrar los jugadores excluyendo PF/Coach y limitando al equipo
+    const jugadores = datos.filter(fila => {
+      const col3 = (fila.columna3 || "").toString().toLowerCase().trim();
+      const col4 = fila.columna4;
 
-    const posicion = tarjeta.dataset.posicion;
-    const jugadorId = tarjeta.dataset.id;
+      const esStaff = col3 === "pf" || col3 === "coach";
+      return !esStaff && col4 === equipoSeleccionado;
+    });
 
-    // Guardar selección en LocalStorage (reemplaza a TinyDB)
-    localStorage.setItem("posicionSeleccionada", posicion);
-    localStorage.setItem("jugadorSeleccionado", jugadorId);
+    // 2. Renderizar la plantilla dinámicamente
+    contenedor.innerHTML = jugadores.map((jugador, index) => `
+      <div class="tarjeta-jugador" data-posicion="${index + 1}" data-usuario="${jugador.num}">
+        <img src="${jugador.columna10 || 'assets/placeholder.png'}" alt="${jugador.num}" loading="lazy" />
+        <span>${jugador.columna9 || jugador.columna6 || jugador.num}</span>
+      </div>
+    `).join("");
 
-    // Navegar a la pantalla final
-    window.location.href = "detalle.html";
-  });
+    // 3. Capturar el clic en cualquier tarjeta del contenedor
+    contenedor.addEventListener("click", (e) => {
+      const tarjeta = e.target.closest(".tarjeta-jugador");
+      if (!tarjeta) return;
 
-  // Botón Volver
-  document.getElementById("btn-volver").addEventListener("click", () => {
-    window.location.href = "menu_principal.html";
-  });
+      const posicion = tarjeta.dataset.posicion;
+      const usuarioJugador = tarjeta.dataset.usuario;
+
+      // Guardar selección para usarla en la pantalla siguiente
+      localStorage.setItem("posicionSeleccionada", posicion);
+      localStorage.setItem("jugadorSeleccionado", usuarioJugador);
+
+      // Redirigir a la siguiente vista
+      window.location.href = "detalle.html";
+    });
+
+  } catch (error) {
+    console.error("Error al consultar Google Apps Script:", error);
+  }
 });
