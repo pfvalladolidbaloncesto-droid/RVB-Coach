@@ -1,10 +1,12 @@
-// Registrar Service Worker para PWA
+// Forzar actualización del registro del SW
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
     navigator.serviceWorker
-      .register("./sw.js")
-      .then((reg) => console.log("Service Worker registrado con éxito:", reg.scope))
-      .catch((err) => console.error("Error al registrar el Service Worker:", err));
+      .register("./sw.js?v=5")
+      .then((reg) => {
+        reg.update(); // Fuerza al Service Worker a buscar actualizaciones
+      })
+      .catch((err) => console.error("Error al registrar Service Worker:", err));
   });
 }
 
@@ -14,10 +16,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const passwordInput = document.getElementById("password");
   const recuerdameCheckbox = document.getElementById("recuerdame");
 
-  // URL exacta de tu despliegue de Google Apps Script
   const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbz_9e4W-jSgJInp-lA--M-q3yU6U9Rz3lR-J0m5JkZ_z621A_v52aWl4K0X1-j92_U/exec"; 
 
-  // Cargar datos guardados (Si 'Recuérdame' estaba activo)
   const recordado = localStorage.getItem("Recuerdame") === "true";
   if (recordado) {
     usuarioInput.value = localStorage.getItem("Usuario") || "";
@@ -25,7 +25,6 @@ document.addEventListener("DOMContentLoaded", () => {
     recuerdameCheckbox.checked = true;
   }
 
-  // Evento de inicio de sesión
   loginForm.addEventListener("submit", async (e) => {
     e.preventDefault();
 
@@ -37,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
       return;
     }
 
-    // Persistencia de credenciales
     if (recuerdameCheckbox.checked) {
       localStorage.setItem("Usuario", usuario);
       localStorage.setItem("Password", password);
@@ -49,19 +47,16 @@ document.addEventListener("DOMContentLoaded", () => {
     }
 
     try {
-      // Petición a la API de Google Apps Script
       const url = `${SCRIPT_URL}?accion=consultar&num=${encodeURIComponent(usuario)}`;
       const response = await fetch(url);
       const data = await response.json();
 
       let passRemota = "";
 
-      // Comprobar respuesta JSON y convertir la contraseña a String
       if (Array.isArray(data) && data.length > 0 && data[0].columna2 !== undefined) {
         passRemota = String(data[0].columna2).trim();
       }
 
-      // Comparación exacta entre strings
       if (passRemota === password) {
         window.location.href = `menu_principal.html?startValue=${encodeURIComponent(usuario)}`;
       } else {
@@ -69,7 +64,7 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     } catch (error) {
       console.error("Error al consultar el servicio:", error);
-      alert("Error al conectar con el servidor. Revisa tu conexión a internet.");
+      alert("Error al conectar con el servidor. Revisa tu conexión.");
     }
   });
 });
