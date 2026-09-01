@@ -11,18 +11,10 @@ const ASSETS = [
   "./cbc.png"
 ];
 
-// Instalación del Service Worker
 self.addEventListener("install", (event) => {
-  event.waitUntil(
-    caches.open(CACHE_NAME).then((cache) => {
-      console.log("Archivos almacenados en caché exitosamente");
-      return cache.addAll(ASSETS);
-    })
-  );
   self.skipWaiting();
 });
 
-// Activación y limpieza de cachés antiguas
 self.addEventListener("activate", (event) => {
   event.waitUntil(
     caches.keys().then((keys) => {
@@ -33,20 +25,33 @@ self.addEventListener("activate", (event) => {
           }
         })
       );
-    })
+    }).then(() => self.clients.claim())
   );
-  self.clients.claim();
 });
 
-// Intercepción de peticiones (Estrategia Network-First para la API)
 self.addEventListener("fetch", (event) => {
-  // Las llamadas a Google Script se procesan siempre por red
+  // Ignorar Google Apps Script
   if (event.request.url.includes("script.google.com")) {
     event.respondWith(fetch(event.request));
     return;
   }
 
-  // Para assets locales: Caché primero, con caída a red
+  // Estrategia Network-First para la página de inicio (rompe la caché definitivamente)
+  if (event.request.mode === "navigate" || event.request.url.endsWith("index.html")) {
+    event.respondWith(
+      fetch(event.request)
+        .then((networkResponse) => {
+          return caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, networkResponse.clone());
+            return networkResponse;
+          });
+        })
+        .catch(() => caches.match(event.request))
+    );
+    return;
+  }
+
+  // Para el resto de assets: Cache First
   event.respondWith(
     caches.match(event.request).then((response) => {
       return response || fetch(event.request);
