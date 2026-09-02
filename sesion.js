@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return "";
   }
 
-  // 4. Manejo de la cámara / archivo (Opcional)
+  // 4. Manejo de la cámara / archivo con compresión opcional para evitar sobrecargar Drive
   const btnFoto = document.getElementById("Foto");
   const inputFileFoto = document.getElementById("inputFileFoto");
   const imagen1 = document.getElementById("Imagen1");
@@ -53,9 +53,36 @@ document.addEventListener("DOMContentLoaded", () => {
     if (file) {
       const reader = new FileReader();
       reader.onload = function(uploadEvent) {
-        imagenBase64 = uploadEvent.target.result;
-        imagen1.src = imagenBase64;
-        imagen1.style.display = "block";
+        const img = new Image();
+        img.src = uploadEvent.target.result;
+        img.onload = function() {
+          const canvas = document.createElement('canvas');
+          const MAX_WIDTH = 800;
+          const MAX_HEIGHT = 800;
+          let width = img.width;
+          let height = img.height;
+
+          if (width > height) {
+            if (width > MAX_WIDTH) {
+              height *= MAX_WIDTH / width;
+              width = MAX_WIDTH;
+            }
+          } else {
+            if (height > MAX_HEIGHT) {
+              width *= MAX_HEIGHT / height;
+              height = MAX_HEIGHT;
+            }
+          }
+
+          canvas.width = width;
+          canvas.height = height;
+          const ctx = canvas.getContext('2d');
+          ctx.drawImage(img, 0, 0, width, height);
+
+          imagenBase64 = canvas.toDataURL('image/jpeg', 0.7);
+          imagen1.src = imagenBase64;
+          imagen1.style.display = "block";
+        };
       };
       reader.readAsDataURL(file);
     }
@@ -98,7 +125,7 @@ document.addEventListener("DOMContentLoaded", () => {
       body: formData
     }).catch(err => console.error("Error en Google Form", err));
 
-    // Envío de la imagen mediante formulario oculto e iframe (Evita el error 401 y problemas de CORS)
+    // Envío de la imagen mediante formulario oculto e iframe
     if (imagenBase64) {
       const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
       
