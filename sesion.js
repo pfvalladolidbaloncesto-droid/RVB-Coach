@@ -18,6 +18,24 @@ document.addEventListener("DOMContentLoaded", () => {
     duracionInput.value = 55;
   }
 
+  // Mapeo dinámico de IDs de Google Drive según equipo y entrenamiento
+  const carpetasDriveIDs = {
+    "EBA_Pista": "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT"[cite: 3],
+    "EBA_Físico": "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ"[cite: 3],
+    "Junior A_Pista": "1popwCXqp2NRuGDHPLqGUGavYZcjHoF4d"[cite: 3],
+    "Junior A_Físico": "17KMZF1tKwZYZB5fg2lpNdVN0F8g1jSle"[cite: 3],
+    "Junior B_Pista": "1N9l0FKZ3Bp4W8_F7TfEyT38cEggXEZRl"[cite: 3],
+    "Junior B_Físico": "1yPuV6bwl46gITw0AHJP3MA7YEhq2R8Gv"[cite: 3],
+    "Cadete A_Pista": "1LgRPFVcKe8UKHbqoyi5yYLmCq4rucHz2"[cite: 3],
+    "Cadete A_Físico": "1cHUj-F3JeKkoshtnKtWqgIuWVFnY1vjB"[cite: 3],
+    "Cadete B_Pista": "18EANg_Wv3W8jgxkGe55Yk8OgTsZly319"[cite: 3],
+    "Cadete B_Físico": "1_KgcdJe-T4MtFpqJyp9VZ9YyFygSx4Xa"[cite: 3],
+    "Infantil A_Pista": "1PhY2dTw98_uVder7BzUXdLU5eT9Iu_8P"[cite: 3],
+    "Infantil A_Físico": "1M1JUbcwUhsJoww0f0BPs8akjHZr4vK2A"[cite: 3],
+    "Infantil B_Pista": "1ePmEXq2EYBcrUoKBmk4SIRRr2BQFbNyq"[cite: 3],
+    "Infantil B_Físico": "1G44NviyutQ4CTPelgjxtHSKCGCI183ZJ"[cite: 3]
+  };
+
   const btnFoto = document.getElementById("Foto");
   const inputFileFoto = document.getElementById("inputFileFoto");
   const imagen1 = document.getElementById("Imagen1");
@@ -83,22 +101,26 @@ document.addEventListener("DOMContentLoaded", () => {
       });
       console.log("✅ Datos enviados a Google Forms correctamente.");
 
-      // 2. Si hay foto, la enviamos a Google Drive mediante el formulario oculto estilo Kio
+      // 2. Si hay foto, seleccionamos su ID de carpeta correspondiente y la enviamos a Drive
       if (archivoSeleccionado) {
         console.log("📤 Enviando foto a Google Drive...");
         
+        const claveBusqueda = `${equipoActual}_${tipoActual}`;
+        const idCarpetaSeleccionada = carpetasDriveIDs[claveBusqueda] || "17KMZF1tKwZYZB5fg2lpNdVN0F8g1jSle"; // Fallback por defecto
+
         const reader = new FileReader();
         reader.onload = function(e) {
           const base64Completo = e.target.result;
           const base64Puro = base64Completo.split(',')[1];
           
           document.getElementById("inputDataImg").value = base64Puro;
-          document.getElementById("inputFilename").value = "sesion_" + fechaInput.value + "_" + equipoActual + ".jpg";
+          document.getElementById("inputFilename").value = "sesion_" + fechaInput.value + "_" + equipoActual + "_" + tipoActual + ".jpg";
           document.getElementById("inputMimetype").value = archivoSeleccionado.type;
+          document.getElementById("inputFolderId").value = idCarpetaSeleccionada;
           
           // Disparamos el envío del formulario oculto al Apps Script
           document.getElementById("formOcultoDrive").submit();
-          console.log("✅ Imagen enviada al script de Google Drive.");
+          console.log("✅ Imagen enviada al script de Google Drive en la carpeta: " + idCarpetaSeleccionada);
         };
         reader.readAsDataURL(archivoSeleccionado);
       }
