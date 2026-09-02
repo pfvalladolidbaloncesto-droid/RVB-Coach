@@ -164,7 +164,9 @@ button:hover {
 
 /* --- VISTA SELECTOR Y CUADRÍCULA 4x4 (PWA) --- */
 .selector-container {
-  max-width: 650px; /* Ampliado para acomodar cómodamente la retícula 4x4 */
+  max-width: 500px !important;
+  width: 100% !important;
+  align-items: stretch !important;
 }
 
 .selector-header {
@@ -186,13 +188,13 @@ button:hover {
   margin-top: 0;
 }
 
-/* Contenedor Grid 4x4 */
+/* Contenedor Grid 4x4 Fijo */
 #grid-jugadores {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 10px;
+  display: grid !important;
+  grid-template-columns: repeat(4, 1fr) !important;
+  gap: 8px;
   width: 100%;
-  margin-top: 10px;
+  min-height: 320px; /* Evita que la tarjeta salte en vertical durante la carga */
 }
 
 /* Tarjeta individual */
@@ -205,7 +207,7 @@ button:hover {
   border: 1px solid #e2e8f0;
   border-radius: 8px;
   padding: 8px 4px;
-  min-height: 105px; /* Reserva el espacio vertical para evitar la vibración */
+  min-height: 100px;
   box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
   cursor: pointer;
   transition: transform 0.15s ease, box-shadow 0.15s ease;
@@ -218,37 +220,22 @@ button:hover {
 
 /* Foto redonda sin parpadeo */
 .tarjeta-jugador img {
-  width: 60px;
-  height: 60px;
+  width: 55px;
+  height: 55px;
   object-fit: cover;
   border-radius: 50%;
-  background-color: #e9ecef; /* Color gris estático durante la carga */
+  background-color: #e9ecef;
   margin-bottom: 6px;
   display: block;
 }
 
 /* Identificador del jugador */
 .tarjeta-jugador span {
-  font-size: 0.75rem;
+  font-size: 0.7rem;
   font-weight: bold;
   color: #333;
   text-align: center;
   word-break: break-all;
-}
-/* Parche para evitar que el contenedor se estreche e intente centrarse de forma inestable */
-.selector-container {
-  max-width: 500px !important;
-  width: 100% !important;
-  align-items: stretch !important; /* Estira los elementos al ancho completo de la caja */
-}
-
-/* Forzar que el grid mantenga ancho relativo al contenedor */
-#grid-jugadores {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-  width: 100%;
-  min-height: 300px; /* Reserva el alto de la pantalla de antemano */
 }
 
 .cargando-texto {
