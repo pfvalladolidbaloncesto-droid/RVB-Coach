@@ -6,16 +6,21 @@ const equipoSeleccionado = localStorage.getItem("equipo") || localStorage.getIte
 document.addEventListener("DOMContentLoaded", async () => {
   const contenedor = document.getElementById("grid-jugadores");
   const tituloEquipo = document.getElementById("nombre-equipo");
+  const btnVolver = document.getElementById("btn-volver");
 
   if (tituloEquipo) tituloEquipo.textContent = equipoSeleccionado;
+  
+  if (btnVolver) {
+    btnVolver.onclick = () => { window.location.href = "menu_principal.html"; };
+  }
 
   try {
-    // 2. Consulta al Apps Script
+    // 2. Consulta al Apps Script pasándole el equipo seleccionado
     const response = await fetch(`${URL_APPS_SCRIPT}?equipo=${encodeURIComponent(equipoSeleccionado)}`);
     const jugadores = await response.json();
 
     if (!jugadores || jugadores.length === 0) {
-      contenedor.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No hay jugadores para <b>${equipoSeleccionado}</b></p>`;
+      contenedor.innerHTML = `<p class="cargando-texto">No hay jugadores para <b>${equipoSeleccionado}</b></p>`;
       return;
     }
 
@@ -50,7 +55,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     console.error("Error al cargar la plantilla:", error);
     if (contenedor) {
-      contenedor.innerHTML = "<p style='color:red; text-align:center; grid-column:1/-1;'>Error de conexión con la base de datos.</p>";
+      contenedor.innerHTML = "<p class='cargando-texto' style='color:red;'>Error de conexión con la base de datos.</p>";
     }
   }
 });
