@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", () => {
   let tipoEntrenamiento = "Físico"; // Valor por defecto
   if (rolGuardado.toUpperCase() === "PF") {
     tipoEntrenamiento = "Físico";
-  } else if (rolGuardado.toLowerCase().includes("entrenador") || rolGuardado.toLowerCase() === "coach") {
+  } else if (rolGuardado.toLowerCase().includes("Entrenador") || rolGuardado.toLowerCase() === "coach") {
     tipoEntrenamiento = "Pista";
   } else {
     // Si no viene del rol, intentamos leerlo del localStorage directo
