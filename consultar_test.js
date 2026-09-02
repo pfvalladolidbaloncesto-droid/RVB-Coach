@@ -9,14 +9,26 @@ document.addEventListener("DOMContentLoaded", () => {
 });
 
 function Test_consulta_Initialize() {
-    const user = localStorage.getItem("User") || sessionStorage.getItem("User") || "UsuarioDemo";[cite: 3]
-    document.getElementById("Nombre").innerText = user;[cite: 3]
+    // Lee el usuario guardado desde selector.html / menu_principal (TinyBD simulado con localStorage)
+    const user = localStorage.getItem("User") || sessionStorage.getItem("User");[cite: 3]
+    if (user) {
+        document.getElementById("Nombre").innerText = user;[cite: 3]
+    } else {
+        document.getElementById("Nombre").innerText = "No seleccionado";
+    }
 
     console.log(`Leyendo fila 1 de la hoja: ${NombreHoja}`);[cite: 3]
 
-    const testList = ["SLR", "ANKLE", "DJ", "CMJ", "SJ", "30-15", "PESO", "ALTURA"];[cite: 3]
+    // Recupera la lista de tests compartida desde menu_principal / registrar_test
+    let testList = [];
+    try {
+        const storedTests = localStorage.getItem("TestList") || sessionStorage.getItem("TestList");
+        testList = storedTests ? JSON.parse(storedTests) : ["SLR", "ANKLE", "DJ", "CMJ", "SJ", "30-15", "PESO", "ALTURA"];[cite: 3]
+    } catch (e) {
+        testList = ["SLR", "ANKLE", "DJ", "CMJ", "SJ", "30-15", "PESO", "ALTURA"];[cite: 3]
+    }
+
     const testSelect = document.getElementById("test");
-    
     testSelect.innerHTML = '<option value="">Seleccione...</option>';
     testList.forEach(item => {
         let opt = document.createElement("option");
@@ -29,13 +41,14 @@ function Test_consulta_Initialize() {
 function actualizarResultado() {
     const testVal = document.getElementById("test").value;
     const latVal = document.getElementById("lateralidad").value;
-    document.getElementById("Resultado").innerText = testVal + latVal;[cite: 3]
+    document.getElementById("Resultado").innerText = testVal + (latVal ? latVal : "");[cite: 3]
 }
 
 function test_AfterPicking() {
     const testVal = document.getElementById("test").value;
     const lateralidadSelect = document.getElementById("lateralidad");
 
+    // Lógica idéntica a registrar_test: habilita lateralidad solo para test específicos
     if (["SLR", "ANKLE", "DJ"].includes(testVal)) {
         lateralidadSelect.disabled = false;[cite: 3]
     } else {
