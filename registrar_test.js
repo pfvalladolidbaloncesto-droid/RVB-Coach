@@ -1,5 +1,5 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Inicializar fecha actual con formato YYYY-MM-DD (coherente con App Inventor Reloj1)
+  // Inicializar fecha actual de forma segura para inputs type="date"
   const inputFecha = document.getElementById('fecha');
   if (inputFecha) {
     const now = new Date();
@@ -9,19 +9,21 @@ document.addEventListener("DOMContentLoaded", () => {
     inputFecha.value = `${year}-${month}-${day}`;
   }
 
-  // Cargar usuario desde localStorage (equivalente a TinyDB GetValue tag "User")[cite: 1]
+  // Cargar el usuario correctamente comprobando las claves que usa el selector
   const usuarioGuardado = localStorage.getItem("User") || localStorage.getItem("jugadorSeleccionado");
-  if (usuarioGuardado) {
-    const inputNombre = document.getElementById('nombre');
-    if (inputNombre) inputNombre.value = usuarioGuardado;
+  const inputNombre = document.getElementById('nombre');
+  if (inputNombre) {
+    if (usuarioGuardado) {
+      inputNombre.value = usuarioGuardado;
+    } else {
+      inputNombre.value = "Sin usuario seleccionado";
+    }
   }
 
-  // Cargar lista de tests disponibles desde localStorage (equivalente a TinyDB GetValue tag "Test")[cite: 1]
   const selectTest = document.getElementById('test');
   const selectLateralidad = document.getElementById('lateralidad');
   const etiqueta4 = document.getElementById('etiqueta4');
 
-  // Recuperar tests guardados o usar una lista predeterminada si no existe
   let listaTests = [];
   try {
     const testsStored = localStorage.getItem("Test");
@@ -32,7 +34,6 @@ document.addEventListener("DOMContentLoaded", () => {
     listaTests = [];
   }
 
-  // Si no hay tests en localStorage, añadimos algunos por defecto comunes (incluyendo los que activan lateralidad: SLR, ANKL, DJ)[cite: 1]
   if (!Array.isArray(listaTests) || listaTests.length === 0) {
     listaTests = ["SLR", "ANKLE", "DJ", "CMJ", "Abalakov"];
   }
@@ -46,7 +47,6 @@ document.addEventListener("DOMContentLoaded", () => {
     });
   }
 
-  // Lógica de habilitación de lateralidad idéntica al bloque If/Else de App Inventor[cite: 1]
   function actualizarLateralidad() {
     const testSeleccionado = selectTest.value;
     const testsConLateralidad = ["SLR", "ANKLE", "DJ"];
@@ -55,12 +55,12 @@ document.addEventListener("DOMContentLoaded", () => {
       selectLateralidad.disabled = false;
       selectLateralidad.required = true;
       const latVal = selectLateralidad.value;
-      etiqueta4.textContent = latVal ? `${testSeleccionado}${latVal}` : testSeleccionado;[cite: 1]
+      if (etiqueta4) etiqueta4.textContent = latVal ? `${testSeleccionado}${latVal}` : testSeleccionado;
     } else {
       selectLateralidad.value = "";
       selectLateralidad.disabled = true;
       selectLateralidad.required = false;
-      etiqueta4.textContent = testSeleccionado;[cite: 1]
+      if (etiqueta4) etiqueta4.textContent = testSeleccionado;
     }
   }
 
@@ -71,7 +71,6 @@ document.addEventListener("DOMContentLoaded", () => {
     selectLateralidad.addEventListener('change', actualizarLateralidad);
   }
 
-  // Botón Volver (equivalente a Selector / Menú principal)[cite: 2]
   const btnVolver = document.getElementById('btn-volver');
   if (btnVolver) {
     btnVolver.onclick = () => {
@@ -79,7 +78,6 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
-  // Envío del formulario mediante Web1.Get con los entry IDs exactos de Google Forms[cite: 1, 2]
   const formRegistrarTest = document.getElementById('form-registrar-test');
   if (formRegistrarTest) {
     formRegistrarTest.addEventListener('submit', async (event) => {
@@ -91,26 +89,25 @@ document.addEventListener("DOMContentLoaded", () => {
       const lateralidadVal = selectLateralidad.disabled ? "" : selectLateralidad.value;
       const resultadoVal = document.getElementById('resultado').value;
 
-      // Validación de campos obligatorios idéntica a la lógica de bloques[cite: 1]
       if (!nombreVal || !fechaVal || !testVal || !resultadoVal || (!selectLateralidad.disabled && !lateralidadVal)) {
-        alert("Comprueba los campos obligatorios");[cite: 1]
+        alert("Comprueba los campos obligatorios");
         return;
       }
 
-      const baseUrl = "https://docs.google.com/forms/d/15YWvKXpfe_r9iPzBUpXNIdxuBihOFTol8vY35eTAEAA/formResponse";[cite: 1]
+      const baseUrl = "https://docs.google.com/forms/d/15YWvKXpfe_r9iPzBUpXNIdxuBihOFTol8vY35eTAEAA/formResponse";
       
       const params = new URLSearchParams({
-        "entry.1509260909": nombreVal,     [cite: 1]
-        "entry.2139116252": fechaVal,      [cite: 1]
-        "entry.1616925557": testVal,       [cite: 1]
-        "entry.1899409210": lateralidadVal,[cite: 1]
-        "entry.2040101941": resultadoVal   [cite: 1]
+        "entry.1509260909": nombreVal,
+        "entry.2139116252": fechaVal,
+        "entry.1616925557": testVal,
+        "entry.1899409210": lateralidadVal,
+        "entry.2040101941": resultadoVal
       });
 
       try {
-        await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET', mode: 'no-cors' });[cite: 1]
+        await fetch(`${baseUrl}?${params.toString()}`, { method: 'GET', mode: 'no-cors' });
         alert("Test registrado con éxito");
-        window.location.href = "selector.html";[cite: 1, 2]
+        window.location.href = "selector.html";
       } catch (error) {
         alert("Error al enviar los datos: " + error);
       }
