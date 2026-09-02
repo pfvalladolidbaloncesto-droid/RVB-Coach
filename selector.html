@@ -7,7 +7,7 @@
   
   <style>
     * {
-      box-sizing: border-box;
+      box-sizing: border-box !important;
       margin: 0;
       padding: 0;
       font-family: Arial, sans-serif;
@@ -48,20 +48,20 @@
       cursor: pointer;
     }
 
-    /* REJILLA 4X4 FIJA */
+    /* REJILLA 4X4 OBLIGATORIA */
     #grid-jugadores {
       display: grid !important;
       grid-template-columns: repeat(4, 1fr) !important;
-      gap: 10px;
-      width: 100%;
+      gap: 10px !important;
+      width: 100% !important;
       min-height: 360px;
     }
 
     .celda-grid {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
+      display: flex !important;
+      flex-direction: column !important;
+      align-items: center !important;
+      justify-content: center !important;
       background-color: #ffffff;
       border: 1px solid #dcdcdc;
       border-radius: 8px;
@@ -77,20 +77,20 @@
     }
 
     .celda-grid img {
-      width: 50px;
-      height: 50px;
-      object-fit: cover;
-      border-radius: 50%;
+      width: 50px !important;
+      height: 50px !important;
+      object-fit: cover !important;
+      border-radius: 50% !important;
       background-color: #e9ecef;
       margin-bottom: 6px;
-      display: block;
+      display: block !important;
     }
 
     .celda-grid span {
-      font-size: 0.7rem;
-      font-weight: bold;
-      color: #333;
-      text-align: center;
+      font-size: 0.7rem !important;
+      font-weight: bold !important;
+      color: #333 !important;
+      text-align: center !important;
       word-break: break-all;
     }
 
@@ -122,6 +122,76 @@
     </div>
   </div>
 
-  <script src="selector.js"></script>
+  <script>
+    const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxjNjsoJvliC8sZPLhLYUS9pcJ19d5uu49szu7RjnPBBMmAM6ZgD515hNhHulAxbsMCwQ/exec";
+
+    const equipoSeleccionado = localStorage.getItem("equipo") || localStorage.getItem("equipoUsuario") || "Junior A";
+
+    document.addEventListener("DOMContentLoaded", async () => {
+      const contenedor = document.getElementById("grid-jugadores");
+      const tituloEquipo = document.getElementById("nombre-equipo");
+      const btnVolver = document.getElementById("btn-volver");
+
+      if (tituloEquipo) tituloEquipo.textContent = equipoSeleccionado;
+      if (btnVolver) btnVolver.onclick = () => { window.location.href = "menu_principal.html"; };
+
+      try {
+        const response = await fetch(`${URL_APPS_SCRIPT}?equipo=${encodeURIComponent(equipoSeleccionado)}`);
+        const jugadores = await response.json();
+
+        if (!jugadores || jugadores.length === 0) {
+          contenedor.innerHTML = `<p class="cargando-texto">No hay jugadores para <b>${equipoSeleccionado}</b></p>`;
+          return;
+        }
+
+        const mapaJugadores = {};
+        jugadores.forEach(j => {
+          const pos = parseInt(j.posicion, 10);
+          if (!isNaN(pos)) {
+            mapaJugadores[pos] = j.usuario;
+          }
+        });
+
+        let htmlGrid = "";
+        for (let i = 1; i <= 16; i++) {
+          const idUsuario = mapaJugadores[i];
+
+          if (idUsuario) {
+            const rutaFoto = `fotos/${idUsuario}.jpg`;
+            htmlGrid += `
+              <div class="celda-grid tarjeta-jugador" data-posicion="${i}" data-usuario="${idUsuario}">
+                <img src="${rutaFoto}" alt="${idUsuario}" onerror="this.src='fotos/default.jpg'" loading="lazy" />
+                <span>${idUsuario}</span>
+              </div>
+            `;
+          } else {
+            htmlGrid += `
+              <div class="celda-grid celda-vacia" data-posicion="${i}">
+                <span style="color: #ccc;">${i}</span>
+              </div>
+            `;
+          }
+        }
+
+        contenedor.innerHTML = htmlGrid;
+
+        contenedor.addEventListener("click", (e) => {
+          const tarjeta = e.target.closest(".tarjeta-jugador");
+          if (!tarjeta) return;
+
+          localStorage.setItem("posicionSeleccionada", tarjeta.dataset.posicion);
+          localStorage.setItem("jugadorSeleccionado", tarjeta.dataset.usuario);
+
+          window.location.href = "detalle.html";
+        });
+
+      } catch (error) {
+        console.error("Error al cargar la plantilla:", error);
+        if (contenedor) {
+          contenedor.innerHTML = "<p class='cargando-texto' style='color:red;'>Error de conexión con la base de datos.</p>";
+        }
+      }
+    });
+  </script>
 </body>
 </html>
