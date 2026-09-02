@@ -92,7 +92,7 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.readAsDataURL(file);
   });
 
-  // 5. Enviar (Con modo depuración para capturar el error de la foto)
+  // 5. Enviar
   const btnEnviar = document.getElementById("Enviar");
 
   btnEnviar.addEventListener("click", async () => {
@@ -139,39 +139,54 @@ document.addEventListener("DOMContentLoaded", () => {
         body: formData
       });
 
-      // Envío de la imagen con captura de errores en consola
+      console.log("✅ Datos enviados a Google Forms correctamente.");
+
+      // Envío de la imagen mediante formulario oculto (iframe) anti-CORS
       if (imagenBase64) {
         const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
         const base64Clean = imagenBase64.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "");
         const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
-        console.log("📤 Intentando enviar imagen a Apps Script...");
+        console.log("📤 Enviando imagen por formulario oculto (iframe)...");
 
-        const datos =
-          "filename=" + encodeURIComponent(fileName) +
-          "&folderId=" + encodeURIComponent(folderId) +
-          "&mimetype=" + encodeURIComponent("image/jpeg") +
-          "&data=" + encodeURIComponent(base64Clean);
-
-        try {
-          const respuesta = await fetch(scriptURL, {
-            method: "POST",
-            mode: "cors",
-            headers: {
-              "Content-Type": "application/x-www-form-urlencoded"
-            },
-            body: datos
-          });
-
-          const resultadoTexto = await respuesta.text();
-          console.log("📥 Respuesta recibida del Apps Script:", resultadoTexto);
-        } catch (errRed) {
-          console.error("❌ Error de red o CORS al contactar con Apps Script:", errRed);
+        let iframe = document.getElementById("hidden_iframe");
+        if (!iframe) {
+          iframe = document.createElement("iframe");
+          iframe.name = "hidden_iframe";
+          iframe.id = "hidden_iframe";
+          iframe.style.display = "none";
+          document.body.appendChild(iframe);
         }
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = scriptURL;
+        form.target = "hidden_iframe";
+
+        const datosAEnviar = {
+          filename: fileName,
+          folderId: folderId,
+          mimetype: "image/jpeg",
+          data: base64Clean
+        };
+
+        for (const key in datosAEnviar) {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = datosAEnviar[key];
+          form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+
+        console.log("✅ Petición de imagen lanzada mediante iframe oculto.");
       }
 
-      // 🛑 MODO PRUEBA ACTIVO: La página NO cambia de sitio para que veas la consola
-      console.log("🏁 Fin del proceso. Revisa si ha salido algún error rojo en la consola.");
+      // MODO PRUEBA ACTIVO (No redirige para que puedas ver la consola)
+      console.log("🏁 Fin del proceso de prueba. Revisa tu Google Drive para confirmar si la imagen ha llegado a su carpeta.");
       btnEnviar.disabled = false;
       btnEnviar.textContent = "Subir sesión";
 
