@@ -89,8 +89,7 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
-    .form-group input:disabled,
-    .form-group select:disabled {
+    .form-group input:read-only {
       background-color: #f8f9fa;
       color: #6c757d;
       cursor: not-allowed;
@@ -143,13 +142,13 @@
       </div>
 
       <div class="form-group">
-        <label for="nombre">Nombre</label>
-        <input type="text" id="nombre" placeholder="Cargando atleta..." readonly required>
+        <label for="nombre">Nombre (User)</label>
+        <input type="text" id="nombre" readonly required placeholder="Cargando jugador...">
       </div>
 
       <div class="form-group">
         <label for="equiposel">Equipo</label>
-        <input type="text" id="equiposel" placeholder="Cargando equipo..." readonly required>
+        <input type="text" id="equiposel" readonly required placeholder="Cargando equipo...">
       </div>
 
       <div class="form-group">
@@ -190,19 +189,19 @@
       // Fecha actual por defecto
       document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 
-      // Recuperación de variables desde localStorage
-      const jugadorGuardado = localStorage.getItem("User") || localStorage.getItem("Usuario") || localStorage.getItem("jugadorSeleccionado");
-      const equipoGuardado = localStorage.getItem("equipo") || localStorage.getItem("Equipo") || localStorage.getItem("equipoUsuario");
+      // Lee estrictamente 'User' (jugador seleccionado en selector.js) y 'equipo'
+      const jugadorSeleccionado = localStorage.getItem("User") || localStorage.getItem("jugadorSeleccionado");
+      const equipoSeleccionado = localStorage.getItem("equipo") || localStorage.getItem("Equipo");
 
-      if (jugadorGuardado) {
-        document.getElementById('nombre').value = jugadorGuardado;
+      if (jugadorSeleccionado) {
+        document.getElementById('nombre').value = jugadorSeleccionado;
       }
 
-      if (equipoGuardado) {
-        document.getElementById('equiposel').value = equipoGuardado;
+      if (equipoSeleccionado) {
+        document.getElementById('equiposel').value = equipoSeleccionado;
       }
 
-      // Evento Volver
+      // Volver a selector.html
       document.getElementById('btn-volver').onclick = () => {
         window.location.href = "selector.html";
       };
@@ -224,7 +223,7 @@
       const baseUrl = "https://docs.google.com/forms/d/1eca4eShUyVGaxiuB13ONX_dzXynArxuUQmtfFBx5veU/formResponse";
       const params = new URLSearchParams({
         "entry.1206689442": document.getElementById('fecha').value,
-        "entry.1144883834": document.getElementById('nombre').value,
+        "entry.1144883834": document.getElementById('nombre').value, // Envía 'User'
         "entry.697775640": document.getElementById('equiposel').value,
         "entry.1150680246": document.getElementById('entrenamiento').value,
         "entry.961295529": rpeVal,
