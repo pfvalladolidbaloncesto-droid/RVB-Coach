@@ -107,6 +107,55 @@
       min-height: 70px;
     }
 
+    /* Estilos Slider RPE (Verde a Rojo) */
+    .rpe-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+
+    .rpe-slider {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 12px;
+      border-radius: 6px;
+      background: linear-gradient(to right, #28a745 0%, #ffc107 50%, #dc3545 100%);
+      outline: none;
+      padding: 0;
+      border: none;
+    }
+
+    .rpe-slider::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #333;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .rpe-slider::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #333;
+      cursor: pointer;
+      box-shadow: 0 2px 5px rgba(0,0,0,0.2);
+    }
+
+    .rpe-value {
+      font-size: 18px;
+      font-weight: 800;
+      min-width: 28px;
+      text-align: center;
+      color: #1a1a1a;
+    }
+
     .btn-submit {
       width: 100%;
       padding: 13px;
@@ -148,13 +197,20 @@
 
       <div class="form-group">
         <label for="equiposel">Equipo</label>
-        <input type="text" id="equiposel" readonly required placeholder="Cargando equipo...">
+        <select id="equiposel" required>
+          <option value="TERCERA">TERCERA</option>
+          <option value="Junior A">Junior A</option>
+          <option value="Junior B">Junior B</option>
+          <option value="Cadete A">Cadete A</option>
+          <option value="Cadete B">Cadete B</option>
+          <option value="Infantil A">Infantil A</option>
+          <option value="Infantil B">Infantil B</option>
+        </select>
       </div>
 
       <div class="form-group">
         <label for="entrenamiento">Entrenamiento</label>
         <select id="entrenamiento" required>
-          <option value="">Selecciona tipo</option>
           <option value="Pista">Pista</option>
           <option value="Físico">Físico</option>
         </select>
@@ -162,7 +218,10 @@
 
       <div class="form-group">
         <label for="rpe">RPE (0-10)</label>
-        <input type="number" id="rpe" min="0" max="10" placeholder="0 a 10" required>
+        <div class="rpe-container">
+          <input type="range" id="rpe" class="rpe-slider" min="0" max="10" value="5" oninput="actualizarValorRPE(this.value)">
+          <span id="rpe-val" class="rpe-value">5</span>
+        </div>
       </div>
 
       <div class="form-group">
@@ -185,11 +244,13 @@
   </div>
 
   <script>
+    function actualizarValorRPE(val) {
+      document.getElementById('rpe-val').textContent = val;
+    }
+
     document.addEventListener("DOMContentLoaded", () => {
-      // Fecha actual por defecto
       document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 
-      // Lee estrictamente 'User' (jugador seleccionado en selector.js) y 'equipo'
       const jugadorSeleccionado = localStorage.getItem("User") || localStorage.getItem("jugadorSeleccionado");
       const equipoSeleccionado = localStorage.getItem("equipo") || localStorage.getItem("Equipo");
 
@@ -201,7 +262,6 @@
         document.getElementById('equiposel').value = equipoSeleccionado;
       }
 
-      // Volver a selector.html
       document.getElementById('btn-volver').onclick = () => {
         window.location.href = "selector.html";
       };
@@ -210,20 +270,12 @@
     function enviarRPE(event) {
       event.preventDefault();
 
-      const rpeInput = document.getElementById('rpe');
-      const rpeVal = parseInt(rpeInput.value, 10);
-      
-      if (isNaN(rpeVal) || rpeVal < 0 || rpeVal > 10) {
-        alert("Comprueba valores de campos obligatorios (RPE debe ser de 0 a 10)");
-        rpeInput.style.borderColor = "#dc3545";
-        return;
-      }
-      rpeInput.style.borderColor = "#e1e4e8";
+      const rpeVal = document.getElementById('rpe').value;
 
       const baseUrl = "https://docs.google.com/forms/d/1eca4eShUyVGaxiuB13ONX_dzXynArxuUQmtfFBx5veU/formResponse";
       const params = new URLSearchParams({
         "entry.1206689442": document.getElementById('fecha').value,
-        "entry.1144883834": document.getElementById('nombre').value, // Envía 'User'
+        "entry.1144883834": document.getElementById('nombre').value,
         "entry.697775640": document.getElementById('equiposel').value,
         "entry.1150680246": document.getElementById('entrenamiento').value,
         "entry.961295529": rpeVal,
