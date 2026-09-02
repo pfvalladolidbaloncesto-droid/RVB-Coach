@@ -39,7 +39,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return "";
   }
 
-  // 4. Cámara / imagen
+  // 4. Cámara / imagen (Optimizada a 300x300 para no saturar los parámetros de Google)
   const btnFoto = document.getElementById("Foto");
   const inputFileFoto = document.getElementById("inputFileFoto");
   const imagen1 = document.getElementById("Imagen1");
@@ -60,8 +60,8 @@ document.addEventListener("DOMContentLoaded", () => {
       img.src = uploadEvent.target.result;
       img.onload = function () {
         const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 800;
-        const MAX_HEIGHT = 800;
+        const MAX_WIDTH = 300;
+        const MAX_HEIGHT = 300;
 
         let width = img.width;
         let height = img.height;
@@ -84,7 +84,7 @@ document.addEventListener("DOMContentLoaded", () => {
         const ctx = canvas.getContext("2d");
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        imagenBase64 = canvas.toDataURL("image/jpeg", 0.7);
+        imagenBase64 = canvas.toDataURL("image/jpeg", 0.6);
         imagen1.src = imagenBase64;
         imagen1.style.display = "block";
       };
@@ -141,13 +141,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log("✅ Datos enviados a Google Forms correctamente.");
 
-      // Envío de la imagen mediante formulario oculto (iframe)
+      // Envío de la imagen optimizada mediante formulario oculto (iframe)
       if (imagenBase64) {
         const scriptURL = "https://script.google.com/macros/s/AKfycbx3F2GN42yBilThhMzm6tURPXvSlS4Sm5NQaKXeRO3VuvQ3aHelvgfjtk0_LkgQfVOWFg/exec";
         const base64Clean = imagenBase64.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "");
         const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
-        console.log("📤 Enviando imagen por formulario oculto (iframe)...");
+        console.log("📤 Enviando imagen optimizada por formulario oculto...");
 
         let iframe = document.getElementById("hidden_iframe");
         if (!iframe) {
@@ -182,10 +182,10 @@ document.addEventListener("DOMContentLoaded", () => {
         form.submit();
         document.body.removeChild(form);
 
-        console.log("✅ Petición de imagen enviada mediante iframe.");
+        console.log("✅ Petición de imagen enviada correctamente.");
       }
 
-      console.log("🏁 Fin del proceso. Revisa tu Google Drive.");
+      console.log("🏁 Fin del proceso. ¡Comprueba tu Google Drive!");
       btnEnviar.disabled = false;
       btnEnviar.textContent = "Subir sesión";
 
