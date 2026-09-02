@@ -4,8 +4,23 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registro Readiness - Coach RVB</title>
-  <link rel="stylesheet" href="style.css?v=3" />
   <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
     .readiness-container {
       background: #ffffff;
       padding: 24px;
@@ -22,11 +37,28 @@
       margin-bottom: 20px;
     }
 
+    #labelID {
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: #000;
+      text-transform: uppercase;
+    }
+
+    .btn-volver {
+      padding: 8px 16px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
     .slider-group {
       margin-bottom: 20px;
       display: flex;
       flex-direction: column;
-      gap: 6px;
+      gap: 8px;
     }
 
     .slider-label-header {
@@ -39,15 +71,16 @@
     .slider-value {
       color: #007bff;
       font-size: 1.1rem;
+      font-weight: bold;
     }
 
-    /* Estilos base de los Sliders */
+    /* Estilos base de Sliders */
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
       width: 100%;
-      height: 10px;
-      border-radius: 5px;
+      height: 12px;
+      border-radius: 6px;
       outline: none;
       cursor: pointer;
     }
@@ -66,83 +99,157 @@
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: #ffffff;
-      border: 2px solid #333;
+      border: 2px solid #333333;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
     input[type="range"]::-moz-range-thumb {
-      width: 22px;
-      height: 22px;
+      width: 24px;
+      height: 24px;
       border-radius: 50%;
       background: #ffffff;
-      border: 2px solid #333;
+      border: 2px solid #333333;
       box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
-    .actions-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 20px;
+    .btn-enviar {
+      padding: 10px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
     }
   </style>
 </head>
 <body>
-  <div class="main-container">
-    <div class="readiness-container">
-      
-      <div class="header-readiness">
-        <button id="btnVolver" class="btn-action" style="width: auto; padding: 6px 12px;">← Atrás</button>
-        <h2 id="labelID">Cargando...</h2>
-      </div>
 
-      <!-- 1. Dolor Muscular (Verde a Rojo) -->
-      <div class="slider-group">
-        <div class="slider-label-header">
-          <label for="deslizadorSoreness">Dolor muscular</label>
-          <span id="respuestaSoreness" class="slider-value">5</span>
-        </div>
-        <input type="range" id="deslizadorSoreness" class="slider-green-to-red" min="0" max="10" value="5" />
-      </div>
-
-      <!-- 2. Fatiga (Verde a Rojo) -->
-      <div class="slider-group">
-        <div class="slider-label-header">
-          <label for="deslizadorFatiga">Fatiga</label>
-          <span id="respuestaFatiga" class="slider-value">5</span>
-        </div>
-        <input type="range" id="deslizadorFatiga" class="slider-green-to-red" min="0" max="10" value="5" />
-      </div>
-
-      <!-- 3. Sueño (Rojo a Verde) -->
-      <div class="slider-group">
-        <div class="slider-label-header">
-          <label for="deslizadorSueno">Sueño</label>
-          <span id="respuestaSueno" class="slider-value">5</span>
-        </div>
-        <input type="range" id="deslizadorSueno" class="slider-red-to-green" min="0" max="10" value="5" />
-      </div>
-
-      <!-- 4. Estrés (Verde a Rojo) -->
-      <div class="slider-group">
-        <div class="slider-label-header">
-          <label for="deslizadorEstres">Estrés</label>
-          <span id="respuestaEstres" class="slider-value">5</span>
-        </div>
-        <input type="range" id="deslizadorEstres" class="slider-green-to-red" min="0" max="10" value="5" />
-      </div>
-
-      <!-- Botón de Envío -->
-      <div class="actions-group">
-        <button id="btnEnviar" class="btn-action" style="background-color: #28a745;">Enviar</button>
-      </div>
-
+  <div class="readiness-container">
+    
+    <div class="header-readiness">
+      <button id="btnVolver" class="btn-volver">← Atrás</button>
+      <h2 id="labelID">---</h2>
     </div>
+
+    <!-- 1. Dolor Muscular (Verde a Rojo) -->
+    <div class="slider-group">
+      <div class="slider-label-header">
+        <label for="deslizadorSoreness">Dolor muscular</label>
+        <span id="respuestaSoreness" class="slider-value">5</span>
+      </div>
+      <input type="range" id="deslizadorSoreness" class="slider-green-to-red" min="0" max="10" value="5" />
+    </div>
+
+    <!-- 2. Fatiga (Verde a Rojo) -->
+    <div class="slider-group">
+      <div class="slider-label-header">
+        <label for="deslizadorFatiga">Fatiga</label>
+        <span id="respuestaFatiga" class="slider-value">5</span>
+      </div>
+      <input type="range" id="deslizadorFatiga" class="slider-green-to-red" min="0" max="10" value="5" />
+    </div>
+
+    <!-- 3. Sueño (Rojo a Verde) -->
+    <div class="slider-group">
+      <div class="slider-label-header">
+        <label for="deslizadorSueno">Sueño</label>
+        <span id="respuestaSueno" class="slider-value">5</span>
+      </div>
+      <input type="range" id="deslizadorSueno" class="slider-red-to-green" min="0" max="10" value="5" />
+    </div>
+
+    <!-- 4. Estrés (Verde a Rojo) -->
+    <div class="slider-group">
+      <div class="slider-label-header">
+        <label for="deslizadorEstres">Estrés</label>
+        <span id="respuestaEstres" class="slider-value">5</span>
+      </div>
+      <input type="range" id="deslizadorEstres" class="slider-green-to-red" min="0" max="10" value="5" />
+    </div>
+
+    <!-- Botón de Envío -->
+    <button id="btnEnviar" class="btn-enviar">Enviar</button>
+
   </div>
 
-  <script src="screen2.js" defer></script>
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Elementos UI
+      const labelID = document.getElementById("labelID");
+      const btnVolver = document.getElementById("btnVolver");
+      const btnEnviar = document.getElementById("btnEnviar");
+
+      const sliderSoreness = document.getElementById("deslizadorSoreness");
+      const valSoreness = document.getElementById("respuestaSoreness");
+
+      const sliderFatiga = document.getElementById("deslizadorFatiga");
+      const valFatiga = document.getElementById("respuestaFatiga");
+
+      const sliderSueno = document.getElementById("deslizadorSueno");
+      const valSueno = document.getElementById("respuestaSueno");
+
+      const sliderEstres = document.getElementById("deslizadorEstres");
+      const valEstres = document.getElementById("respuestaEstres");
+
+      // Carga de jugador seleccionado (Comprueba todas las claves posibles)
+      const jugadorSeleccionado = localStorage.getItem("jugadorSeleccionado") || 
+                                  localStorage.getItem("User") || 
+                                  localStorage.getItem("Usuario") || 
+                                  "JUGADOR";
+      
+      labelID.textContent = jugadorSeleccionado;
+
+      // Actualizar lectura de los sliders en tiempo real
+      const vincularSlider = (slider, display) => {
+        slider.addEventListener("input", (e) => {
+          display.textContent = e.target.value;
+        });
+      };
+
+      vincularSlider(sliderSoreness, valSoreness);
+      vincularSlider(sliderFatiga, valFatiga);
+      vincularSlider(sliderSueno, valSueno);
+      vincularSlider(sliderEstres, valEstres);
+
+      // Botón Volver -> Selector
+      btnVolver.addEventListener("click", () => {
+        window.location.href = "selector.html";
+      });
+
+      // Botón Enviar -> Google Form Response
+      btnEnviar.addEventListener("click", async () => {
+        btnEnviar.disabled = true;
+        btnEnviar.textContent = "Enviando...";
+
+        const baseUrl = "https://docs.google.com/forms/d/1X__q1bWSeTStyYXdV1czQbYkrXa5BGuIQ7gFcyvFcxY/formResponse";
+        
+        const params = new URLSearchParams();
+        params.append("entry.467683432", jugadorSeleccionado);
+        params.append("entry.148315985", valSoreness.textContent);
+        params.append("entry.1935157596", valFatiga.textContent);
+        params.append("entry.1299849898", valSueno.textContent);
+        params.append("entry.1016767713", valEstres.textContent);
+
+        const fullUrl = `${baseUrl}?${params.toString()}`;
+
+        try {
+          await fetch(fullUrl, { mode: "no-cors" });
+          window.location.href = "selector.html";
+        } catch (error) {
+          console.error("Error al enviar el formulario:", error);
+          alert("Hubo un error al guardar los datos.");
+          btnEnviar.disabled = false;
+          btnEnviar.textContent = "Enviar";
+        }
+      });
+    });
+  </script>
 </body>
 </html>
