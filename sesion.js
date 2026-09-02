@@ -9,7 +9,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const duracionInput = document.getElementById("Duracion");
 
   const equipoGuardado = localStorage.getItem("Equipo") || localStorage.getItem("equipo") || localStorage.getItem("EquipoSeleccionado") || "Junior A";
-  const tipoEntrenamiento = localStorage.getItem("TipoEntrenamiento") || localStorage.getItem("tipoEntrenamiento") || localStorage.getItem("entrenamiento") || "Físico";
+  const rolGuardado = localStorage.getItem("Rol") || localStorage.getItem("rol") || localStorage.getItem("tipoRol") || "";
+
+  // Determinamos el entrenamiento según el rol del menú principal
+  let tipoEntrenamiento = "Físico"; // Valor por defecto
+  if (rolGuardado.toUpperCase() === "PF") {
+    tipoEntrenamiento = "Físico";
+  } else if (rolGuardado.toLowerCase().includes("entrenador") || rolGuardado.toLowerCase() === "coach") {
+    tipoEntrenamiento = "Pista";
+  } else {
+    // Si no viene del rol, intentamos leerlo del localStorage directo
+    tipoEntrenamiento = localStorage.getItem("TipoEntrenamiento") || localStorage.getItem("tipoEntrenamiento") || localStorage.getItem("entrenamiento") || "Físico";
+  }
 
   document.getElementById("Equipo").value = equipoGuardado.trim();
   document.getElementById("Entrenamiento1").value = tipoEntrenamiento.trim();
