@@ -41,9 +41,46 @@
       font-size: 1.1rem;
     }
 
+    /* Estilos base de los Sliders */
     input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
       width: 100%;
+      height: 10px;
+      border-radius: 5px;
+      outline: none;
       cursor: pointer;
+    }
+
+    /* Sliders 1, 2 y 4: Verde (0) a Rojo (10) */
+    .slider-green-to-red {
+      background: linear-gradient(to right, #28a745, #ffc107, #dc3545);
+    }
+
+    /* Slider 3 (Sueño): Rojo (0) a Verde (10) */
+    .slider-red-to-green {
+      background: linear-gradient(to right, #dc3545, #ffc107, #28a745);
+    }
+
+    /* Personalización del tirador (Thumb) */
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #333;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 22px;
+      height: 22px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #333;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
     }
 
     .actions-group {
@@ -62,40 +99,40 @@
         <h2 id="labelID">Cargando...</h2>
       </div>
 
-      <!-- 1. Dolor Muscular (Soreness) -->
+      <!-- 1. Dolor Muscular (Verde a Rojo) -->
       <div class="slider-group">
         <div class="slider-label-header">
           <label for="deslizadorSoreness">Dolor muscular</label>
           <span id="respuestaSoreness" class="slider-value">5</span>
         </div>
-        <input type="range" id="deslizadorSoreness" min="0" max="10" value="5" />
+        <input type="range" id="deslizadorSoreness" class="slider-green-to-red" min="0" max="10" value="5" />
       </div>
 
-      <!-- 2. Fatiga -->
+      <!-- 2. Fatiga (Verde a Rojo) -->
       <div class="slider-group">
         <div class="slider-label-header">
           <label for="deslizadorFatiga">Fatiga</label>
           <span id="respuestaFatiga" class="slider-value">5</span>
         </div>
-        <input type="range" id="deslizadorFatiga" min="0" max="10" value="5" />
+        <input type="range" id="deslizadorFatiga" class="slider-green-to-red" min="0" max="10" value="5" />
       </div>
 
-      <!-- 3. Sueño -->
+      <!-- 3. Sueño (Rojo a Verde) -->
       <div class="slider-group">
         <div class="slider-label-header">
           <label for="deslizadorSueno">Sueño</label>
           <span id="respuestaSueno" class="slider-value">5</span>
         </div>
-        <input type="range" id="deslizadorSueno" min="0" max="10" value="5" />
+        <input type="range" id="deslizadorSueno" class="slider-red-to-green" min="0" max="10" value="5" />
       </div>
 
-      <!-- 4. Estrés -->
+      <!-- 4. Estrés (Verde a Rojo) -->
       <div class="slider-group">
         <div class="slider-label-header">
           <label for="deslizadorEstres">Estrés</label>
           <span id="respuestaEstres" class="slider-value">5</span>
         </div>
-        <input type="range" id="deslizadorEstres" min="0" max="10" value="5" />
+        <input type="range" id="deslizadorEstres" class="slider-green-to-red" min="0" max="10" value="5" />
       </div>
 
       <!-- Botón de Envío -->
@@ -106,75 +143,6 @@
     </div>
   </div>
 
-  <script>
-    document.addEventListener("DOMContentLoaded", () => {
-      // Elementos UI
-      const labelID = document.getElementById("labelID");
-      const btnVolver = document.getElementById("btnVolver");
-      const btnEnviar = document.getElementById("btnEnviar");
-
-      const sliderSoreness = document.getElementById("deslizadorSoreness");
-      const valSoreness = document.getElementById("respuestaSoreness");
-
-      const sliderFatiga = document.getElementById("deslizadorFatiga");
-      const valFatiga = document.getElementById("respuestaFatiga");
-
-      const sliderSueno = document.getElementById("deslizadorSueno");
-      const valSueno = document.getElementById("respuestaSueno");
-
-      const sliderEstres = document.getElementById("deslizadorEstres");
-      const valEstres = document.getElementById("respuestaEstres");
-
-      // 1. Carga de datos de usuario seleccionado (proviene de TinyDB / localStorage)
-      const jugadorSeleccionado = localStorage.getItem("jugadorSeleccionado") || localStorage.getItem("Usuario") || "Usuario";
-      labelID.textContent = jugadorSeleccionado;
-
-      // 2. Sincronizar lectura de deslizadores
-      const vincularSlider = (slider, display) => {
-        slider.addEventListener("input", (e) => {
-          display.textContent = e.target.value;
-        });
-      };
-
-      vincularSlider(sliderSoreness, valSoreness);
-      vincularSlider(sliderFatiga, valFatiga);
-      vincularSlider(sliderSueno, valSueno);
-      vincularSlider(sliderEstres, valEstres);
-
-      // 3. Botón Volver -> Selector
-      btnVolver.addEventListener("click", () => {
-        window.location.href = "selector.html";
-      });
-
-      // 4. Botón Enviar -> Google Form Response
-      btnEnviar.addEventListener("click", async () => {
-        btnEnviar.disabled = true;
-        btnEnviar.textContent = "Enviando...";
-
-        const baseUrl = "https://docs.google.com/forms/d/1X__q1bWSeTStyYXdV1czQbYkrXa5BGuIQ7gFcyvFcxY/formResponse";
-        
-        // Mapeo exacto de los entry IDs de tu bloque de App Inventor
-        const params = new URLSearchParams();
-        params.append("entry.467683432", jugadorSeleccionado);
-        params.append("entry.148315985", valSoreness.textContent);
-        params.append("entry.1935157596", valFatiga.textContent);
-        params.append("entry.1299849898", valSueno.textContent);
-        params.append("entry.1016767713", valEstres.textContent);
-
-        const fullUrl = `${baseUrl}?${params.toString()}`;
-
-        try {
-          // Usamos mode no-cors para enviar el Google Form sin bloqueos de origen cruzado
-          await fetch(fullUrl, { mode: "no-cors" });
-          window.location.href = "selector.html";
-        } catch (error) {
-          console.error("Error al enviar el formulario:", error);
-          alert("Hubo un error al guardar los datos.");
-          btnEnviar.disabled = false;
-          btnEnviar.textContent = "Enviar";
-        }
-      });
-    });
-  </script>
+  <script src="screen2.js" defer></script>
 </body>
 </html>
