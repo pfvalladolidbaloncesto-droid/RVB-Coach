@@ -22,8 +22,8 @@ document.addEventListener("DOMContentLoaded", () => {
   etiquetaUsuario.textContent = usuario;
   localStorage.setItem("Usuario", usuario);
 
-  // 2. Preseleccionar Rol por defecto si existe
-  const rolDefecto = localStorage.getItem("RolPorDefecto");
+  // 2. Preseleccionar Rol por defecto (normalizado a rolUsuario)
+  const rolDefecto = localStorage.getItem("rolUsuario") || localStorage.getItem("RolPorDefecto");
   if (rolDefecto) {
     if (rolDefecto.toUpperCase().includes("FISICO") || rolDefecto.toUpperCase().includes("PF")) {
       selectorRol.value = "PF";
@@ -33,30 +33,40 @@ document.addEventListener("DOMContentLoaded", () => {
       selectorRol.value = rolDefecto;
     }
   }
+  localStorage.setItem("rolUsuario", selectorRol.value);
 
-  // 3. Preseleccionar Equipo por defecto
-  const equipoDefecto = localStorage.getItem("equipo") || localStorage.getItem("EquipoPorDefecto") || localStorage.getItem("Equipo");
+  // 3. Preseleccionar Equipo por defecto (normalizado a equipoUsuario)
+  const equipoDefecto = localStorage.getItem("equipoUsuario") || localStorage.getItem("EquipoPorDefecto");
   if (equipoDefecto) {
-    // Busca coincidencia sin importar mayúsculas/minúsculas
     const opciones = Array.from(selectorEquipo.options);
     const opcionEncontrada = opciones.find(opt => opt.value.toUpperCase() === equipoDefecto.toUpperCase());
     if (opcionEncontrada) {
       selectorEquipo.value = opcionEncontrada.value;
     }
   }
+  localStorage.setItem("equipoUsuario", selectorEquipo.value);
 
   // 4. Guardar lista por defecto de Tests
   const listaTests = ["SLR", "ANKLE", "PESO", "30-15", "DJ", "CMJ", "ALTURA", "ENVERGADURA"];
   localStorage.setItem("Test", JSON.stringify(listaTests));
 
-  // Función auxiliar para guardar selección de Equipo y Navegar
+  // Función auxiliar para guardar selección normalizada y Navegar
   function guardarYRedirigir(variableNombre, pantallaDestino) {
     const equipoSeleccionado = selectorEquipo.value;
-    
-    // Guardamos en todas las variaciones de clave para asegurar compatibilidad total
-    localStorage.setItem("equipo", equipoSeleccionado);
+    const rolSeleccionado = selectorRol.value;
+
+    // Normalización de Equipo -> Equipo
     localStorage.setItem("Equipo", equipoSeleccionado);
-    localStorage.setItem("equipoUsuario", equipoSeleccionado);
+    
+    // Normalización de Rol -> Rol (mapeando texto según corresponda)
+    let rolFinal = rolSeleccionado;
+    if (rolSeleccionado === "PF") {
+      rolFinal = "Físico";
+    } else if (rolSeleccionado === "Entrenador") {
+      rolFinal = "Pista";
+    }
+    localStorage.setItem("Rol", rolFinal);
+
     localStorage.setItem("Variable", variableNombre);
     
     window.location.href = pantallaDestino;
@@ -89,14 +99,6 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   btnSesion.addEventListener("click", () => {
-    const rolSeleccionado = selectorRol.value;
-    
-    if (rolSeleccionado === "PF") {
-      localStorage.setItem("Rol", "Físico");
-    } else if (rolSeleccionado === "Entrenador") {
-      localStorage.setItem("Rol", "Pista");
-    }
-
     guardarYRedirigir("Sesión", "sesion.html");
   });
 
