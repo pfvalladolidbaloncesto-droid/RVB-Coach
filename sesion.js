@@ -141,35 +141,52 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log("✅ Datos enviados a Google Forms correctamente.");
 
-      // Envío de la imagen por JSON directo al Apps Script
+      // Envío de la imagen mediante formulario oculto (iframe) sin errores 404
       if (imagenBase64) {
         const scriptURL = "https://script.google.com/macros/s/AKfycbx3F2GN42yBilThhMzm6tURPXvSlS4Sm5NQaKXeRO3VuvQ3aHelvgfjtk0_LkgQfVOWFg/exec";
         const base64Clean = imagenBase64.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "");
         const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
-        console.log("📤 Enviando imagen por JSON al Apps Script...");
+        console.log("📤 Enviando imagen por formulario oculto (iframe)...");
 
-        const cuerpoPeticion = {
+        let iframe = document.getElementById("hidden_iframe");
+        if (!iframe) {
+          iframe = document.createElement("iframe");
+          iframe.name = "hidden_iframe";
+          iframe.id = "hidden_iframe";
+          iframe.style.display = "none";
+          document.body.appendChild(iframe);
+        }
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = scriptURL;
+        form.target = "hidden_iframe";
+
+        const datosAEnviar = {
           filename: fileName,
           folderId: folderId,
           mimetype: "image/jpeg",
           data: base64Clean
         };
 
-        await fetch(scriptURL, {
-          method: "POST",
-          mode: "no-cors",
-          headers: {
-            "Content-Type": "text/plain;charset=utf-8"
-          },
-          body: JSON.stringify(cuerpoPeticion)
-        });
+        for (const key in datosAEnviar) {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = datosAEnviar[key];
+          form.appendChild(input);
+        }
 
-        console.log("✅ Petición de imagen enviada.");
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+
+        console.log("✅ Petición de imagen enviada mediante iframe.");
       }
 
-      // MODO PRUEBA ACTIVO (No redirige para que puedas comprobar la consola y el Drive)
-      console.log("🏁 Fin del proceso. Comprueba tu Google Drive.");
+      // MODO PRUEBA ACTIVO (No redirige para que puedas comprobar Drive)
+      console.log("🏁 Fin del proceso. Revisa tu Google Drive.");
       btnEnviar.disabled = false;
       btnEnviar.textContent = "Subir sesión";
 
