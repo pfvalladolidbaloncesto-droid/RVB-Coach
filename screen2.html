@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro Readiness - Coach RVB</title>
+  <link rel="stylesheet" href="style.css?v=3" />
+  <style>
+    .readiness-container {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 450px;
+    }
+
+    .header-readiness {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
+    }
+
+    .slider-group {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .slider-label-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .slider-value {
+      color: #007bff;
+      font-size: 1.1rem;
+    }
+
+    input[type="range"] {
+      width: 100%;
+      cursor: pointer;
+    }
+
+    .actions-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 20px;
+    }
+  </style>
+</head>
+<body>
+  <div class="main-container">
+    <div class="readiness-container">
+      
+      <div class="header-readiness">
+        <button id="btnVolver" class="btn-action" style="width: auto; padding: 6px 12px;">← Atrás</button>
+        <h2 id="labelID">Cargando...</h2>
+      </div>
+
+      <!-- 1. Dolor Muscular (Soreness) -->
+      <div class="slider-group">
+        <div class="slider-label-header">
+          <label for="deslizadorSoreness">Dolor muscular</label>
+          <span id="respuestaSoreness" class="slider-value">5</span>
+        </div>
+        <input type="range" id="deslizadorSoreness" min="0" max="10" value="5" />
+      </div>
+
+      <!-- 2. Fatiga -->
+      <div class="slider-group">
+        <div class="slider-label-header">
+          <label for="deslizadorFatiga">Fatiga</label>
+          <span id="respuestaFatiga" class="slider-value">5</span>
+        </div>
+        <input type="range" id="deslizadorFatiga" min="0" max="10" value="5" />
+      </div>
+
+      <!-- 3. Sueño -->
+      <div class="slider-group">
+        <div class="slider-label-header">
+          <label for="deslizadorSueno">Sueño</label>
+          <span id="respuestaSueno" class="slider-value">5</span>
+        </div>
+        <input type="range" id="deslizadorSueno" min="0" max="10" value="5" />
+      </div>
+
+      <!-- 4. Estrés -->
+      <div class="slider-group">
+        <div class="slider-label-header">
+          <label for="deslizadorEstres">Estrés</label>
+          <span id="respuestaEstres" class="slider-value">5</span>
+        </div>
+        <input type="range" id="deslizadorEstres" min="0" max="10" value="5" />
+      </div>
+
+      <!-- Botón de Envío -->
+      <div class="actions-group">
+        <button id="btnEnviar" class="btn-action" style="background-color: #28a745;">Enviar</button>
+      </div>
+
+    </div>
+  </div>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Elementos UI
+      const labelID = document.getElementById("labelID");
+      const btnVolver = document.getElementById("btnVolver");
+      const btnEnviar = document.getElementById("btnEnviar");
+
+      const sliderSoreness = document.getElementById("deslizadorSoreness");
+      const valSoreness = document.getElementById("respuestaSoreness");
+
+      const sliderFatiga = document.getElementById("deslizadorFatiga");
+      const valFatiga = document.getElementById("respuestaFatiga");
+
+      const sliderSueno = document.getElementById("deslizadorSueno");
+      const valSueno = document.getElementById("respuestaSueno");
+
+      const sliderEstres = document.getElementById("deslizadorEstres");
+      const valEstres = document.getElementById("respuestaEstres");
+
+      // 1. Carga de datos de usuario seleccionado (proviene de TinyDB / localStorage)
+      const jugadorSeleccionado = localStorage.getItem("jugadorSeleccionado") || localStorage.getItem("Usuario") || "Usuario";
+      labelID.textContent = jugadorSeleccionado;
+
+      // 2. Sincronizar lectura de deslizadores
+      const vincularSlider = (slider, display) => {
+        slider.addEventListener("input", (e) => {
+          display.textContent = e.target.value;
+        });
+      };
+
+      vincularSlider(sliderSoreness, valSoreness);
+      vincularSlider(sliderFatiga, valFatiga);
+      vincularSlider(sliderSueno, valSueno);
+      vincularSlider(sliderEstres, valEstres);
+
+      // 3. Botón Volver -> Selector
+      btnVolver.addEventListener("click", () => {
+        window.location.href = "selector.html";
+      });
+
+      // 4. Botón Enviar -> Google Form Response
+      btnEnviar.addEventListener("click", async () => {
+        btnEnviar.disabled = true;
+        btnEnviar.textContent = "Enviando...";
+
+        const baseUrl = "https://docs.google.com/forms/d/1X__q1bWSeTStyYXdV1czQbYkrXa5BGuIQ7gFcyvFcxY/formResponse";
+        
+        // Mapeo exacto de los entry IDs de tu bloque de App Inventor
+        const params = new URLSearchParams();
+        params.append("entry.467683432", jugadorSeleccionado);
+        params.append("entry.148315985", valSoreness.textContent);
+        params.append("entry.1935157596", valFatiga.textContent);
+        params.append("entry.1299849898", valSueno.textContent);
+        params.append("entry.1016767713", valEstres.textContent);
+
+        const fullUrl = `${baseUrl}?${params.toString()}`;
+
+        try {
+          // Usamos mode no-cors para enviar el Google Form sin bloqueos de origen cruzado
+          await fetch(fullUrl, { mode: "no-cors" });
+          window.location.href = "selector.html";
+        } catch (error) {
+          console.error("Error al enviar el formulario:", error);
+          alert("Hubo un error al guardar los datos.");
+          btnEnviar.disabled = false;
+          btnEnviar.textContent = "Enviar";
+        }
+      });
+    });
+  </script>
+</body>
+</html>
