@@ -1,98 +1,191 @@
-function doPost(e) {
+document.addEventListener("DOMContentLoaded", () => {
+    // 1. Inicialización de fecha actual (YYYY-MM-DD)
+    const fechaInput = document.getElementById("SelectorDeFecha1");
+    const today = new Date().toISOString().split('T')[0];
+    fechaInput.value = today;
 
-  try {
-
-    Logger.log("=================================");
-    Logger.log("📥 DOPOST RECIBIDO");
-    Logger.log("=================================");
-
-    if (!e) {
-      Logger.log("❌ El objeto e es undefined");
-      throw new Error("No se recibió el objeto e");
+    // 2. Recuperar datos de localStorage
+    const entrenamientoInput = document.getElementById("Entrenamiento1");
+    const equipoInput = document.getElementById("Equipo");
+    const duracionInput = document.getElementById("Duracion");
+    
+    const equipoGuardado = localStorage.getItem("Equipo") || "";
+    const tipoEntrenamiento = localStorage.getItem("TipoEntrenamiento") || "Físico";
+    
+    entrenamientoInput.value = tipoEntrenamiento;
+    equipoInput.value = equipoGuardado;
+    
+    if (tipoEntrenamiento === "Físico") {
+        duracionInput.value = 55;
     }
 
-    if (!e.parameter) {
-      Logger.log("❌ e.parameter es undefined");
-      throw new Error("No se recibieron parámetros");
+    // 3. Matriz completa de carpetas de Google Drive
+    function obtenerFolderId(equipo, entrenamiento) {
+        if (entrenamiento === "Pista" && equipo === "EBA") return "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT";
+        if (entrenamiento === "Físico" && equipo === "EBA") return "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ";
+        if (entrenamiento === "Pista" && equipo === "Junior A") return "1popWCqp2NRuGDHPlqGUGavYzCjHof4d";
+        if (entrenamiento === "Físico" && equipo === "Junior A") return "17KMZF1tKwZyZB5fg2lPndVN0F8g1jSle";
+        if (entrenamiento === "Pista" && equipo === "Junior B") return "1N9I0FKZ3Bp4W6_F7TfeyT38cEggXEZRI";
+        if (entrenamiento === "Físico" && equipo === "Junior B") return "1yPuV6bwl48glTw0AHJP3MA7YEhq2R8Gv";
+        if (entrenamiento === "Pista" && equipo === "Cadete A") return "1LgRPFVcke8UKHbqoyi5yYLmCq4rucHZ2";
+        if (entrenamiento === "Físico" && equipo === "Cadete A") return "1ChuJ-F3JeKkoshtnKlWqgluWVFnY1vjB";
+        if (entrenamiento === "Pista" && equipo === "Cadete B") return "18EANG_Wv3W6jgxkGe55YK8OgTsZly319";
+        if (entrenamiento === "Físico" && equipo === "Cadete B") return "1_KgcdJe-T4MTfpqJyp9VZ9YyFyGsx4Xa";
+        if (entrenamiento === "Pista" && equipo === "Infantil A") return "1PhY2dTw98_uVder7BzUXdLU5eT9lu_8P";
+        if (entrenamiento === "Físico" && equipo === "Infantil A") return "1M1JubcwUhsJoww0f0BP8bakjHzR4vK2A";
+        if (entrenamiento === "Pista" && equipo === "Infantil B") return "1EpMEXq2EYBcRucK8mk4SIRR2BQfBNyq";
+        if (entrenamiento === "Físico" && equipo === "Infantil B") return "1G44Nviyut4CTPelgjxhKCGCI183ZJ";
+        return "";
     }
 
-    Logger.log("📋 Parámetros recibidos:");
-    Logger.log(JSON.stringify(e.parameter));
+    // 4. Manejo de la cámara / archivo con compresión
+    const btnFoto = document.getElementById("Foto");
+    const inputFileFoto = document.getElementById("inputFileFoto");
+    const imagen1 = document.getElementById("Imagen1");
+    let imagenBase64 = "";
 
-    var dataBase64 = e.parameter.data;
-    var mimetype = e.parameter.mimetype;
-    var filename = e.parameter.filename;
-    var folderId = e.parameter.folderId;
+    btnFoto.addEventListener("click", () => {
+        inputFileFoto.click();
+    });
 
-    Logger.log("📄 Filename: " + filename);
-    Logger.log("🖼️ Mimetype: " + mimetype);
-    Logger.log("📁 Folder ID: " + folderId);
+    inputFileFoto.addEventListener("change", (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            const reader = new FileReader();
+            reader.onload = function(uploadEvent) {
+                const img = new Image();
+                img.src = uploadEvent.target.result;
+                img.onload = function() {
+                    const canvas = document.createElement('canvas');
+                    const MAX_WIDTH = 800;
+                    const MAX_HEIGHT = 800;
+                    let width = img.width;
+                    let height = img.height;
 
-    if (!dataBase64) {
-      throw new Error("No se recibió la imagen (data)");
-    }
+                    if (width > height) {
+                        if (width > MAX_WIDTH) {
+                            height *= MAX_WIDTH / width;
+                            width = MAX_WIDTH;
+                        }
+                    } else {
+                        if (height > MAX_HEIGHT) {
+                            width *= MAX_HEIGHT / height;
+                            height = MAX_HEIGHT;
+                        }
+                    }
 
-    if (!folderId) {
-      throw new Error("No se recibió folderId");
-    }
+                    canvas.width = width;
+                    canvas.height = height;
+                    const ctx = canvas.getContext('2d');
+                    ctx.drawImage(img, 0, 0, width, height);
 
-    if (!filename) {
-      throw new Error("No se recibió filename");
-    }
+                    imagenBase64 = canvas.toDataURL('image/jpeg', 0.7);
+                    imagen1.src = imagenBase64;
+                    imagen1.style.display = "block";
+                };
+            };
+            reader.readAsDataURL(file);
+        }
+    });
 
-    Logger.log("📦 Longitud Base64: " + dataBase64.length);
+    // 5. Validación y Envío Definitivo
+    const btnEnviar = document.getElementById("Enviar");
+    btnEnviar.addEventListener("click", async () => {
+        const campos = [fechaInput, entrenamientoInput, equipoInput, duracionInput];
+        let valido = true;
 
-    // Convertir Base64 a bytes
-    var data = Utilities.base64Decode(dataBase64);
+        campos.forEach(campo => {
+            if (!campo.value) {
+                campo.style.backgroundColor = "#ff0000";
+                valido = false;
+            } else {
+                campo.style.backgroundColor = "";
+            }
+        });
 
-    Logger.log("🔄 Base64 convertido correctamente");
-    Logger.log("📦 Bytes: " + data.length);
+        if (!valido) {
+            alert("Comprueba campos obligatorios");
+            return;
+        }
 
-    // Crear Blob
-    var blob = Utilities.newBlob(
-      data,
-      mimetype || "image/jpeg",
-      filename
-    );
+        const equipoActual = equipoInput.value;
+        const tipoActual = entrenamientoInput.value;
+        const folderId = obtenerFolderId(equipoActual, tipoActual);
 
-    Logger.log("🧱 Blob creado");
+        // Deshabilitar botón para evitar doble clic
+        btnEnviar.disabled = true;
+        btnEnviar.textContent = "Subiendo...";
 
-    // Buscar carpeta
-    var folder = DriveApp.getFolderById(folderId);
+        try {
+            // Envío a Google Forms
+            const formData = new URLSearchParams();
+            formData.append("entry.279691575", fechaInput.value);
+            formData.append("entry.1010684221", equipoActual);
+            formData.append("entry.1004271819", tipoActual);
+            formData.append("entry.152725020", duracionInput.value);
 
-    Logger.log("📁 Carpeta encontrada: " + folder.getName());
+            await fetch("https://docs.google.com/forms/d/1OsUlDQwOkJHkD8w8gIqERg4oP4FulmRmcAx_WoeMs4Y/formResponse", {
+                method: "POST",
+                mode: "no-cors",
+                body: formData
+            });
 
-    // Crear archivo
-    var file = folder.createFile(blob);
+            // Envío de la imagen a Google Apps Script usando un formulario oculto clásico
+            if (imagenBase64) {
+                const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
+                let base64Clean = imagenBase64.replace(/^data:image\/[a-z]+;base64,/, "");
+                const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
-    Logger.log("✅ ARCHIVO CREADO");
-    Logger.log("📄 Nombre: " + file.getName());
-    Logger.log("🆔 ID: " + file.getId());
+                let iframe = document.getElementById("hidden_iframe");
+                if (!iframe) {
+                    iframe = document.createElement("iframe");
+                    iframe.name = "hidden_iframe";
+                    iframe.id = "hidden_iframe";
+                    iframe.style.display = "none";
+                    document.body.appendChild(iframe);
+                }
 
-    return ContentService
-      .createTextOutput(
-        JSON.stringify({
-          success: true,
-          fileId: file.getId()
-        })
-      )
-      .setMimeType(ContentService.MimeType.JSON);
+                const form = document.createElement("form");
+                form.method = "POST";
+                form.action = scriptURL;
+                form.target = "hidden_iframe";
 
-  } catch (error) {
+                const camposAEnviar = {
+                    data: base64Clean,
+                    mimetype: "image/jpeg",
+                    filename: fileName,
+                    folderId: folderId
+                };
 
-    Logger.log("=================================");
-    Logger.log("❌ ERROR");
-    Logger.log(error.message);
-    Logger.log(error.stack);
-    Logger.log("=================================");
+                for (const key in camposAEnviar) {
+                    const input = document.createElement("input");
+                    input.type = "hidden";
+                    input.name = key;
+                    input.value = camposAEnviar[key];
+                    form.appendChild(input);
+                }
 
-    return ContentService
-      .createTextOutput(
-        JSON.stringify({
-          success: false,
-          error: error.message
-        })
-      )
-      .setMimeType(ContentService.MimeType.JSON);
-  }
-}
+                document.body.appendChild(form);
+                form.submit();
+                document.body.removeChild(form);
+            }
+
+            // Pequeña pausa de cortesía para asegurar que el navegador dispare el iframe antes de cambiar de página
+            await new Promise(resolve => setTimeout(resolve, 1500));
+            alert("Sesión subida con éxito");
+            window.location.href = "menu_principal.html";
+
+        } catch (error) {
+            console.error("Error en el envío:", error);
+            alert("Hubo un error al subir la sesión.");
+            btnEnviar.disabled = false;
+            btnEnviar.textContent = "Subir sesión";
+        }
+    });
+
+    // 6. Botón Menú Principal
+    const btnMenu = document.getElementById("Menú");
+    btnMenu.addEventListener("click", () => {
+        window.location.href = "menu_principal.html";
+    });
+});ventListener("click", () => { window.location.href = "menu_principal.html"; }); });
