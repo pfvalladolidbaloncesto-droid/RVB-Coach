@@ -4,24 +4,124 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Selector de Jugadores</title>
-  <!-- Vinculación del CSS -->
-  <link rel="stylesheet" href="styles.css">
+  
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .selector-container {
+      background: #ffffff;
+      padding: 20px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 500px;
+    }
+
+    .selector-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-bottom: 20px;
+    }
+
+    .btn-volver {
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+
+    /* REJILLA 4X4 FIJA */
+    #grid-jugadores {
+      display: grid !important;
+      grid-template-columns: repeat(4, 1fr) !important;
+      gap: 10px;
+      width: 100%;
+      min-height: 360px;
+    }
+
+    .celda-grid {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      background-color: #ffffff;
+      border: 1px solid #dcdcdc;
+      border-radius: 8px;
+      padding: 8px 4px;
+      min-height: 90px;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      cursor: pointer;
+      transition: transform 0.15s ease;
+    }
+
+    .celda-grid:hover {
+      transform: translateY(-2px);
+    }
+
+    .celda-grid img {
+      width: 50px;
+      height: 50px;
+      object-fit: cover;
+      border-radius: 50%;
+      background-color: #e9ecef;
+      margin-bottom: 6px;
+      display: block;
+    }
+
+    .celda-grid span {
+      font-size: 0.7rem;
+      font-weight: bold;
+      color: #333;
+      text-align: center;
+      word-break: break-all;
+    }
+
+    .celda-vacia {
+      cursor: default;
+      background-color: #fafafa;
+      border: 1px dashed #e0e0e0;
+      box-shadow: none;
+    }
+
+    .cargando-texto {
+      grid-column: 1 / -1;
+      text-align: center;
+      color: #666;
+      padding: 20px;
+    }
+  </style>
 </head>
 <body>
 
-  <div class="main-container selector-container">
+  <div class="selector-container">
     <div class="selector-header">
       <button class="btn-volver" id="btn-volver">← Volver</button>
       <h2 id="nombre-equipo">Cargando...</h2>
     </div>
 
-    <!-- Contenedor del Grid 4x4 -->
     <div id="grid-jugadores">
       <p class="cargando-texto">Cargando plantilla...</p>
     </div>
   </div>
 
-  <!-- Vinculación del JavaScript -->
   <script src="selector.js"></script>
 </body>
 </html>
