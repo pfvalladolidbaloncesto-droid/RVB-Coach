@@ -141,7 +141,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log("✅ Datos enviados a Google Forms correctamente.");
 
-      // Envío de la imagen mediante formulario oculto (iframe) sin errores 404
+      // Envío de la imagen mediante formulario oculto (iframe)
       if (imagenBase64) {
         const scriptURL = "https://script.google.com/macros/s/AKfycbx3F2GN42yBilThhMzm6tURPXvSlS4Sm5NQaKXeRO3VuvQ3aHelvgfjtk0_LkgQfVOWFg/exec";
         const base64Clean = imagenBase64.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "");
@@ -185,7 +185,6 @@ document.addEventListener("DOMContentLoaded", () => {
         console.log("✅ Petición de imagen enviada mediante iframe.");
       }
 
-      // MODO PRUEBA ACTIVO (No redirige para que puedas comprobar Drive)
       console.log("🏁 Fin del proceso. Revisa tu Google Drive.");
       btnEnviar.disabled = false;
       btnEnviar.textContent = "Subir sesión";
