@@ -38,21 +38,19 @@ document.addEventListener("DOMContentLoaded", () => {
     return "";
   }
 
-  // 4. Manejo de la cámara / archivo con compresión opcional
+  // 4. Manejo de la cámara / archivo con compresión
   const btnFoto = document.getElementById("Foto");
   const inputFileFoto = document.getElementById("inputFileFoto");
   const imagen1 = document.getElementById("Imagen1");
   let imagenBase64 = "";
 
   btnFoto.addEventListener("click", () => {
-    console.log("DEBUG: Botón 'Foto' presionado, abriendo selector...");
     inputFileFoto.click();
   });
 
   inputFileFoto.addEventListener("change", (e) => {
     const file = e.target.files[0];
     if (file) {
-      console.log("DEBUG: Archivo seleccionado:", file.name, "Tamaño:", file.size);
       const reader = new FileReader();
       reader.onload = function(uploadEvent) {
         const img = new Image();
@@ -84,21 +82,15 @@ document.addEventListener("DOMContentLoaded", () => {
           imagenBase64 = canvas.toDataURL('image/jpeg', 0.7);
           imagen1.src = imagenBase64;
           imagen1.style.display = "block";
-          console.log("DEBUG: Imagen procesada a Base64 con éxito. Longitud:", imagenBase64.length);
         };
       };
       reader.readAsDataURL(file);
-    } else {
-      console.log("DEBUG: No se seleccionó ningún archivo.");
     }
   });
 
-  // 5. Validación y Envío con Diagnóstico Visual
+  // 5. Validación y Envío Definitivo
   const btnEnviar = document.getElementById("Enviar");
-  btnEnviar.addEventListener("click", () => {
-    console.log("------------------------------------------");
-    console.log("DEBUG: INICIO DEL PROCESO DE ENVÍO");
-    
+  btnEnviar.addEventListener("click", async () => {
     const campos = [fechaInput, entrenamientoInput, equipoInput, duracionInput];
     let valido = true;
 
@@ -106,14 +98,12 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!campo.value) {
         campo.style.backgroundColor = "#ff0000";
         valido = false;
-        console.warn("DEBUG: Campo obligatorio vacío:", campo.id);
       } else {
         campo.style.backgroundColor = "";
       }
     });
 
     if (!valido) {
-      console.error("DEBUG ERROR: Hay campos obligatorios vacíos.");
       alert("Comprueba campos obligatorios");
       return;
     }
@@ -122,67 +112,76 @@ document.addEventListener("DOMContentLoaded", () => {
     const tipoActual = entrenamientoInput.value;
     const folderId = obtenerFolderId(equipoActual, tipoActual);
 
-    console.log("DEBUG: Equipo:", equipoActual, "| Tipo:", tipoActual, "| FolderID asignado:", folderId);
+    // Deshabilitar botón para evitar doble clic
+    btnEnviar.disabled = true;
+    btnEnviar.textContent = "Subiendo...";
 
-    if (!folderId) {
-      console.error("DEBUG ERROR: ¡El folderId está vacío! La combinación de equipo y entrenamiento no coincide con la matriz.");
-    }
+    try {
+      // Envío a Google Forms
+      const formData = new URLSearchParams();
+      formData.append("entry.279691575", fechaInput.value);
+      formData.append("entry.1010684221", equipoActual);
+      formData.append("entry.1004271819", tipoActual);
+      formData.append("entry.152725020", duracionInput.value);
 
-    // Envío a Google Forms
-    console.log("DEBUG: Enviando datos a Google Forms...");
-    const formData = new URLSearchParams();
-    formData.append("entry.279691575", fechaInput.value);
-    formData.append("entry.1010684221", equipoActual);
-    formData.append("entry.1004271819", tipoActual);
-    formData.append("entry.152725020", duracionInput.value);
-
-    fetch("https://docs.google.com/forms/d/1OsUlDQwOkJHkD8w8gIqERg4oP4FulmRmcAx_WoeMs4Y/formResponse", {
-      method: "POST",
-      mode: "no-cors",
-      body: formData
-    })
-    .then(() => console.log("DEBUG: Petición a Google Form ejecutada."))
-    .catch(err => console.error("DEBUG ERROR en Google Form:", err));
-
-    // Envío de la imagen
-    if (imagenBase64) {
-      const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
-      
-      let base64Clean = imagenBase64.replace(/^data:image\/[a-z]+;base64,/, "");
-      const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
-
-      console.log("DEBUG: Preparando envío de imagen a Apps Script...");
-      console.log("DEBUG URL:", scriptURL);
-      console.log("DEBUG FileName:", fileName);
-
-      const dataToSend = new URLSearchParams();
-      dataToSend.append("data", base64Clean);
-      dataToSend.append("mimetype", "image/jpeg");
-      dataToSend.append("filename", fileName);
-      dataToSend.append("folderId", folderId);
-
-      // Usamos fetch con catch para registrar si la red bloquea la petición al script
-      fetch(scriptURL, {
+      await fetch("https://docs.google.com/forms/d/1OsUlDQwOkJHkD8w8gIqERg4oP4FulmRmcAx_WoeMs4Y/formResponse", {
         method: "POST",
         mode: "no-cors",
-        body: dataToSend
-      })
-      .then(() => {
-        console.log("DEBUG: El navegador completó el envío de la imagen al Apps Script.");
-      })
-      .catch(err => {
-        console.error("DEBUG ERROR CRÍTICO al enviar imagen:", err);
+        body: formData
       });
 
-      navigator.sendBeacon(scriptURL, dataToSend);
-      console.log("DEBUG: navigator.sendBeacon ejecutado para la imagen.");
-    } else {
-      console.warn("DEBUG: No hay imagen cargada para enviar.");
-    }
+      // Envío de la imagen a Google Apps Script usando un formulario oculto clásico (el más compatible con navegadores)
+      if (imagenBase64) {
+        const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
+        let base64Clean = imagenBase64.replace(/^data:image\/[a-z]+;base64,/, "");
+        const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
-    // COMENTADO TEMPORALMENTE PARA QUE LA CONSOLA NO SE BORRE:
-    // window.location.href = "menu_principal.html";
-    alert("Envío de prueba finalizado. Revisa la consola (F12) para ver los logs.");
+        let iframe = document.getElementById("hidden_iframe");
+        if (!iframe) {
+          iframe = document.createElement("iframe");
+          iframe.name = "hidden_iframe";
+          iframe.id = "hidden_iframe";
+          iframe.style.display = "none";
+          document.body.appendChild(iframe);
+        }
+
+        const form = document.createElement("form");
+        form.method = "POST";
+        form.action = scriptURL;
+        form.target = "hidden_iframe";
+
+        const camposAEnviar = {
+          data: base64Clean,
+          mimetype: "image/jpeg",
+          filename: fileName,
+          folderId: folderId
+        };
+
+        for (const key in camposAEnviar) {
+          const input = document.createElement("input");
+          input.type = "hidden";
+          input.name = key;
+          input.value = camposAEnviar[key];
+          form.appendChild(input);
+        }
+
+        document.body.appendChild(form);
+        form.submit();
+        document.body.removeChild(form);
+      }
+
+      // Pequeña pausa de cortesía para asegurar que el navegador dispare el iframe antes de cambiar de página
+      await new Promise(resolve => setTimeout(resolve, 1500));
+
+      alert("Sesión subida con éxito");
+      window.location.href = "menu_principal.html";
+
+    } catch (error) {
+      console.error("Error en el envío:", error);
+      alert("Hubo un error al subir la sesión.");
+      btnEnviar.disabled = false;
+      btnEnviar.textContent = "Subir sesión";
+    }
   });
 
   // 6. Botón Menú Principal
