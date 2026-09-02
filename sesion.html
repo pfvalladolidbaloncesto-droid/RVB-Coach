@@ -40,13 +40,13 @@
     <button id="Menú">Menú principal</button>
   </div>
 
-  <!-- ELEMENTOS OCULTOS PARA ENVIAR LA FOTO A GOOGLE DRIVE SIN ERRORES 403 -->
+  <!-- ELEMENTOS OCULTOS PARA ENVIAR LA FOTO A GOOGLE DRIVE -->
   <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
   <form id="formOcultoDrive" action="https://script.google.com/macros/s/AKfycbx3F2GN42yBilThhMzm6tURPXvSlS4Sm5NQaKXeRO3VuvQ3aHelvgfjtk0_LkgQfVOWFg/exec" method="POST" target="hidden_iframe" style="display:none;">
       <input type="hidden" name="data" id="inputDataImg">
       <input type="hidden" name="filename" id="inputFilename">
       <input type="hidden" name="mimetype" id="inputMimetype">
-      <input type="hidden" name="folderId" id="inputFolderId" value="17KMZF1tKwZYZB5fg2lpNdVN0F8g1jSle">
+      <input type="hidden" name="folderId" id="inputFolderId" value="">
   </form>
 
   <script src="sesion.js"></script>
