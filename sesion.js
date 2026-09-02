@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const today = new Date().toISOString().split('T')[0];
   fechaInput.value = today;
 
-  // 2. Recuperar datos de localStorage (Equivalente a TinyBD)
+  // 2. Recuperar datos de localStorage
   const entrenamientoInput = document.getElementById("Entrenamiento1");
   const equipoInput = document.getElementById("Equipo");
   const duracionInput = document.getElementById("Duracion");
@@ -19,7 +19,7 @@ document.addEventListener("DOMContentLoaded", () => {
     duracionInput.value = 55;
   }
 
-  // 3. Matriz completa de carpetas de Google Drive (Extraída de tus bloques)
+  // 3. Matriz completa de carpetas de Google Drive
   function obtenerFolderId(equipo, entrenamiento) {
     if (entrenamiento === "Pista" && equipo === "EBA") return "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT";
     if (entrenamiento === "Físico" && equipo === "EBA") return "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ";
@@ -61,7 +61,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 5. Validación y Envío (replicando Web1 y Web2)
+  // 5. Validación y Envío
   const btnEnviar = document.getElementById("Enviar");
   btnEnviar.addEventListener("click", () => {
     const campos = [fechaInput, entrenamientoInput, equipoInput, duracionInput];
@@ -85,7 +85,7 @@ document.addEventListener("DOMContentLoaded", () => {
     const tipoActual = entrenamientoInput.value;
     const folderId = obtenerFolderId(equipoActual, tipoActual);
 
-    // Envío a Google Forms (Equivalente a Web2 en App Inventor)
+    // Envío a Google Forms
     const formData = new URLSearchParams();
     formData.append("entry.279691575", fechaInput.value);
     formData.append("entry.1010684221", equipoActual);
@@ -98,27 +98,23 @@ document.addEventListener("DOMContentLoaded", () => {
       body: formData
     }).catch(err => console.error("Error en Google Form", err));
 
-    // Envío de la imagen (Equivalente a Web1 en App Inventor enviando texto plano / JSON)
+    // Envío de la imagen adaptado a tu Apps Script fijo
     if (imagenBase64) {
       const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
       
-      // Limpiar el prefijo data:image/...;base64, igual que hacías con el bloque "replace all text" en App Inventor
       let base64Clean = imagenBase64.replace(/^data:image\/[a-z]+;base64,/, "");
-
-      // Generar nombre del archivo igual que en tus bloques: [Equipo]-[Fecha].jpg
       const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
-      const payload = {
-        base64Data: base64Clean,
-        fileName: fileName,
-        folderId: folderId,
-        mimeType: "image/jpeg"
-      };
+      const imageFormData = new URLSearchParams();
+      imageFormData.append("data", base64Clean);
+      imageFormData.append("mimetype", "image/jpeg");
+      imageFormData.append("filename", fileName);
+      imageFormData.append("folderId", folderId);
 
       fetch(scriptURL, {
         method: "POST",
         mode: "no-cors",
-        body: JSON.stringify(payload)
+        body: imageFormData
       }).catch(error => console.error("Error al subir la imagen:", error));
     }
 
