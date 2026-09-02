@@ -1,11 +1,9 @@
 document.addEventListener("DOMContentLoaded", () => {
 
-  // 1. Fecha actual
   const fechaInput = document.getElementById("SelectorDeFecha1");
   const today = new Date().toISOString().split("T")[0];
   fechaInput.value = today;
 
-  // 2. Datos de localStorage (con recuperación flexible)
   const entrenamientoInput = document.getElementById("Entrenamiento1");
   const equipoInput = document.getElementById("Equipo");
   const duracionInput = document.getElementById("Duracion");
@@ -20,7 +18,6 @@ document.addEventListener("DOMContentLoaded", () => {
     duracionInput.value = 55;
   }
 
-  // 3. Carpetas de Google Drive
   function obtenerFolderId(equipo, entrenamiento) {
     if (entrenamiento === "Pista" && equipo === "EBA") return "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT";
     if (entrenamiento === "Físico" && equipo === "EBA") return "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ";
@@ -39,7 +36,6 @@ document.addEventListener("DOMContentLoaded", () => {
     return "";
   }
 
-  // 4. Cámara / imagen (Optimizada a 300x300 para no saturar los parámetros de Google)
   const btnFoto = document.getElementById("Foto");
   const inputFileFoto = document.getElementById("inputFileFoto");
   const imagen1 = document.getElementById("Imagen1");
@@ -92,7 +88,6 @@ document.addEventListener("DOMContentLoaded", () => {
     reader.readAsDataURL(file);
   });
 
-  // 5. Enviar
   const btnEnviar = document.getElementById("Enviar");
 
   btnEnviar.addEventListener("click", async () => {
@@ -126,7 +121,6 @@ document.addEventListener("DOMContentLoaded", () => {
     btnEnviar.textContent = "Subiendo...";
 
     try {
-      // Envío a Google Forms
       const formData = new URLSearchParams();
       formData.append("entry.279691575", fechaInput.value);
       formData.append("entry.1010684221", equipoActual);
@@ -141,13 +135,12 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log("✅ Datos enviados a Google Forms correctamente.");
 
-      // Envío de la imagen optimizada mediante formulario oculto (iframe)
       if (imagenBase64) {
         const scriptURL = "https://script.google.com/macros/s/AKfycbx3F2GN42yBilThhMzm6tURPXvSlS4Sm5NQaKXeRO3VuvQ3aHelvgfjtk0_LkgQfVOWFg/exec";
         const base64Clean = imagenBase64.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "");
         const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
-        console.log("📤 Enviando imagen optimizada por formulario oculto...");
+        console.log("📤 Enviando imagen por formulario oculto...");
 
         let iframe = document.getElementById("hidden_iframe");
         if (!iframe) {
@@ -182,10 +175,10 @@ document.addEventListener("DOMContentLoaded", () => {
         form.submit();
         document.body.removeChild(form);
 
-        console.log("✅ Petición de imagen enviada correctamente.");
+        console.log("✅ Petición de imagen enviada.");
       }
 
-      console.log("🏁 Fin del proceso. ¡Comprueba tu Google Drive!");
+      console.log("🏁 Fin del proceso. ¡Revisa tu Google Drive!");
       btnEnviar.disabled = false;
       btnEnviar.textContent = "Subir sesión";
 
@@ -197,7 +190,6 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 6. Menú
   const btnMenu = document.getElementById("Menú");
   btnMenu.addEventListener("click", () => {
     window.location.href = "menu_principal.html";
