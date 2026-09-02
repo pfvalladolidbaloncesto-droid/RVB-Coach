@@ -117,19 +117,24 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       if (archivoSeleccionado) {
-        const reader = new FileReader();
-        reader.onload = function(e) {
-          const base64Completo = e.target.result;
-          const base64Puro = base64Completo.split(',')[1];
-          
-          document.getElementById("inputDataImg").value = base64Puro;
-          document.getElementById("inputFilename").value = `${equipoActual}-${fechaInput.value}.jpg`;
-          document.getElementById("inputMimetype").value = archivoSeleccionado.type;
-          document.getElementById("inputFolderId").value = idCarpetaSeleccionada;
-          
-          document.getElementById("formOcultoDrive").submit();
-        };
-        reader.readAsDataURL(archivoSeleccionado);
+        await new Promise((resolve, reject) => {
+          const reader = new FileReader();
+          reader.onload = function(e) {
+            const base64Completo = e.target.result;
+            const base64Puro = base64Completo.split(',')[1];
+            
+            document.getElementById("inputDataImg").value = base64Puro;
+            document.getElementById("inputFilename").value = `${equipoActual}-${fechaInput.value}.jpg`;
+            document.getElementById("inputMimetype").value = archivoSeleccionado.type;
+            document.getElementById("inputFolderId").value = idCarpetaSeleccionada;
+            
+            resolve();
+          };
+          reader.onerror = (error) => reject(error);
+          reader.readAsDataURL(archivoSeleccionado);
+        });
+
+        document.getElementById("formOcultoDrive").submit();
       }
 
       alert("¡Sesión subida correctamente!");
