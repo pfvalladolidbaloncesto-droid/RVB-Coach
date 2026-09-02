@@ -38,7 +38,7 @@ document.addEventListener("DOMContentLoaded", () => {
     return "";
   }
 
-  // 4. Manejo de la cámara / archivo con compresión opcional para evitar sobrecargar Drive
+  // 4. Manejo de la cámara / archivo con compresión opcional
   const btnFoto = document.getElementById("Foto");
   const inputFileFoto = document.getElementById("inputFileFoto");
   const imagen1 = document.getElementById("Imagen1");
@@ -88,7 +88,7 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 5. Validación y Envío
+  // 5. Validación y Envío (Corregido)
   const btnEnviar = document.getElementById("Enviar");
   btnEnviar.addEventListener("click", () => {
     const campos = [fechaInput, entrenamientoInput, equipoInput, duracionInput];
@@ -163,7 +163,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       document.body.appendChild(form);
       form.submit();
-      document.body.removeChild(form);
+      
+      // Retraso para evitar cancelar la petición antes de enviarse
+      setTimeout(() => {
+        if (document.body.contains(form)) {
+          document.body.removeChild(form);
+        }
+      }, 1000);
     }
 
     alert("Sesión subida con éxito");
