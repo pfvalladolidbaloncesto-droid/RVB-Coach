@@ -29,6 +29,7 @@
       box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
       width: 100%;
       max-width: 500px;
+      min-height: 520px;
     }
 
     .selector-header {
@@ -36,6 +37,7 @@
       align-items: center;
       justify-content: space-between;
       margin-bottom: 20px;
+      height: 40px;
     }
 
     .btn-volver {
@@ -48,13 +50,13 @@
       cursor: pointer;
     }
 
-    /* REJILLA 4X4 OBLIGATORIA */
+    /* REJILLA 4X4 FIJA */
     #grid-jugadores {
       display: grid !important;
       grid-template-columns: repeat(4, 1fr) !important;
       gap: 10px !important;
       width: 100% !important;
-      min-height: 360px;
+      min-height: 420px;
     }
 
     .celda-grid {
@@ -66,7 +68,7 @@
       border: 1px solid #dcdcdc;
       border-radius: 8px;
       padding: 8px 4px;
-      min-height: 90px;
+      height: 95px !important;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
       cursor: pointer;
       transition: transform 0.15s ease;
@@ -76,13 +78,15 @@
       transform: translateY(-2px);
     }
 
-    .celda-grid img {
+    .avatar-foto {
       width: 50px !important;
       height: 50px !important;
-      object-fit: cover !important;
+      min-width: 50px !important;
+      min-height: 50px !important;
       border-radius: 50% !important;
-      background-color: #e9ecef;
+      background-color: #e0e0e0;
       margin-bottom: 6px;
+      object-fit: cover !important;
       display: block !important;
     }
 
@@ -92,6 +96,7 @@
       color: #333 !important;
       text-align: center !important;
       word-break: break-all;
+      line-height: 1;
     }
 
     .celda-vacia {
@@ -157,10 +162,18 @@
           const idUsuario = mapaJugadores[i];
 
           if (idUsuario) {
-            const rutaFoto = `fotos/${idUsuario}.jpg`;
+            const rutaFoto = `fotos/${idUsuario}.jpeg`;
+            const fotoFallback = `fotos/none.jpeg`;
+
             htmlGrid += `
               <div class="celda-grid tarjeta-jugador" data-posicion="${i}" data-usuario="${idUsuario}">
-                <img src="${rutaFoto}" alt="${idUsuario}" onerror="this.src='fotos/default.jpg'" loading="lazy" />
+                <img 
+                  class="avatar-foto" 
+                  src="${rutaFoto}" 
+                  alt="${idUsuario}" 
+                  onerror="this.onerror=null; this.src='${fotoFallback}';" 
+                  loading="lazy" 
+                />
                 <span>${idUsuario}</span>
               </div>
             `;
