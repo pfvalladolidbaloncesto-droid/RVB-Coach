@@ -133,7 +133,26 @@
 
     const equipoSeleccionado = localStorage.getItem("equipo") || localStorage.getItem("equipoUsuario") || "Junior A";
 
-    // Comprueba de forma asíncrona si la foto existe sin bloquear la UI
+    // Función para resolver el destino según la acción guardada en el menú principal
+    function obtenerPantallaDestino() {
+      const accion = localStorage.getItem("Variable");
+
+      switch (accion) {
+        case "Readiness":
+          return "screen2.html";
+        case "RPE":
+          return "rpe.html";
+        case "Registrar test":
+          return "registrar_test.html";
+        case "Consultar test":
+          return "consultar_test.html";
+        case "Carga Jugador":
+          return "carga_jugador.html";
+        default:
+          return "screen2.html"; // Por defecto redirige a Readiness
+      }
+    }
+
     function obtenerRutaFoto(idUsuario) {
       return new Promise((resolve) => {
         const img = new Image();
@@ -144,7 +163,6 @@
       });
     }
 
-    // Renderiza las 16 celdas
     async function renderizarGrid(jugadores) {
       const contenedor = document.getElementById("grid-jugadores");
       if (!jugadores || jugadores.length === 0) {
@@ -158,7 +176,6 @@
         if (!isNaN(pos)) mapaJugadores[pos] = j.usuario;
       });
 
-      // Precargamos las comprobaciones de fotos en paralelo
       const promesasFotos = [];
       for (let i = 1; i <= 16; i++) {
         const idUsuario = mapaJugadores[i];
@@ -203,7 +220,7 @@
       if (tituloEquipo) tituloEquipo.textContent = equipoSeleccionado;
       if (btnVolver) btnVolver.onclick = () => { window.location.href = "menu_principal.html"; };
 
-      // EVENTO DE CLIC EN LA REJILLA
+      // EVENTO DE CLIC EN LA REJILLA CON NAVEGACIÓN DINÁMICA
       contenedor.addEventListener("click", (e) => {
         const tarjeta = e.target.closest(".tarjeta-jugador");
         if (!tarjeta) return;
@@ -211,10 +228,12 @@
         localStorage.setItem("posicionSeleccionada", tarjeta.dataset.posicion);
         localStorage.setItem("jugadorSeleccionado", tarjeta.dataset.usuario);
 
-        window.location.href = "detalle.html";
+        // Redirecciona según la acción pulsada previamente
+        const destino = obtenerPantallaDestino();
+        window.location.href = destino;
       });
 
-      // OPTIMIZACIÓN: Cargar inmediatamente desde la caché local si existe
+      // Cargar caché local
       const cacheClave = `plantilla_${equipoSeleccionado}`;
       const datosCache = localStorage.getItem(cacheClave);
 
@@ -227,15 +246,12 @@
         }
       }
 
-      // Solicitud en segundo plano para actualizar los datos
+      // Solicitud en segundo plano a Apps Script
       try {
         const response = await fetch(`${URL_APPS_SCRIPT}?equipo=${encodeURIComponent(equipoSeleccionado)}`);
         const jugadores = await response.json();
 
-        // Actualizamos la caché local
         localStorage.setItem(cacheClave, JSON.stringify(jugadores));
-
-        // Refrescamos la vista
         await renderizarGrid(jugadores);
       } catch (error) {
         console.error("Error al consultar Google Apps Script:", error);
