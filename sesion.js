@@ -141,13 +141,13 @@ document.addEventListener("DOMContentLoaded", () => {
 
       console.log("✅ Datos enviados a Google Forms correctamente.");
 
-      // Envío de la imagen mediante JSON directo al nuevo Apps Script
+      // Envío de la imagen por JSON directo al Apps Script
       if (imagenBase64) {
         const scriptURL = "https://script.google.com/macros/s/AKfycbx3F2GN42yBilThhMzm6tURPXvSlS4Sm5NQaKXeRO3VuvQ3aHelvgfjtk0_LkgQfVOWFg/exec";
         const base64Clean = imagenBase64.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "");
         const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
-        console.log("📤 Enviando imagen en formato JSON al Apps Script...");
+        console.log("📤 Enviando imagen por JSON al Apps Script...");
 
         const cuerpoPeticion = {
           filename: fileName,
@@ -165,11 +165,11 @@ document.addEventListener("DOMContentLoaded", () => {
           body: JSON.stringify(cuerpoPeticion)
         });
 
-        console.log("✅ Petición de imagen enviada al Apps Script.");
+        console.log("✅ Petición de imagen enviada.");
       }
 
       // MODO PRUEBA ACTIVO (No redirige para que puedas comprobar la consola y el Drive)
-      console.log("🏁 Fin del proceso. Revisa tu Google Drive para confirmar si la imagen ya está en su carpeta.");
+      console.log("🏁 Fin del proceso. Comprueba tu Google Drive.");
       btnEnviar.disabled = false;
       btnEnviar.textContent = "Subir sesión";
 
