@@ -4,104 +4,24 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Selector de Jugadores</title>
-  
-  <!-- Estilos garantizados directamente dentro del HTML -->
-  <style>
-    * {
-      box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: Arial, sans-serif;
-    }
-
-    body {
-      background-color: #f4f4f9;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
-      padding: 20px;
-    }
-
-    .selector-container {
-      background: #ffffff;
-      padding: 20px;
-      border-radius: 12px;
-      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
-      width: 100%;
-      max-width: 500px; /* Ancho fijo para que nunca tiemble ni vibre */
-    }
-
-    .selector-header {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      margin-bottom: 20px;
-    }
-
-    .btn-volver {
-      padding: 8px 16px;
-      background-color: #007bff;
-      color: white;
-      border: none;
-      border-radius: 6px;
-      font-weight: bold;
-      cursor: pointer;
-    }
-
-    /* REJILLA 4X4 ESTÍCTA */
-    #grid-jugadores {
-      display: grid !important;
-      grid-template-columns: repeat(4, 1fr) !important; /* 4 columnas fijas */
-      gap: 10px;
-      width: 100%;
-    }
-
-    .celda-grid {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      background-color: #ffffff;
-      border: 1px solid #dcdcdc;
-      border-radius: 8px;
-      padding: 10px 5px;
-      min-height: 90px;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      font-weight: bold;
-      font-size: 1.1rem;
-      color: #333;
-    }
-  </style>
+  <!-- Vinculación del CSS -->
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
 
-  <div class="selector-container">
+  <div class="main-container selector-container">
     <div class="selector-header">
-      <button class="btn-volver" onclick="window.location.href='menu_principal.html'">← Volver</button>
-      <h2 id="nombre-equipo">Junior A</h2>
+      <button class="btn-volver" id="btn-volver">← Volver</button>
+      <h2 id="nombre-equipo">Cargando...</h2>
     </div>
 
-    <!-- Contenedor con celdas estáticas de prueba (1 al 16) -->
+    <!-- Contenedor del Grid 4x4 -->
     <div id="grid-jugadores">
-      <div class="celda-grid">1</div>
-      <div class="celda-grid">2</div>
-      <div class="celda-grid">3</div>
-      <div class="celda-grid">4</div>
-      <div class="celda-grid">5</div>
-      <div class="celda-grid">6</div>
-      <div class="celda-grid">7</div>
-      <div class="celda-grid">8</div>
-      <div class="celda-grid">9</div>
-      <div class="celda-grid">10</div>
-      <div class="celda-grid">11</div>
-      <div class="celda-grid">12</div>
-      <div class="celda-grid">13</div>
-      <div class="celda-grid">14</div>
-      <div class="celda-grid">15</div>
-      <div class="celda-grid">16</div>
+      <p class="cargando-texto">Cargando plantilla...</p>
     </div>
   </div>
 
+  <!-- Vinculación del JavaScript -->
+  <script src="selector.js"></script>
 </body>
 </html>
