@@ -123,6 +123,7 @@
       outline: none;
       padding: 0;
       border: none;
+      cursor: pointer;
     }
 
     .rpe-slider::-webkit-slider-thumb {
@@ -182,8 +183,7 @@
       <h2 class="title">Registro RPE</h2>
     </div>
     
-    <form id="form-rpe" onsubmit="enviarRPE(event)">
-      
+    <form id="form-rpe">
       <div class="form-group">
         <label for="fecha">Fecha</label>
         <input type="date" id="fecha" required>
@@ -218,7 +218,7 @@
       <div class="form-group">
         <label for="rpe">RPE (0-10)</label>
         <div class="rpe-container">
-          <input type="range" id="rpe" class="rpe-slider" min="0" max="10" value="5" oninput="actualizarValorRPE(this.value)">
+          <input type="range" id="rpe" class="rpe-slider" min="0" max="10" value="5">
           <span id="rpe-val" class="rpe-value">5</span>
         </div>
       </div>
@@ -242,55 +242,6 @@
     </form>
   </div>
 
-  <script>
-    function actualizarValorRPE(val) {
-      document.getElementById('rpe-val').textContent = val;
-    }
-
-    document.addEventListener("DOMContentLoaded", () => {
-      document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
-
-      const jugadorSeleccionado = localStorage.getItem("User") || localStorage.getItem("jugadorSeleccionado");
-      const equipoSeleccionado = localStorage.getItem("Equipo") || localStorage.getItem("equipoUsuario");
-
-      if (jugadorSeleccionado) {
-        document.getElementById('nombre').value = jugadorSeleccionado;
-      }
-
-      if (equipoSeleccionado) {
-        document.getElementById('equiposel').value = equipoSeleccionado;
-      }
-
-      document.getElementById('btn-volver').onclick = () => {
-        window.location.href = "selector.html";
-      };
-    });
-
-    function enviarRPE(event) {
-      event.preventDefault();
-
-      const rpeVal = document.getElementById('rpe').value;
-
-      const baseUrl = "https://docs.google.com/forms/d/1eca4eShUyVGaxiuB13ONX_dzXynArxuUQmtfFBx5veU/formResponse";
-      const params = new URLSearchParams({
-        "entry.1206689442": document.getElementById('fecha').value,
-        "entry.1144883834": document.getElementById('nombre').value,
-        "entry.697775640": document.getElementById('equiposel').value,
-        "entry.1150680246": document.getElementById('entrenamiento').value,
-        "entry.961295529": rpeVal,
-        "entry.1650450183": document.getElementById('estatus').value,
-        "entry.1691140284": document.getElementById('comentarios').value
-      });
-
-      fetch(`${baseUrl}?${params.toString()}`, { method: 'POST', mode: 'no-cors' })
-        .then(() => {
-          alert("RPE registrado con éxito");
-          window.location.href = "selector.html";
-        })
-        .catch(error => {
-          alert("Error al enviar los datos: " + error);
-        });
-    }
-  </script>
+  <script src="rpe.js" defer></script>
 </body>
 </html>
