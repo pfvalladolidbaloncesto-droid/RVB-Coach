@@ -1,100 +1,86 @@
-const NombreHoja = "VisualizacionTEST";[cite: 3]
+document.addEventListener('DOMContentLoaded', () => {
+  // Recuperar nombre de usuario almacenado (equivalente a TinyDB / Nombre.Text)
+  const nombreUsuario = localStorage.getItem('User') || '';
+  document.getElementById('Nombre').textContent = nombreUsuario;
 
-document.addEventListener("DOMContentLoaded", () => {
-    Test_consulta_Initialize();
+  const testSelect = document.getElementById('test-select');
+  const lateralidadSelect = document.getElementById('lateralidad-select');
 
-    document.getElementById("test").addEventListener("change", test_AfterPicking);
-    document.getElementById("lateralidad").addEventListener("change", lateralidad_AfterPicking);
-    document.getElementById("Enviar").addEventListener("click", Enviar_Click);
+  // Botón Enviar (equivalente a Enviar.Click)
+  document.getElementById('Enviar').addEventListener('click', async () => {
+    let isValid = true;
+
+    // 1. Validar si el campo test está vacío
+    if (!testSelect.value || testSelect.value === "") {
+      testSelect.style.backgroundColor = '#FF0000'; // Rojo
+      alert("Comprueba los campos obligatorios");
+      isValid = false;
+    } else {
+      testSelect.style.backgroundColor = '#FFFFFF'; // Blanco / por defecto
+    }
+
+    // 2. Validar si el test requiere lateralidad (SLR, ANKLE, DJ) y la lateralidad está vacía
+    const testsConLateralidad = ["SLR", "ANKLE", "DJ"];
+    const esTestLateral = testsConLateralidad.includes(testSelect.value);
+    
+    if (esTestLateral && (!lateralidadSelect.value || lateralidadSelect.value === "")) {
+      lateralidadSelect.style.backgroundColor = '#FF0000'; // Rojo
+      alert("Comprueba los campos obligatorios");
+      isValid = false;
+    } else {
+      lateralidadSelect.style.backgroundColor = '#FFFFFF';
+    }
+
+    // 3. Si todo es válido, realizar la consulta (equivalente a ReadWithExactFilter)
+    if (isValid) {
+      const nombreHoja = localStorage.getItem('NombreHoja') || "VisualizacionTEST";
+      await consultarGoogleSheet(nombreHoja, nombreUsuario, testSelect.value, lateralidadSelect.value);
+    }
+  });
 });
 
-function Test_consulta_Initialize() {
-    // Lee el usuario guardado desde selector.html / menu_principal (TinyBD simulado con localStorage)
-    const user = localStorage.getItem("User") || sessionStorage.getItem("User");[cite: 3]
-    if (user) {
-        document.getElementById("Nombre").innerText = user;[cite: 3]
-    } else {
-        document.getElementById("Nombre").innerText = "No seleccionado";
+// Equivalente al evento GotFilterResult y las cadenas de condicionales de los bloques largos
+async function consultarGoogleSheet(sheetName, nombreUsuario, testSeleccionado, lateralidadSeleccionada) {
+  try {
+    // URL de tu Web App de Google Apps Script
+    const urlScript = "https://script.google.com/macros/s/AKfycbxeODB3WoJxuyl8kVZNZ-ciTnWEZwKOeIKBAb7Oef-gSzT1YNVNqrabkXpPMTP_KU9Q/exec";
+    const response = await fetch(`${urlScript}?sheet=${sheetName}&filter=${nombreUsuario}`);
+    const rows = await response.json();
+
+    if (rows && rows.length > 0) {
+      const fila = rows[0]; // Primera coincidencia encontrada (columna 1 = nombreUsuario)
+
+      // Construir la clave exacta igual que en tus bloques condicionales
+      let combinacionTest = testSeleccionado;
+      if (["SLR", "ANKLE", "DJ"].includes(testSeleccionado) && lateralidadSeleccionada) {
+        combinacionTest += lateralidadSeleccionada; // Ej: SLRIZQ, SLRDCH
+      }
+
+      // Mapeo de los campos de texto según la combinación (traducción de la cadena de "if" largos)
+      const campo1 = document.getElementById('CampoDeTexto1');
+      const campo2 = document.getElementById('CampoDeTexto2');
+      const campo3 = document.getElementById('CampoDeTexto3');
+      const campo4 = document.getElementById('CampoDeTexto4');
+
+      if (combinacionTest === "SLRIZQ") {
+        campo1.value = fila[3] || ""; // Ajusta los índices según las columnas de tu hoja
+        campo2.value = fila[4] || "";
+        campo3.value = fila[5] || "";
+        campo4.value = fila[6] || "";
+      } else if (combinacionTest === "SLRDCH") {
+        campo1.value = fila[7] || "";
+        campo2.value = fila[8] || "";
+        campo3.value = fila[9] || "";
+        campo4.value = fila[10] || "";
+      } else if (testSeleccionado === "CMJ") {
+        campo1.value = fila[11] || "";
+        campo2.value = fila[12] || "";
+        campo3.value = fila[13] || "";
+        campo4.value = fila[14] || "";
+      } 
+      // Añade aquí los demás "else if" para SJ, 30-15, PESO, etc. según tus bloques.
     }
-
-    console.log(`Leyendo fila 1 de la hoja: ${NombreHoja}`);[cite: 3]
-
-    // Recupera la lista de tests compartida desde menu_principal / registrar_test
-    let testList = [];
-    try {
-        const storedTests = localStorage.getItem("TestList") || sessionStorage.getItem("TestList");
-        testList = storedTests ? JSON.parse(storedTests) : ["SLR", "ANKLE", "DJ", "CMJ", "SJ", "30-15", "PESO", "ALTURA"];[cite: 3]
-    } catch (e) {
-        testList = ["SLR", "ANKLE", "DJ", "CMJ", "SJ", "30-15", "PESO", "ALTURA"];[cite: 3]
-    }
-
-    const testSelect = document.getElementById("test");
-    testSelect.innerHTML = '<option value="">Seleccione...</option>';
-    testList.forEach(item => {
-        let opt = document.createElement("option");
-        opt.value = item;
-        opt.textContent = item;
-        testSelect.appendChild(opt);[cite: 3]
-    });
-}
-
-function actualizarResultado() {
-    const testVal = document.getElementById("test").value;
-    const latVal = document.getElementById("lateralidad").value;
-    document.getElementById("Resultado").innerText = testVal + (latVal ? latVal : "");[cite: 3]
-}
-
-function test_AfterPicking() {
-    const testVal = document.getElementById("test").value;
-    const lateralidadSelect = document.getElementById("lateralidad");
-
-    // Lógica idéntica a registrar_test: habilita lateralidad solo para test específicos
-    if (["SLR", "ANKLE", "DJ"].includes(testVal)) {
-        lateralidadSelect.disabled = false;[cite: 3]
-    } else {
-        lateralidadSelect.value = "";[cite: 3]
-        lateralidadSelect.disabled = true;[cite: 3]
-    }
-    actualizarResultado();
-}
-
-function lateralidad_AfterPicking() {
-    actualizarResultado();[cite: 3]
-}
-
-function Enviar_Click() {
-    const testElement = document.getElementById("test");
-    const testVal = testElement.value;
-
-    if (!testVal) {
-        testElement.style.backgroundColor = "#ffcccc";[cite: 3]
-        alert("El campo de test es obligatorio.");[cite: 3]
-        return;
-    } else {
-        testElement.style.backgroundColor = "";
-    }
-
-    const resultadoFinal = document.getElementById("Resultado").innerText;
-    console.log(`Filtrando hoja ${NombreHoja}, fila 1, con nombre: ${document.getElementById("Nombre").innerText}`);[cite: 3]
-
-    simularGotFilterResult(resultadoFinal, [
-        ["120", "2026-06-01", "135", "2026-06-10"]
-    ]);
-}
-
-function HojaDeCálculo1_GotFilterResult(resultado, returnData) {
-    if (!returnData || returnData.length === 0) return;[cite: 3]
-
-    let row = returnData[0];[cite: 3]
-
-    if (["SLRIZQ", "SLRDCH", "CMJ", "SJ", "30-15", "PESO", "ALTURA", "SLR", "ANKLE", "DJ"].includes(resultado)) {
-        document.getElementById("CampoDeTexto1").value = row[0] || "";[cite: 3]
-        document.getElementById("CampoDeTexto2").value = row[1] || "";[cite: 3]
-        document.getElementById("CampoDeTexto3").value = row[2] || "";[cite: 3]
-        document.getElementById("CampoDeTexto4").value = row[3] || "";[cite: 3]
-    }
-}
-
-function simularGotFilterResult(resultado, returnData) {
-    HojaDeCálculo1_GotFilterResult(resultado, returnData);
+  } catch (error) {
+    console.error("Error al obtener los datos de la hoja:", error);
+  }
 }
