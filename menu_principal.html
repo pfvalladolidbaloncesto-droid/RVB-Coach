@@ -9,6 +9,48 @@
   <meta name="theme-color" content="#ffffff" />
   
   <link rel="stylesheet" href="style.css?v=3" />
+  <style>
+    /* Estilos personalizados para los colores solicitados */
+    .user-header {
+      background-color: #3b82f6;
+      color: white;
+      padding: 12px 15px;
+      border-radius: 8px;
+      text-align: center;
+      font-weight: 600;
+      margin-bottom: 20px;
+    }
+
+    .btn-action {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      padding: 12px;
+    }
+
+    .btn-action:hover {
+      background-color: #059669;
+    }
+
+    .btn-logout {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      width: 100%;
+      padding: 12px;
+      margin-top: 15px;
+    }
+
+    .btn-logout:hover {
+      background-color: #2563eb;
+    }
+  </style>
   <script src="menu_principal.js?v=3" defer></script>
 </head>
 <body>
@@ -50,7 +92,7 @@
         <button id="btnSesion" class="btn-action">Subir sesión</button>
         <button id="btnCargaEquipo" class="btn-action">Carga Equipo</button>
         <button id="btnCargaJugador" class="btn-action">Carga jugador</button>
-        <button id="btnLesion" class="btn-action btn-warning">Registrar lesión</button>
+        <button id="btnLesion" class="btn-action" style="background-color: #f59e0b;">Registrar lesión</button>
       </div>
 
       <button id="btnLogOut" class="btn-logout">Cerrar sesión</button>
