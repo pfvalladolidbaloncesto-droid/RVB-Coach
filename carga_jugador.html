@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Carga Jugador - Coach RVB</title>
+  
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#ffffff" />
+  
+  <link rel="stylesheet" href="style.css?v=3" />
+  <script src="carga_jugador.js?v=3" defer></script>
+</head>
+<body>
+  <div class="main-container menu-container">
+    <header class="user-header">
+      <span id="etiquetaTitulo" class="user-name">Carga Jugador</span>
+    </header>
+
+    <main class="menu-content">
+      <!-- Equipo Seleccionado -->
+      <div class="form-group">
+        <label>Equipo</label>
+        <input type="text" id="inputEquipo" class="input-text" disabled />
+      </div>
+
+      <!-- Jugador Seleccionado -->
+      <div class="form-group">
+        <label>Jugador</label>
+        <input type="text" id="inputJugador" class="input-text" disabled />
+      </div>
+
+      <!-- Selector de Fecha -->
+      <div class="form-group">
+        <label for="inputFecha">Fecha</label>
+        <input type="date" id="inputFecha" class="input-date" />
+      </div>
+
+      <!-- Botón de Enviar -->
+      <button id="btnEnviarCargaJugador" class="btn-action">Enviar</button>
+
+      <!-- Botón para volver al selector -->
+      <button id="btnVolverSelector" class="btn-logout" style="margin-top: 15px; background-color: #6c757d;">Volver al selector</button>
+    </main>
+  </div>
+</body>
+</html>
