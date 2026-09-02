@@ -4,40 +4,146 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sesión</title>
+  <style>
+    body {
+      font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+      background-color: #f4f6f9;
+      margin: 0;
+      padding: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+    }
+    .card {
+      background: #ffffff;
+      padding: 30px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 420px;
+      box-sizing: border-box;
+    }
+    .header-container {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 24px;
+    }
+    .header-container h2 {
+      margin: 0;
+      font-size: 22px;
+      font-weight: 700;
+      color: #111;
+    }
+    .btn-atras {
+      background-color: #10b981;
+      color: white;
+      border: none;
+      padding: 8px 14px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .form-group {
+      margin-bottom: 16px;
+    }
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 600;
+      color: #374151;
+      margin-bottom: 6px;
+    }
+    .form-group input {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      border-radius: 8px;
+      font-size: 15px;
+      box-sizing: border-box;
+      background-color: #f9fafb;
+    }
+    .form-group input:disabled {
+      background-color: #f3f4f6;
+      color: #6b7280;
+    }
+    .file-upload-container {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+    }
+    .btn-foto {
+      background-color: #3b82f6;
+      color: white;
+      border: none;
+      padding: 9px 16px;
+      border-radius: 8px;
+      font-weight: 600;
+      cursor: pointer;
+      font-size: 14px;
+    }
+    .btn-enviar {
+      width: 100%;
+      background-color: #10b981;
+      color: white;
+      border: none;
+      padding: 12px;
+      border-radius: 8px;
+      font-size: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .btn-enviar:hover {
+      background-color: #059669;
+    }
+    #Imagen1 {
+      border-radius: 8px;
+      max-height: 50px;
+      border: 1px solid #e5e7eb;
+    }
+  </style>
 </head>
 <body>
-  <div class="vertical-arrangement" id="sesion-screen">
-    <div class="horizontal-arrangement">
+
+  <div class="card" id="sesion-screen">
+    <div class="header-container">
+      <button id="Menú" class="btn-atras">← Atrás</button>
+      <h2>SESIÓN</h2>
+    </div>
+    
+    <div class="form-group">
       <label for="SelectorDeFecha1">Fecha</label>
       <input type="date" id="SelectorDeFecha1">
     </div>
     
-    <div class="horizontal-arrangement">
+    <div class="form-group">
       <label for="Entrenamiento1">Entrenamiento</label>
       <input type="text" id="Entrenamiento1" disabled>
     </div>
     
-    <div class="horizontal-arrangement">
+    <div class="form-group">
       <label for="Equipo">Equipo</label>
       <input type="text" id="Equipo" disabled>
     </div>
     
-    <div class="horizontal-arrangement">
-      <label for="Duracion">Duración</label>
+    <div class="form-group">
+      <label for="Duracion">Duración (min)</label>
       <input type="number" id="Duracion">
     </div>
     
-    <div class="horizontal-arrangement">
-      <label>Archivo</label>
-      <div class="vertical-arrangement">
-        <img id="Imagen1" alt="Preview" style="display:none; max-width: 100px;" />
+    <div class="form-group">
+      <label>Archivo / Foto</label>
+      <div class="file-upload-container">
+        <button id="Foto" class="btn-foto">📷 Foto</button>
+        <img id="Imagen1" alt="Preview" style="display:none;" />
         <input type="file" id="inputFileFoto" accept="image/*" capture="environment" style="display:none;">
-        <button id="Foto">Foto</button>
       </div>
     </div>
     
-    <button id="Enviar">Subir sesión</button>
-    <button id="Menú">Menú principal</button>
+    <button id="Enviar" class="btn-enviar">Subir sesión</button>
   </div>
 
   <!-- ELEMENTOS OCULTOS PARA ENVIAR LA FOTO A GOOGLE DRIVE -->
