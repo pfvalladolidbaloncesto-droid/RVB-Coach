@@ -4,7 +4,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const today = new Date().toISOString().split('T')[0];
   fechaInput.value = today;
 
-  // 2. Recuperar datos de localStorage
+  // 2. Recuperar datos de localStorage (Equivalente a TinyBD)
   const entrenamientoInput = document.getElementById("Entrenamiento1");
   const equipoInput = document.getElementById("Equipo");
   const duracionInput = document.getElementById("Duracion");
@@ -19,7 +19,26 @@ document.addEventListener("DOMContentLoaded", () => {
     duracionInput.value = 55;
   }
 
-  // 3. Manejo de la cámara / archivo (Opcional)
+  // 3. Matriz completa de carpetas de Google Drive (Extraída de tus bloques)
+  function obtenerFolderId(equipo, entrenamiento) {
+    if (entrenamiento === "Pista" && equipo === "EBA") return "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT";
+    if (entrenamiento === "Físico" && equipo === "EBA") return "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ";
+    if (entrenamiento === "Pista" && equipo === "Junior A") return "1popWCqp2NRuGDHPlqGUGavYzCjHof4d";
+    if (entrenamiento === "Físico" && equipo === "Junior A") return "17KMZF1tKwZyZB5fg2lPndVN0F8g1jSle";
+    if (entrenamiento === "Pista" && equipo === "Junior B") return "1N9I0FKZ3Bp4W6_F7TfeyT38cEggXEZRI";
+    if (entrenamiento === "Físico" && equipo === "Junior B") return "1yPuV6bwl48glTw0AHJP3MA7YEhq2R8Gv";
+    if (entrenamiento === "Pista" && equipo === "Cadete A") return "1LgRPFVcke8UKHbqoyi5yYLmCq4rucHZ2";
+    if (entrenamiento === "Físico" && equipo === "Cadete A") return "1ChuJ-F3JeKkoshtnKlWqgluWVFnY1vjB";
+    if (entrenamiento === "Pista" && equipo === "Cadete B") return "18EANG_Wv3W6jgxkGe55YK8OgTsZly319";
+    if (entrenamiento === "Físico" && equipo === "Cadete B") return "1_KgcdJe-T4MTfpqJyp9VZ9YyFyGsx4Xa";
+    if (entrenamiento === "Pista" && equipo === "Infantil A") return "1PhY2dTw98_uVder7BzUXdLU5eT9lu_8P";
+    if (entrenamiento === "Físico" && equipo === "Infantil A") return "1M1JubcwUhsJoww0f0BP8bakjHzR4vK2A";
+    if (entrenamiento === "Pista" && equipo === "Infantil B") return "1EpMEXq2EYBcRucK8mk4SIRR2BQfBNyq";
+    if (entrenamiento === "Físico" && equipo === "Infantil B") return "1G44Nviyut4CTPelgjxhKCGCI183ZJ";
+    return "";
+  }
+
+  // 4. Manejo de la cámara / archivo (Opcional)
   const btnFoto = document.getElementById("Foto");
   const inputFileFoto = document.getElementById("inputFileFoto");
   const imagen1 = document.getElementById("Imagen1");
@@ -42,15 +61,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 4. Matriz de carpetas de Google Drive
-  const folderMapping = {
-    "EBA": { "Pista": "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT", "Físico": "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ" },
-  };
-
-  // 5. Validación y Envío
+  // 5. Validación y Envío (replicando Web1 y Web2)
   const btnEnviar = document.getElementById("Enviar");
   btnEnviar.addEventListener("click", () => {
-    // Validar solo los campos de texto obligatorios (la foto ya no es obligatoria)
     const campos = [fechaInput, entrenamientoInput, equipoInput, duracionInput];
     let valido = true;
 
@@ -70,9 +83,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const equipoActual = equipoInput.value;
     const tipoActual = entrenamientoInput.value;
-    const folderId = folderMapping[equipoActual]?.[tipoActual] || "ID_POR_DEFECTO";
+    const folderId = obtenerFolderId(equipoActual, tipoActual);
 
-    // Envío de datos de texto a Google Forms
+    // Envío a Google Forms (Equivalente a Web2 en App Inventor)
     const formData = new URLSearchParams();
     formData.append("entry.279691575", fechaInput.value);
     formData.append("entry.1010684221", equipoActual);
@@ -85,17 +98,23 @@ document.addEventListener("DOMContentLoaded", () => {
       body: formData
     }).catch(err => console.error("Error en Google Form", err));
 
-    // Envío de la imagen a Google Apps Script (solo si se ha seleccionado una foto)
+    // Envío de la imagen (Equivalente a Web1 en App Inventor enviando texto plano / JSON)
     if (imagenBase64) {
       const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
+      
+      // Limpiar el prefijo data:image/...;base64, igual que hacías con el bloque "replace all text" en App Inventor
+      let base64Clean = imagenBase64.replace(/^data:image\/[a-z]+;base64,/, "");
+
+      // Generar nombre del archivo igual que en tus bloques: [Equipo]-[Fecha].jpg
+      const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
+
       const payload = {
-        base64Data: imagenBase64,
-        fileName: `${equipoActual}-${fechaInput.value}.jpg`,
+        base64Data: base64Clean,
+        fileName: fileName,
         folderId: folderId,
         mimeType: "image/jpeg"
       };
 
-      // Se usa no-cors para evitar el error de bloqueo del navegador con Google Apps Script
       fetch(scriptURL, {
         method: "POST",
         mode: "no-cors",
@@ -103,7 +122,6 @@ document.addEventListener("DOMContentLoaded", () => {
       }).catch(error => console.error("Error al subir la imagen:", error));
     }
 
-    // Notificación de éxito y redirección
     alert("Sesión subida con éxito");
     window.location.href = "menu_principal.html";
   });
