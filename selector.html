@@ -162,17 +162,13 @@
           const idUsuario = mapaJugadores[i];
 
           if (idUsuario) {
-            const rutaFoto = `fotos/${idUsuario}.jpeg`;
-            const fotoFallback = `fotos/none.jpeg`;
-
+            // Carga directa de none.jpeg sin comprobaciones intermedias
             htmlGrid += `
               <div class="celda-grid tarjeta-jugador" data-posicion="${i}" data-usuario="${idUsuario}">
                 <img 
                   class="avatar-foto" 
-                  src="${rutaFoto}" 
+                  src="fotos/none.jpeg" 
                   alt="${idUsuario}" 
-                  onerror="this.onerror=null; this.src='${fotoFallback}';" 
-                  loading="lazy" 
                 />
                 <span>${idUsuario}</span>
               </div>
