@@ -8,28 +8,18 @@ document.addEventListener("DOMContentLoaded", () => {
   const equipoInput = document.getElementById("Equipo");
   const duracionInput = document.getElementById("Duracion");
 
-  const equipoGuardado = localStorage.getItem("Equipo") || localStorage.getItem("equipo") || localStorage.getItem("EquipoSeleccionado") || "Junior A";
-  const rolGuardado = localStorage.getItem("Rol") || localStorage.getItem("rol") || localStorage.getItem("tipoRol") || "";
-
-  // Determinamos el entrenamiento según el rol del menú principal
-  let tipoEntrenamiento = "Físico"; // Valor por defecto
-  if (rolGuardado.toUpperCase() === "PF") {
-    tipoEntrenamiento = "Físico";
-  } else if (rolGuardado.toLowerCase().includes("Entrenador") || rolGuardado.toLowerCase() === "coach") {
-    tipoEntrenamiento = "Pista";
-  } else {
-    // Si no viene del rol, intentamos leerlo del localStorage directo
-    tipoEntrenamiento = localStorage.getItem("TipoEntrenamiento") || localStorage.getItem("tipoEntrenamiento") || localStorage.getItem("entrenamiento") || "Físico";
-  }
+  // Recuperamos el equipo y el rol directamente del almacenamiento del menú principal
+  const equipoGuardado = localStorage.getItem("Equipo") || "Junior A";
+  const rolGuardado = localStorage.getItem("Rol") || localStorage.getItem("rolUsuario") || "Físico";
 
   document.getElementById("Equipo").value = equipoGuardado.trim();
-  document.getElementById("Entrenamiento1").value = tipoEntrenamiento.trim();
+  document.getElementById("Entrenamiento1").value = rolGuardado.trim();
 
-  if (tipoEntrenamiento.includes("Físico") || tipoEntrenamiento.includes("Fisico") || !duracionInput.value) {
+  if (rolGuardado.includes("Físico") || rolGuardado.includes("Fisico") || !duracionInput.value) {
     duracionInput.value = 55;
   }
 
-  // Diccionario exacto de IDs de Google Drive sin errores de sintaxis
+  // Diccionario exacto de IDs de Google Drive
   const carpetasDriveIDs = {
     "EBA_Pista": "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT",
     "EBA_Físico": "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ",
