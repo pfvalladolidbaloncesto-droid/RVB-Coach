@@ -227,13 +227,13 @@ document.addEventListener("DOMContentLoaded", () => {
       // IMAGEN
       // -----------------------------------------
 // -----------------------------------------
-      // IMAGEN (Método FormData con CORS)
+      // IMAGEN
       // -----------------------------------------
 
       if (imagenBase64) {
 
         const scriptURL =
-          "https://script.google.com/macros/s/AKfycbz8tt9CDJZM4w5EZ0jlJHIU-A5dmsHSfT55eMByTvwos_OFHQoqBHSTT-QTphCrKmv7uA/exec";
+          "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
 
         const base64Clean =
           imagenBase64.replace(
@@ -244,23 +244,58 @@ document.addEventListener("DOMContentLoaded", () => {
         const fileName =
           `${equipoActual}-${fechaInput.value}.jpg`;
 
-        const formData = new FormData();
-        formData.append("filename", fileName);
-        formData.append("folderId", folderId);
-        formData.append("mimetype", "image/jpeg");
-        formData.append("data", base64Clean);
+        console.log("📤 Enviando imagen...");
 
-        console.log("📤 Enviando imagen por FormData...");
+        const datos =
+          "filename=" + encodeURIComponent(fileName) +
+          "&folderId=" + encodeURIComponent(folderId) +
+          "&mimetype=" + encodeURIComponent("image/jpeg") +
+          "&data=" + encodeURIComponent(base64Clean);
 
-        await fetch(scriptURL, {
-          method: "POST",
-          mode: "cors", // Permite comunicación con Apps Script si este responde con cabeceras CORS
-          body: formData
-        });
+        try {
+          // Cambiamos a 'cors' temporalmente para ver si el servidor responde o da error de red
+          const respuesta = await fetch(scriptURL, {
+            method: "POST",
+            mode: "cors", 
+            headers: {
+              "Content-Type": "application/x-www-form-urlencoded"
+            },
+            body: datos
+          });
 
-        console.log("✅ Imagen enviada correctamente");
+          const resultadoTexto = await respuesta.text();
+          console.log("📥 Respuesta del servidor Google:", resultadoTexto);
+
+        } catch (errErrorRed) {
+          console.error("❌ Error atrapado en el fetch de la imagen:", errErrorRed);
+        }
       }
 
+      // 🛑 PAUSA DEPURACIÓN: Comentamos esto para que NO cambie de página y puedas ver la consola
+      /*
+      await new Promise(resolve =>
+        setTimeout(resolve, 1500)
+      );
+
+      alert("Sesión subida con éxito");
+
+      window.location.href =
+        "menu_principal.html";
+      */
+
+      console.log("🏁 Proceso de envío finalizado. Revisa la consola, la página NO se va a recargar.");
+      btnEnviar.disabled = false;
+      btnEnviar.textContent = "Subir sesión (Modo Prueba)";
+
+    } catch (error) {
+      console.error(
+        "❌ Error general en el try/catch:",
+        error
+      );
+      alert("Hubo un error general.");
+      btnEnviar.disabled = false;
+      btnEnviar.textContent = "Subir sesión";
+    }
         // MISMO FORMATO QUE LA APK:
         // filename + folderId + mimetype + data
         const datos =
