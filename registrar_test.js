@@ -1,5 +1,4 @@
 document.addEventListener("DOMContentLoaded", () => {
-  // Inicializar fecha actual de forma segura para inputs type="date"
   const inputFecha = document.getElementById('fecha');
   if (inputFecha) {
     const now = new Date();
@@ -9,7 +8,6 @@ document.addEventListener("DOMContentLoaded", () => {
     inputFecha.value = `${year}-${month}-${day}`;
   }
 
-  // Cargar el usuario correctamente comprobando las claves que usa el selector
   const usuarioGuardado = localStorage.getItem("User") || localStorage.getItem("jugadorSeleccionado");
   const inputNombre = document.getElementById('nombre');
   if (inputNombre) {
