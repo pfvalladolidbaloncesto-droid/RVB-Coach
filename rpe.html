@@ -89,6 +89,13 @@
       transition: border-color 0.2s, box-shadow 0.2s;
     }
 
+    .form-group input:disabled,
+    .form-group select:disabled {
+      background-color: #f8f9fa;
+      color: #6c757d;
+      cursor: not-allowed;
+    }
+
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
@@ -124,7 +131,7 @@
 
   <div class="card">
     <div class="header-bar">
-      <button class="btn-back" onclick="window.history.back()">← Volver</button>
+      <button class="btn-back" id="btn-volver">← Volver</button>
       <h2 class="title">Registro RPE</h2>
     </div>
     
@@ -137,21 +144,12 @@
 
       <div class="form-group">
         <label for="nombre">Nombre</label>
-        <input type="text" id="nombre" placeholder="Nombre del atleta" required>
+        <input type="text" id="nombre" placeholder="Cargando atleta..." readonly required>
       </div>
 
       <div class="form-group">
         <label for="equiposel">Equipo</label>
-        <select id="equiposel" required>
-          <option value="">Selecciona equipo</option>
-          <option value="TERCERA">TERCERA</option>
-          <option value="Junior A">Junior A</option>
-          <option value="Junior B">Junior B</option>
-          <option value="Cadete A">Cadete A</option>
-          <option value="Cadete B">Cadete B</option>
-          <option value="Infantil A">Infantil A</option>
-          <option value="Infantil B">Infantil B</option>
-        </select>
+        <input type="text" id="equiposel" placeholder="Cargando equipo..." readonly required>
       </div>
 
       <div class="form-group">
@@ -188,8 +186,27 @@
   </div>
 
   <script>
-    // Establece la fecha de hoy por defecto
-    document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+    document.addEventListener("DOMContentLoaded", () => {
+      // Fecha actual por defecto
+      document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+
+      // Recuperación de variables desde localStorage
+      const jugadorGuardado = localStorage.getItem("User") || localStorage.getItem("Usuario") || localStorage.getItem("jugadorSeleccionado");
+      const equipoGuardado = localStorage.getItem("equipo") || localStorage.getItem("Equipo") || localStorage.getItem("equipoUsuario");
+
+      if (jugadorGuardado) {
+        document.getElementById('nombre').value = jugadorGuardado;
+      }
+
+      if (equipoGuardado) {
+        document.getElementById('equiposel').value = equipoGuardado;
+      }
+
+      // Evento Volver
+      document.getElementById('btn-volver').onclick = () => {
+        window.location.href = "selector.html";
+      };
+    });
 
     function enviarRPE(event) {
       event.preventDefault();
@@ -218,9 +235,7 @@
       fetch(`${baseUrl}?${params.toString()}`, { method: 'POST', mode: 'no-cors' })
         .then(() => {
           alert("RPE registrado con éxito");
-          document.getElementById('form-rpe').reset();
-          document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
-          document.getElementById('estatus').value = "Completo";
+          window.location.href = "selector.html";
         })
         .catch(error => {
           alert("Error al enviar los datos: " + error);
