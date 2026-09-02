@@ -162,13 +162,14 @@
           const idUsuario = mapaJugadores[i];
 
           if (idUsuario) {
-            // Carga directa de none.jpeg sin comprobaciones intermedias
+            // Busca la foto del jugador, si falla salta a fotos/none.jpeg
             htmlGrid += `
               <div class="celda-grid tarjeta-jugador" data-posicion="${i}" data-usuario="${idUsuario}">
                 <img 
                   class="avatar-foto" 
-                  src="fotos/none.jpeg" 
-                  alt="${idUsuario}" 
+                  src="fotos/${idUsuario}.jpeg" 
+                  alt="" 
+                  onerror="this.onerror=null; this.src='fotos/none.jpeg';"
                 />
                 <span>${idUsuario}</span>
               </div>
