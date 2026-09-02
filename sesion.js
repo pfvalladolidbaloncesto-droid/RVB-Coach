@@ -4,24 +4,22 @@ document.addEventListener("DOMContentLoaded", () => {
   const today = new Date().toISOString().split('T')[0];
   fechaInput.value = today;
 
-  // 2. Recuperar datos de localStorage (simulando TinyBD)
+  // 2. Recuperar datos de localStorage
   const entrenamientoInput = document.getElementById("Entrenamiento1");
   const equipoInput = document.getElementById("Equipo");
   const duracionInput = document.getElementById("Duracion");
 
-  const rolGuardado = localStorage.getItem("Rol") || "";
   const equipoGuardado = localStorage.getItem("Equipo") || "";
-  const tipoEntrenamiento = localStorage.getItem("TipoEntrenamiento") || "Físico"; // Ejemplo
+  const tipoEntrenamiento = localStorage.getItem("TipoEntrenamiento") || "Físico";
 
   entrenamientoInput.value = tipoEntrenamiento;
   equipoInput.value = equipoGuardado;
 
-  // Asignar duración por defecto si es Físico
   if (tipoEntrenamiento === "Físico") {
     duracionInput.value = 55;
   }
 
-  // 3. Manejo de la cámara / archivo
+  // 3. Manejo de la cámara / archivo (Opcional)
   const btnFoto = document.getElementById("Foto");
   const inputFileFoto = document.getElementById("inputFileFoto");
   const imagen1 = document.getElementById("Imagen1");
@@ -44,16 +42,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 4. Matriz de carpetas de Google Drive según equipo y categoría
+  // 4. Matriz de carpetas de Google Drive
   const folderMapping = {
     "EBA": { "Pista": "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT", "Físico": "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ" },
-    // Añadir el resto de equipos aquí (Junior A, Junior B, etc.)
   };
 
   // 5. Validación y Envío
   const btnEnviar = document.getElementById("Enviar");
   btnEnviar.addEventListener("click", () => {
-    // Validar campos obligatorios
+    // Validar solo los campos de texto obligatorios (la foto ya no es obligatoria)
     const campos = [fechaInput, entrenamientoInput, equipoInput, duracionInput];
     let valido = true;
 
@@ -66,17 +63,11 @@ document.addEventListener("DOMContentLoaded", () => {
       }
     });
 
-    if (!imagenBase64) {
-      alert("Comprueba campos obligatorios o falta la foto.");
-      valido = false;
-    }
-
     if (!valido) {
       alert("Comprueba campos obligatorios");
       return;
     }
 
-    // Obtener ID de carpeta correspondiente
     const equipoActual = equipoInput.value;
     const tipoActual = entrenamientoInput.value;
     const folderId = folderMapping[equipoActual]?.[tipoActual] || "ID_POR_DEFECTO";
@@ -94,28 +85,27 @@ document.addEventListener("DOMContentLoaded", () => {
       body: formData
     }).catch(err => console.error("Error en Google Form", err));
 
-    // Envío de la imagen a Google Apps Script Web App
-    const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
-    const payload = {
-      base64Data: imagenBase64,
-      fileName: `${equipoActual}-${fechaInput.value}.jpg`,
-      folderId: folderId,
-      mimeType: "image/jpeg"
-    };
+    // Envío de la imagen a Google Apps Script (solo si se ha seleccionado una foto)
+    if (imagenBase64) {
+      const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
+      const payload = {
+        base64Data: imagenBase64,
+        fileName: `${equipoActual}-${fechaInput.value}.jpg`,
+        folderId: folderId,
+        mimeType: "image/jpeg"
+      };
 
-    fetch(scriptURL, {
-      method: "POST",
-      body: JSON.stringify(payload)
-    })
-    .then(response => response.text())
-    .then(result => {
-      alert("Sesión subida con éxito");
-      window.location.href = "menu_principal.html";
-    })
-    .catch(error => {
-      console.error("Error al subir la imagen:", error);
-      alert("Error al subir la imagen");
-    });
+      // Se usa no-cors para evitar el error de bloqueo del navegador con Google Apps Script
+      fetch(scriptURL, {
+        method: "POST",
+        mode: "no-cors",
+        body: JSON.stringify(payload)
+      }).catch(error => console.error("Error al subir la imagen:", error));
+    }
+
+    // Notificación de éxito y redirección
+    alert("Sesión subida con éxito");
+    window.location.href = "menu_principal.html";
   });
 
   // 6. Botón Menú Principal
