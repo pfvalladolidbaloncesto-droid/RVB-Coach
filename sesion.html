@@ -40,6 +40,15 @@
     <button id="Menú">Menú principal</button>
   </div>
 
+  <!-- ELEMENTOS OCULTOS PARA ENVIAR LA FOTO A GOOGLE DRIVE SIN ERRORES 403 -->
+  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
+  <form id="formOcultoDrive" action="AQUI_PEGAS_TU_URL_DE_GOOGLE_APPS_SCRIPT" method="POST" target="hidden_iframe" style="display:none;">
+      <input type="hidden" name="data" id="inputDataImg">
+      <input type="hidden" name="filename" id="inputFilename">
+      <input type="hidden" name="mimetype" id="inputMimetype">
+      <input type="hidden" name="folderId" id="inputFolderId" value="AQUI_PEGAS_EL_ID_DE_TU_CARPETA_DE_DRIVE">
+  </form>
+
   <script src="sesion.js"></script>
 </body>
 </html>
