@@ -226,11 +226,14 @@ document.addEventListener("DOMContentLoaded", () => {
       // -----------------------------------------
       // IMAGEN
       // -----------------------------------------
+// -----------------------------------------
+      // IMAGEN (Método FormData con CORS)
+      // -----------------------------------------
 
       if (imagenBase64) {
 
         const scriptURL =
-          "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
+          "https://script.google.com/macros/s/AKfycbz8tt9CDJZM4w5EZ0jlJHIU-A5dmsHSfT55eMByTvwos_OFHQoqBHSTT-QTphCrKmv7uA/exec";
 
         const base64Clean =
           imagenBase64.replace(
@@ -241,10 +244,22 @@ document.addEventListener("DOMContentLoaded", () => {
         const fileName =
           `${equipoActual}-${fechaInput.value}.jpg`;
 
-        console.log("📤 Enviando imagen");
-        console.log("Archivo:", fileName);
-        console.log("Folder:", folderId);
-        console.log("Base64:", base64Clean.length);
+        const formData = new FormData();
+        formData.append("filename", fileName);
+        formData.append("folderId", folderId);
+        formData.append("mimetype", "image/jpeg");
+        formData.append("data", base64Clean);
+
+        console.log("📤 Enviando imagen por FormData...");
+
+        await fetch(scriptURL, {
+          method: "POST",
+          mode: "cors", // Permite comunicación con Apps Script si este responde con cabeceras CORS
+          body: formData
+        });
+
+        console.log("✅ Imagen enviada correctamente");
+      }
 
         // MISMO FORMATO QUE LA APK:
         // filename + folderId + mimetype + data
