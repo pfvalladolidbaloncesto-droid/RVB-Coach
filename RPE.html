@@ -1,89 +1,114 @@
-<div id="pantalla-rpe" class="container">
-  <h2>Registro RPE</h2>
-  <form id="form-rpe" onsubmit="enviarRPE(event)">
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Registro RPE - Coach RVB</title>
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+
+  <div class="card">
+    <h2>Registro RPE</h2>
     
-    <label for="fecha">Fecha:</label>
-    <input type="date" id="fecha" required>
+    <form id="form-rpe" onsubmit="enviarRPE(event)">
+      
+      <div class="form-group">
+        <label for="fecha">Fecha</label>
+        <input type="date" id="fecha" required>
+      </div>
 
-    <label for="nombre">Nombre:</label>
-    <input type="text" id="nombre" placeholder="Nombre del atleta" required>
+      <div class="form-group">
+        <label for="nombre">Nombre</label>
+        <input type="text" id="nombre" placeholder="Nombre del atleta" required>
+      </div>
 
-    <label for="equiposel">Equipo:</label>
-    <select id="equiposel" required>
-      <option value="">Selecciona equipo</option>
-      <option value="TERCERA">TERCERA</option>
-      <option value="Junior A">Junior A</option>
-      <option value="Junior B">Junior B</option>
-      <option value="Cadete A">Cadete A</option>
-      <option value="Cadete B">Cadete B</option>
-      <option value="Infantil A">Infantil A</option>
-      <option value="Infantil B">Infantil B</option>
-    </select>
+      <div class="form-group">
+        <label for="equiposel">Equipo</label>
+        <select id="equiposel" required>
+          <option value="">Selecciona equipo</option>
+          <option value="TERCERA">TERCERA</option>
+          <option value="Junior A">Junior A</option>
+          <option value="Junior B">Junior B</option>
+          <option value="Cadete A">Cadete A</option>
+          <option value="Cadete B">Cadete B</option>
+          <option value="Infantil A">Infantil A</option>
+          <option value="Infantil B">Infantil B</option>
+        </select>
+      </div>
 
-    <label for="entrenamiento">Entrenamiento:</label>
-    <select id="entrenamiento" required>
-      <option value="">Selecciona tipo</option>
-      <option value="Pista">Pista</option>
-      <option value="Físico">Físico</option>
-    </select>
+      <div class="form-group">
+        <label for="entrenamiento">Entrenamiento</label>
+        <select id="entrenamiento" required>
+          <option value="">Selecciona tipo</option>
+          <option value="Pista">Pista</option>
+          <option value="Físico">Físico</option>
+        </select>
+      </div>
 
-    <label for="rpe">RPE (0-10):</label>
-    <input type="number" id="rpe" min="0" max="10" placeholder="0 a 10" required>
+      <div class="form-group">
+        <label for="rpe">RPE (0-10)</label>
+        <input type="number" id="rpe" min="0" max="10" placeholder="0 a 10" required>
+      </div>
 
-    <label for="estatus">Estatus:</label>
-    <select id="estatus" required>
-      <option value="Completo" selected>Completo</option>
-      <option value="Ausente">Ausente</option>
-      <option value="Limitado">Limitado</option>
-      <option value="Lesionado">Lesionado</option>
-    </select>
+      <div class="form-group">
+        <label for="estatus">Estatus</label>
+        <select id="estatus" required>
+          <option value="Completo" selected>Completo</option>
+          <option value="Ausente">Ausente</option>
+          <option value="Limitado">Limitado</option>
+          <option value="Lesionado">Lesionado</option>
+        </select>
+      </div>
 
-    <label for="comentarios">Comentarios:</label>
-    <textarea id="comentarios" rows="3" placeholder="Observaciones..."></textarea>
+      <div class="form-group">
+        <label for="comentarios">Comentarios</label>
+        <textarea id="comentarios" rows="3" placeholder="Observaciones..."></textarea>
+      </div>
 
-    <button type="submit">Enviar</button>
-  </form>
-</div>
+      <button type="submit" class="btn-submit">Enviar</button>
+    </form>
+  </div>
 
-<script>
-  // Inicializa la fecha actual al cargar (AAAA-MM-DD)
-  document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+  <script>
+    // Fecha actual por defecto
+    document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 
-  function enviarRPE(event) {
-    event.preventDefault();
+    function enviarRPE(event) {
+      event.preventDefault();
 
-    const rpeVal = parseInt(document.getElementById('rpe').value, 10);
-    
-    // Validación idéntica a los bloques de App Inventor (RPE entre 0 y 10)
-    if (isNaN(rpeVal) || rpeVal < 0 || rpeVal > 10) {
-      alert("Comprueba valores de campos obligatorios (RPE debe ser de 0 a 10)");
-      document.getElementById('rpe').style.backgroundColor = "#ff0000";
-      return;
-    }
-    document.getElementById('rpe').style.backgroundColor = "#ffffff";
+      const rpeInput = document.getElementById('rpe');
+      const rpeVal = parseInt(rpeInput.value, 10);
+      
+      // Validación de rango 0-10
+      if (isNaN(rpeVal) || rpeVal < 0 || rpeVal > 10) {
+        alert("Comprueba valores de campos obligatorios (RPE debe ser de 0 a 10)");
+        return;
+      }
 
-    // Mapeo exacto a los entry de Google Forms
-    const baseUrl = "https://docs.google.com/forms/d/1eca4eShUyVGaxiuB13ONX_dzXynArxuUQmtfFBx5veU/formResponse";
-    const params = new URLSearchParams({
-      "entry.1206689442": document.getElementById('fecha').value,
-      "entry.1144883834": document.getElementById('nombre').value,
-      "entry.697775640": document.getElementById('equiposel').value,
-      "entry.1150680246": document.getElementById('entrenamiento').value,
-      "entry.961295529": rpeVal,
-      "entry.1650450183": document.getElementById('estatus').value,
-      "entry.1691140284": document.getElementById('comentarios').value
-    });
-
-    // Envío en segundo plano sin cambiar de pantalla
-    fetch(`${baseUrl}?${params.toString()}`, { method: 'POST', mode: 'no-cors' })
-      .then(() => {
-        alert("RPE registrado con éxito");
-        document.getElementById('form-rpe').reset();
-        document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
-        document.getElementById('estatus').value = "Completo";
-      })
-      .catch(error => {
-        alert("Error al enviar los datos: " + error);
+      // Parámetros exactos hacia Google Forms
+      const baseUrl = "https://docs.google.com/forms/d/1eca4eShUyVGaxiuB13ONX_dzXynArxuUQmtfFBx5veU/formResponse";
+      const params = new URLSearchParams({
+        "entry.1206689442": document.getElementById('fecha').value,
+        "entry.1144883834": document.getElementById('nombre').value,
+        "entry.697775640": document.getElementById('equiposel').value,
+        "entry.1150680246": document.getElementById('entrenamiento').value,
+        "entry.961295529": rpeVal,
+        "entry.1650450183": document.getElementById('estatus').value,
+        "entry.1691140284": document.getElementById('comentarios').value
       });
-  }
-</script>
+
+      fetch(`${baseUrl}?${params.toString()}`, { method: 'POST', mode: 'no-cors' })
+        .then(() => {
+          alert("RPE registrado con éxito");
+          document.getElementById('form-rpe').reset();
+          document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
+          document.getElementById('estatus').value = "Completo";
+        })
+        .catch(error => {
+          alert("Error al enviar los datos: " + error);
+        });
+    }
+  </script>
+</body>
+</html>
