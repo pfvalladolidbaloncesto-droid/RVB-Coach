@@ -107,7 +107,6 @@
       min-height: 70px;
     }
 
-    /* Estilos Slider RPE (Verde a Rojo) */
     .rpe-container {
       display: flex;
       align-items: center;
@@ -252,7 +251,7 @@
       document.getElementById('fecha').value = new Date().toISOString().split('T')[0];
 
       const jugadorSeleccionado = localStorage.getItem("User") || localStorage.getItem("jugadorSeleccionado");
-      const equipoSeleccionado = localStorage.getItem("equipo") || localStorage.getItem("Equipo");
+      const equipoSeleccionado = localStorage.getItem("Equipo") || localStorage.getItem("equipoUsuario");
 
       if (jugadorSeleccionado) {
         document.getElementById('nombre').value = jugadorSeleccionado;
