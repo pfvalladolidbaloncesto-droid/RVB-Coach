@@ -13,7 +13,7 @@
       display: flex;
       justify-content: center;
       align-items: center;
-      height: 100vh;
+      min-height: 100vh;
     }
     #test-container {
       background: #ffffff;
@@ -24,13 +24,19 @@
       max-width: 400px;
       display: flex;
       flex-direction: column;
-      gap: 15px;
+      gap: 12px;
     }
     #Nombre {
       font-size: 18px;
       font-weight: bold;
       color: #333;
       margin-bottom: 5px;
+    }
+    label {
+      font-size: 14px;
+      font-weight: bold;
+      color: #555;
+      margin-top: 5px;
     }
     select, input, button {
       padding: 10px;
@@ -49,6 +55,7 @@
       border: none;
       cursor: pointer;
       font-weight: bold;
+      margin-top: 10px;
     }
     button:hover {
       background-color: #0056b3;
@@ -58,7 +65,7 @@
 <body>
 
 <div id="test-container">
-  <span id="Nombre">Usuario no definido</span>
+  <span id="Nombre">Atleta no definido</span>
   
   <select id="test-select" required>
     <option value="">Selecciona un Test</option>
@@ -74,25 +81,41 @@
   </select>
 
   <select id="lateralidad-select" disabled>
-    <option value="">Selecciona lateralidad</option>
     <option value="IZQ">IZQ</option>
     <option value="DCH">DCH</option>
   </select>
 
-  <input type="text" id="CampoDeTexto1" placeholder="Resultado 1" readonly>
-  <input type="text" id="CampoDeTexto2" placeholder="Resultado 2" readonly>
-  <input type="text" id="CampoDeTexto3" placeholder="Resultado 3" readonly>
-  <input type="text" id="CampoDeTexto4" placeholder="Resultado 4" readonly>
+  <label for="CampoDeTexto1">Valor último</label>
+  <input type="text" id="CampoDeTexto1" readonly>
+
+  <label for="CampoDeTexto2">Fecha último</label>
+  <input type="text" id="CampoDeTexto2" readonly>
+
+  <label for="CampoDeTexto3">Valor mejor</label>
+  <input type="text" id="CampoDeTexto3" readonly>
+
+  <label for="CampoDeTexto4">Fecha mejor</label>
+  <input type="text" id="CampoDeTexto4" readonly>
 
   <button id="Enviar">Enviar / Consultar</button>
 </div>
 
 <script>
+  // Función para formatear fechas a DD/MM/AAAA
+  function formatearFecha(fechaStr) {
+    if (!fechaStr) return "";
+    const fecha = new Date(fechaStr);
+    if (isNaN(fecha.getTime())) return fechaStr; // Si no es fecha válida, devuelve original
+    const dia = String(fecha.getDate()).padStart(2, '0');
+    const mes = String(fecha.getMonth() + 1).padStart(2, '0');
+    const anio = fecha.getFullYear();
+    return `${dia}/${mes}/${anio}`;
+  }
+
   document.addEventListener('DOMContentLoaded', () => {
-    // Recuperar nombre de usuario almacenado
     const nombreUsuario = localStorage.getItem('User');
     if (nombreUsuario) {
-      document.getElementById('Nombre').textContent = `Atleta: ${nombreUsuario}`;
+      document.getElementById('Nombre').textContent = nombreUsuario;
     }
 
     const testSelect = document.getElementById('test-select');
@@ -107,7 +130,6 @@
         lateralidadSelect.disabled = false;
       } else {
         lateralidadSelect.disabled = true;
-        lateralidadSelect.value = ''; 
         lateralidadSelect.style.backgroundColor = '#FFFFFF';
       }
     });
@@ -168,19 +190,19 @@
 
         if (combinacionTest === "SLRIZQ") {
           campo1.value = fila[3] || ""; 
-          campo2.value = fila[4] || "";
+          campo2.value = formatearFecha(fila[4]);
           campo3.value = fila[5] || "";
-          campo4.value = fila[6] || "";
+          campo4.value = formatearFecha(fila[6]);
         } else if (combinacionTest === "SLRDCH") {
           campo1.value = fila[7] || "";
-          campo2.value = fila[8] || "";
+          campo2.value = formatearFecha(fila[8]);
           campo3.value = fila[9] || "";
-          campo4.value = fila[10] || "";
+          campo4.value = formatearFecha(fila[10]);
         } else if (testSeleccionado === "CMJ") {
           campo1.value = fila[11] || "";
-          campo2.value = fila[12] || "";
+          campo2.value = formatearFecha(fila[12]);
           campo3.value = fila[13] || "";
-          campo4.value = fila[14] || "";
+          campo4.value = formatearFecha(fila[14]);
         } 
       }
     } catch (error) {
