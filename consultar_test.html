@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Consultar Test</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div class="container">
+        <h1>Consulta de Test</h1>
+        <p>Usuario: <span id="Nombre">Cargando...</span></p>
+
+        <div class="form-group">
+            <label for="test">Seleccione el Test:</label>
+            <select id="test">
+                <!-- Se llenará dinámicamente o con valores predefinidos basados en TinyBD1 -->
+            </select>
+        </div>
+
+        <div class="form-group" id="group-lateralidad" style="display: none;">
+            <label for="lateralidad">Lateralidad:</label>
+            <select id="lateralidad" disabled>
+                <option value="">Seleccione...</option>
+                <option value="IZQ">Izquierda</option>
+                <option value="DCH">Derecha</option>
+            </select>
+        </div>
+
+        <p>Resultado combinado: <span id="Resultado"></span></p>
+
+        <button id="Enviar">Enviar Consulta</button>
+
+        <div class="results-container">
+            <input type="text" id="CampoDeTexto1" readonly placeholder="Dato 1">
+            <input type="text" id="CampoDeTexto2" readonly placeholder="Dato 2">
+            <input type="text" id="CampoDeTexto3" readonly placeholder="Dato 3">
+            <input type="text" id="CampoDeTexto4" readonly placeholder="Dato 4">
+        </div>
+    </div>
+
+    <script src="consultar_test.js"></script>
+</body>
+</html>
