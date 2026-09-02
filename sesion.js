@@ -18,29 +18,12 @@ document.addEventListener("DOMContentLoaded", () => {
     duracionInput.value = 55;
   }
 
-  function obtenerFolderId(equipo, entrenamiento) {
-    if (entrenamiento === "Pista" && equipo === "EBA") return "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT";
-    if (entrenamiento === "Físico" && equipo === "EBA") return "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ";
-    if (entrenamiento === "Pista" && equipo === "Junior A") return "1popWCqp2NRuGDHPlqGUGavYzCjHof4d";
-    if (entrenamiento === "Físico" && equipo === "Junior A") return "17KMZF1tKwZyZB5fg2lPndVN0F8g1jSle";
-    if (entrenamiento === "Pista" && equipo === "Junior B") return "1N9I0FKZ3Bp4W6_F7TfeyT38cEggXEZRI";
-    if (entrenamiento === "Físico" && equipo === "Junior B") return "1yPuV6bwl48glTw0AHJP3MA7YEhq2R8Gv";
-    if (entrenamiento === "Pista" && equipo === "Cadete A") return "1LgRPFVcke8UKHbqoyi5yYLmCq4rucHZ2";
-    if (entrenamiento === "Físico" && equipo === "Cadete A") return "1ChuJ-F3JeKkoshtnKlWqgluWVFnY1vjB";
-    if (entrenamiento === "Pista" && equipo === "Cadete B") return "18EANG_Wv3W6jgxkGe55YK8OgTsZly319";
-    if (entrenamiento === "Físico" && equipo === "Cadete B") return "1_KgcdJe-T4MTfpqJyp9VZ9YyFyGsx4Xa";
-    if (entrenamiento === "Pista" && equipo === "Infantil A") return "1PhY2dTw98_uVder7BzUXdLU5eT9lu_8P";
-    if (entrenamiento === "Físico" && equipo === "Infantil A") return "1M1JubcwUhsJoww0f0BP8bakjHzR4vK2A";
-    if (entrenamiento === "Pista" && equipo === "Infantil B") return "1EpMEXq2EYBcRucK8mk4SIRR2BQfBNyq";
-    if (entrenamiento === "Físico" && equipo === "Infantil B") return "1G44Nviyut4CTPelgjxhKCGCI183ZJ";
-    return "";
-  }
-
+  // Capturamos el archivo directamente del input (asegúrate de tener <input type="file" id="inputFileFoto" style="display:none"> en tu HTML)
   const btnFoto = document.getElementById("Foto");
   const inputFileFoto = document.getElementById("inputFileFoto");
   const imagen1 = document.getElementById("Imagen1");
 
-  let imagenBase64 = "";
+  let archivoSeleccionado = null;
 
   btnFoto.addEventListener("click", () => {
     inputFileFoto.click();
@@ -50,40 +33,13 @@ document.addEventListener("DOMContentLoaded", () => {
     const file = e.target.files[0];
     if (!file) return;
 
+    archivoSeleccionado = file; // Guardamos el archivo físico real
+
+    // Vista previa rápida en pantalla
     const reader = new FileReader();
     reader.onload = function (uploadEvent) {
-      const img = new Image();
-      img.src = uploadEvent.target.result;
-      img.onload = function () {
-        const canvas = document.createElement("canvas");
-        const MAX_WIDTH = 300;
-        const MAX_HEIGHT = 300;
-
-        let width = img.width;
-        let height = img.height;
-
-        if (width > height) {
-          if (width > MAX_WIDTH) {
-            height *= MAX_WIDTH / width;
-            width = MAX_WIDTH;
-          }
-        } else {
-          if (height > MAX_HEIGHT) {
-            width *= MAX_HEIGHT / height;
-            height = MAX_HEIGHT;
-          }
-        }
-
-        canvas.width = Math.round(width);
-        canvas.height = Math.round(height);
-
-        const ctx = canvas.getContext("2d");
-        ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
-
-        imagenBase64 = canvas.toDataURL("image/jpeg", 0.6);
-        imagen1.src = imagenBase64;
-        imagen1.style.display = "block";
-      };
+      imagen1.src = uploadEvent.target.result;
+      imagen1.style.display = "block";
     };
     reader.readAsDataURL(file);
   });
@@ -110,22 +66,45 @@ document.addEventListener("DOMContentLoaded", () => {
 
     const equipoActual = equipoInput.value;
     const tipoActual = entrenamientoInput.value;
-    const folderId = obtenerFolderId(equipoActual, tipoActual);
-
-    if (!folderId) {
-      alert("No se ha encontrado la carpeta de Drive.");
-      return;
-    }
 
     btnEnviar.disabled = true;
     btnEnviar.textContent = "Subiendo...";
 
     try {
+      let urlImagenFinal = "";
+
+      // 1. Si hay foto, la subimos a Cloudinary primero
+      if (archivoSeleccionado) {
+        console.log("📤 Subiendo foto a Cloudinary...");
+
+        const dataCloudinary = new FormData();
+        dataCloudinary.append("file", archivoSeleccionado);
+        dataCloudinary.append("upload_preset", "entrenamientos_preset"); // <-- PON AQUÍ EL NOMBRE DE TU PRESET
+
+        const responseCloudinary = await fetch("https://api.cloudinary.com/v1_1/clrq6e0m/image/upload", { // <-- PON AQUÍ EL NOMBRE DE TU NUBE
+          method: "POST",
+          body: dataCloudinary
+        });
+
+        if (!responseCloudinary.ok) {
+          throw new Error("Error al subir la imagen a Cloudinary");
+        }
+
+        const jsonCloudinary = await responseCloudinary.json();
+        urlImagenFinal = jsonCloudinary.secure_url; // ¡Esta es la URL pública y permanente de la foto!
+        console.log("✅ Foto subida con éxito. URL:", urlImagenFinal);
+      }
+
+      // 2. Envío de datos a Google Forms (incluyendo la URL de la foto si quieres guardarla en el formulario)
       const formData = new URLSearchParams();
       formData.append("entry.279691575", fechaInput.value);
       formData.append("entry.1010684221", equipoActual);
       formData.append("entry.1004271819", tipoActual);
       formData.append("entry.152725020", duracionInput.value);
+      
+      // Si en tu Google Forms creas una pregunta de tipo texto corto para la "URL de la foto", 
+      // puedes descomentar la siguiente línea poniendo el entry ID correspondiente:
+      // formData.append("entry.A_AÑADIR_SI_QUIERES", urlImagenFinal);
 
       await fetch("https://docs.google.com/forms/d/1OsUlDQwOkJHkD8w8gIqERg4oP4FulmRmcAx_WoeMs4Y/formResponse", {
         method: "POST",
@@ -134,51 +113,8 @@ document.addEventListener("DOMContentLoaded", () => {
       });
 
       console.log("✅ Datos enviados a Google Forms correctamente.");
+      alert("¡Sesión subida correctamente!");
 
-      if (imagenBase64) {
-        const scriptURL = "https://script.google.com/macros/s/AKfycbx3F2GN42yBilThhMzm6tURPXvSlS4Sm5NQaKXeRO3VuvQ3aHelvgfjtk0_LkgQfVOWFg/exec";
-        const base64Clean = imagenBase64.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "");
-        const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
-
-        console.log("📤 Enviando imagen por formulario oculto...");
-
-        let iframe = document.getElementById("hidden_iframe");
-        if (!iframe) {
-          iframe = document.createElement("iframe");
-          iframe.name = "hidden_iframe";
-          iframe.id = "hidden_iframe";
-          iframe.style.display = "none";
-          document.body.appendChild(iframe);
-        }
-
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = scriptURL;
-        form.target = "hidden_iframe";
-
-        const datosAEnviar = {
-          filename: fileName,
-          folderId: folderId,
-          mimetype: "image/jpeg",
-          data: base64Clean
-        };
-
-        for (const key in datosAEnviar) {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = key;
-          input.value = datosAEnviar[key];
-          form.appendChild(input);
-        }
-
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
-
-        console.log("✅ Petición de imagen enviada.");
-      }
-
-      console.log("🏁 Fin del proceso. ¡Revisa tu Google Drive!");
       btnEnviar.disabled = false;
       btnEnviar.textContent = "Subir sesión";
 
