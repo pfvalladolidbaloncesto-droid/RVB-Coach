@@ -1,7 +1,8 @@
 const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxjNjsoJvliC8sZPLhLYUS9pcJ19d5uu49szu7RjnPBBMmAM6ZgD515hNhHulAxbsMCwQ/exec";
 const FOTO_DEFAULT = "fotos/none.jpeg";
 
-const equipoSeleccionado = localStorage.getItem("equipo") || localStorage.getItem("equipoUsuario") || "Junior A";
+// Lectura normalizada usando la clave 'Equipo'
+const equipoSeleccionado = localStorage.getItem("Equipo") || localStorage.getItem("equipoUsuario") || "Junior A";
 
 // Determina la pantalla destino en función de la opción elegida en menu_principal
 function obtenerPantallaDestino() {
@@ -98,11 +99,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     const idUsuario = tarjeta.dataset.usuario;
     const posicion = tarjeta.dataset.posicion;
 
-    // Guarda en localStorage con todas las claves compatibles
+    // Guarda en localStorage con la key solicitada 'User' sin alterar el usuario activo del coach
     localStorage.setItem("posicionSeleccionada", posicion);
     localStorage.setItem("jugadorSeleccionado", idUsuario);
     localStorage.setItem("User", idUsuario);
-    localStorage.setItem("Usuario", idUsuario);
 
     // Navega a la pantalla destino
     window.location.href = obtenerPantallaDestino();
