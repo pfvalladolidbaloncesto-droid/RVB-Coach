@@ -98,24 +98,45 @@ document.addEventListener("DOMContentLoaded", () => {
       body: formData
     }).catch(err => console.error("Error en Google Form", err));
 
-    // Envío de la imagen adaptado a tu Apps Script fijo
+    // Envío de la imagen mediante formulario oculto e iframe (Evita el error 401 y problemas de CORS)
     if (imagenBase64) {
       const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
       
       let base64Clean = imagenBase64.replace(/^data:image\/[a-z]+;base64,/, "");
       const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
-      const imageFormData = new URLSearchParams();
-      imageFormData.append("data", base64Clean);
-      imageFormData.append("mimetype", "image/jpeg");
-      imageFormData.append("filename", fileName);
-      imageFormData.append("folderId", folderId);
+      let iframe = document.getElementById("hidden_iframe");
+      if (!iframe) {
+        iframe = document.createElement("iframe");
+        iframe.name = "hidden_iframe";
+        iframe.id = "hidden_iframe";
+        iframe.style.display = "none";
+        document.body.appendChild(iframe);
+      }
 
-      fetch(scriptURL, {
-        method: "POST",
-        mode: "no-cors",
-        body: imageFormData
-      }).catch(error => console.error("Error al subir la imagen:", error));
+      const form = document.createElement("form");
+      form.method = "POST";
+      form.action = scriptURL;
+      form.target = "hidden_iframe";
+
+      const camposAEnviar = {
+        data: base64Clean,
+        mimetype: "image/jpeg",
+        filename: fileName,
+        folderId: folderId
+      };
+
+      for (const key in camposAEnviar) {
+        const input = document.createElement("input");
+        input.type = "hidden";
+        input.name = key;
+        input.value = camposAEnviar[key];
+        form.appendChild(input);
+      }
+
+      document.body.appendChild(form);
+      form.submit();
+      document.body.removeChild(form);
     }
 
     alert("Sesión subida con éxito");
