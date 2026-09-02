@@ -143,7 +143,7 @@ document.addEventListener("DOMContentLoaded", () => {
 
       // Envío de la imagen mediante formulario oculto (iframe) anti-CORS
       if (imagenBase64) {
-        const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
+        const scriptURL = "https://script.google.com/macros/s/AKfycbx3F2GN42yBilThhMzm6tURPXvSlS4Sm5NQaKXeRO3VuvQ3aHelvgfjtk0_LkgQfVOWFg/exec";
         const base64Clean = imagenBase64.replace(/^data:image\/[a-zA-Z0-9.+-]+;base64,/, "");
         const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
