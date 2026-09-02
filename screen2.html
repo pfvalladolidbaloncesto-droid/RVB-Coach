@@ -1,137 +1,232 @@
-const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxjNjsoJvliC8sZPLhLYUS9pcJ19d5uu49szu7RjnPBBMmAM6ZgD515hNhHulAxbsMCwQ/exec";
-const FOTO_DEFAULT = "fotos/none.jpeg";
-
-// Lectura normalizada usando la clave 'Equipo'
-const equipoSeleccionado = localStorage.getItem("Equipo") || localStorage.getItem("equipoUsuario") || "Junior A";
-
-// Determina la pantalla destino en función de la opción elegida en menu_principal
-function obtenerPantallaDestino() {
-  const accion = localStorage.getItem("Variable");
-
-  switch (accion) {
-    case "Readiness":
-      return "screen2.html";
-    case "RPE":
-      return "rpe.html";
-    case "Registrar test":
-      return "registrar_test.html";
-    case "Consultar test":
-      return "consultar_test.html";
-    case "Carga Jugador":
-      return "carga_jugador.html";
-    default:
-      return "screen2.html";
-  }
-}
-
-function obtenerRutaFoto(idUsuario) {
-  return new Promise((resolve) => {
-    const img = new Image();
-    const ruta = `fotos/${idUsuario}.jpeg`;
-    img.onload = () => resolve(ruta);
-    img.onerror = () => resolve(FOTO_DEFAULT);
-    img.src = ruta;
-  });
-}
-
-async function renderizarGrid(jugadores) {
-  const contenedor = document.getElementById("grid-jugadores");
-  if (!jugadores || jugadores.length === 0) {
-    contenedor.innerHTML = `<p class="cargando-texto">No hay jugadores para <b>${equipoSeleccionado}</b></p>`;
-    return;
-  }
-
-  const mapaJugadores = {};
-  jugadores.forEach(j => {
-    const pos = parseInt(j.posicion, 10);
-    if (!isNaN(pos)) mapaJugadores[pos] = j.usuario;
-  });
-
-  const promesasFotos = [];
-  for (let i = 1; i <= 16; i++) {
-    const idUsuario = mapaJugadores[i];
-    if (idUsuario) {
-      promesasFotos.push(obtenerRutaFoto(idUsuario));
-    } else {
-      promesasFotos.push(Promise.resolve(null));
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Registro Readiness - Coach RVB</title>
+  <style>
+    * {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
-  }
 
-  const rutasResueltas = await Promise.all(promesasFotos);
-
-  let htmlGrid = "";
-  for (let i = 1; i <= 16; i++) {
-    const idUsuario = mapaJugadores[i];
-    const rutaFoto = rutasResueltas[i - 1];
-
-    if (idUsuario) {
-      htmlGrid += `
-        <div class="celda-grid tarjeta-jugador" data-posicion="${i}" data-usuario="${idUsuario}">
-          <img class="avatar-foto" src="${rutaFoto}" alt="" />
-          <span>${idUsuario}</span>
-        </div>
-      `;
-    } else {
-      htmlGrid += `
-        <div class="celda-grid celda-vacia" data-posicion="${i}">
-          <span style="color: #ccc;">${i}</span>
-        </div>
-      `;
+    body {
+      background-color: #f4f4f9;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      padding: 20px;
     }
-  }
 
-  contenedor.innerHTML = htmlGrid;
-}
-
-document.addEventListener("DOMContentLoaded", async () => {
-  const contenedor = document.getElementById("grid-jugadores");
-  const tituloEquipo = document.getElementById("nombre-equipo");
-  const btnVolver = document.getElementById("btn-volver");
-
-  if (tituloEquipo) tituloEquipo.textContent = equipoSeleccionado;
-  if (btnVolver) btnVolver.onclick = () => { window.location.href = "menu_principal.html"; };
-
-  // Escucha clics en las tarjetas de jugadores
-  contenedor.addEventListener("click", (e) => {
-    const tarjeta = e.target.closest(".tarjeta-jugador");
-    if (!tarjeta) return;
-
-    const idUsuario = tarjeta.dataset.usuario;
-    const posicion = tarjeta.dataset.posicion;
-
-    // Guardado de la selección con la key solicitada (evitando sobrescribir al usuario coach)
-    localStorage.setItem("posicionSeleccionada", posicion);
-    localStorage.setItem("jugadorSeleccionado", idUsuario);
-    localStorage.setItem("User", idUsuario);
-
-    // Navega a la pantalla destino
-    window.location.href = obtenerPantallaDestino();
-  });
-
-  // Lectura rápida desde la caché local
-  const cacheClave = `plantilla_${equipoSeleccionado}`;
-  const datosCache = localStorage.getItem(cacheClave);
-
-  if (datosCache) {
-    try {
-      const jugadoresCache = JSON.parse(datosCache);
-      await renderizarGrid(jugadoresCache);
-    } catch (e) {
-      console.error("Error al leer caché:", e);
+    .readiness-container {
+      background: #ffffff;
+      padding: 24px;
+      border-radius: 12px;
+      box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+      width: 100%;
+      max-width: 450px;
     }
-  }
 
-  // Consulta en segundo plano
-  try {
-    const response = await fetch(`${URL_APPS_SCRIPT}?equipo=${encodeURIComponent(equipoSeleccionado)}`);
-    const jugadores = await response.json();
-
-    localStorage.setItem(cacheClave, JSON.stringify(jugadores));
-    await renderizarGrid(jugadores);
-  } catch (error) {
-    console.error("Error al consultar Google Apps Script:", error);
-    if (!datosCache) {
-      contenedor.innerHTML = "<p class='cargando-texto' style='color:red;'>Error de conexión con la base de datos.</p>";
+    .header-readiness {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 20px;
     }
-  }
-});
+
+    #labelID {
+      font-size: 1.3rem;
+      font-weight: 800;
+      color: #000;
+      text-transform: uppercase;
+    }
+
+    .btn-volver {
+      padding: 8px 16px;
+      background-color: #007bff;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+      transition: background-color 0.2s;
+    }
+
+    .btn-volver:hover {
+      background-color: #0056b3;
+    }
+
+    .form-group {
+      margin-bottom: 16px;
+    }
+
+    .form-group label {
+      display: block;
+      font-size: 14px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+
+    .form-group select {
+      width: 100%;
+      padding: 10px 12px;
+      font-size: 14px;
+      border: 1px solid #e1e4e8;
+      border-radius: 8px;
+      outline: none;
+      background-color: #ffffff;
+      color: #333;
+    }
+
+    .slider-group {
+      margin-bottom: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .slider-label-header {
+      display: flex;
+      justify-content: space-between;
+      font-weight: bold;
+      color: #333;
+    }
+
+    .slider-value {
+      color: #007bff;
+      font-size: 1.1rem;
+      font-weight: bold;
+    }
+
+    input[type="range"] {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 100%;
+      height: 12px;
+      border-radius: 6px;
+      outline: none;
+      cursor: pointer;
+    }
+
+    .slider-green-to-red {
+      background: linear-gradient(to right, #28a745, #ffc107, #dc3545);
+    }
+
+    .slider-red-to-green {
+      background: linear-gradient(to right, #dc3545, #ffc107, #28a745);
+    }
+
+    input[type="range"]::-webkit-slider-thumb {
+      -webkit-appearance: none;
+      appearance: none;
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #333333;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    input[type="range"]::-moz-range-thumb {
+      width: 24px;
+      height: 24px;
+      border-radius: 50%;
+      background: #ffffff;
+      border: 2px solid #333333;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+    }
+
+    .btn-enviar {
+      padding: 12px 20px;
+      background-color: #28a745;
+      color: white;
+      border: none;
+      border-radius: 8px;
+      font-weight: bold;
+      cursor: pointer;
+      font-size: 1rem;
+      margin-top: 10px;
+      width: 100%;
+      transition: background-color 0.2s;
+    }
+
+    .btn-enviar:hover {
+      background-color: #218838;
+    }
+
+    .btn-enviar:disabled {
+      background-color: #6c757d;
+      cursor: not-allowed;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="readiness-container">
+    
+    <div class="header-readiness">
+      <button id="btnVolver" class="btn-volver">← Atrás</button>
+      <h2 id="labelID">---</h2>
+    </div>
+
+    <!-- Selección de Equipo -->
+    <div class="form-group">
+      <label for="equiposel">Equipo</label>
+      <select id="equiposel" required>
+        <option value="TERCERA">TERCERA</option>
+        <option value="Junior A">Junior A</option>
+        <option value="Junior B">Junior B</option>
+        <option value="Cadete A">Cadete A</option>
+        <option value="Cadete B">Cadete B</option>
+        <option value="Infantil A">Infantil A</option>
+        <option value="Infantil B">Infantil B</option>
+      </select>
+    </div>
+
+    <!-- 1. Dolor Muscular -->
+    <div class="slider-group">
+      <div class="slider-label-header">
+        <label for="deslizadorSoreness">Dolor muscular</label>
+        <span id="respuestaSoreness" class="slider-value">5</span>
+      </div>
+      <input type="range" id="deslizadorSoreness" class="slider-green-to-red" min="0" max="10" value="5" />
+    </div>
+
+    <!-- 2. Fatiga -->
+    <div class="slider-group">
+      <div class="slider-label-header">
+        <label for="deslizadorFatiga">Fatiga</label>
+        <span id="respuestaFatiga" class="slider-value">5</span>
+      </div>
+      <input type="range" id="deslizadorFatiga" class="slider-green-to-red" min="0" max="10" value="5" />
+    </div>
+
+    <!-- 3. Sueño -->
+    <div class="slider-group">
+      <div class="slider-label-header">
+        <label for="deslizadorSueno">Sueño</label>
+        <span id="respuestaSueno" class="slider-value">5</span>
+      </div>
+      <input type="range" id="deslizadorSueno" class="slider-red-to-green" min="0" max="10" value="5" />
+    </div>
+
+    <!-- 4. Estrés -->
+    <div class="slider-group">
+      <div class="slider-label-header">
+        <label for="deslizadorEstres">Estrés</label>
+        <span id="respuestaEstres" class="slider-value">5</span>
+      </div>
+      <input type="range" id="deslizadorEstres" class="slider-green-to-red" min="0" max="10" value="5" />
+    </div>
+
+    <button id="btnEnviar" class="btn-enviar">Enviar</button>
+
+  </div>
+
+  <script src="screen2.js" defer></script>
+</body>
+</html>
