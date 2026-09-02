@@ -2,6 +2,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const labelID = document.getElementById("labelID");
   const btnVolver = document.getElementById("btnVolver");
   const btnEnviar = document.getElementById("btnEnviar");
+  const btnMenuPrincipal = document.getElementById("btnMenuPrincipal");
 
   // Elementos de sliders y sus etiquetas de valor
   const sliderSoreness = document.getElementById("deslizadorSoreness");
@@ -34,6 +35,13 @@ document.addEventListener("DOMContentLoaded", () => {
   if (btnVolver) {
     btnVolver.addEventListener("click", () => {
       window.location.href = "selector.html";
+    });
+  }
+
+  // Botón Menú Principal
+  if (btnMenuPrincipal) {
+    btnMenuPrincipal.addEventListener("click", () => {
+      window.location.href = "menu_principal.html";
     });
   }
 
