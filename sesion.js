@@ -88,9 +88,9 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   });
 
-  // 5. Validación y Envío Definitivo
+  // 5. Validación y Envío
   const btnEnviar = document.getElementById("Enviar");
-  btnEnviar.addEventListener("click", async () => {
+  btnEnviar.addEventListener("click", () => {
     const campos = [fechaInput, entrenamientoInput, equipoInput, duracionInput];
     let valido = true;
 
@@ -112,76 +112,37 @@ document.addEventListener("DOMContentLoaded", () => {
     const tipoActual = entrenamientoInput.value;
     const folderId = obtenerFolderId(equipoActual, tipoActual);
 
-    // Deshabilitar botón para evitar doble clic
-    btnEnviar.disabled = true;
-    btnEnviar.textContent = "Subiendo...";
+    // Envío a Google Forms
+    const formData = new URLSearchParams();
+    formData.append("entry.279691575", fechaInput.value);
+    formData.append("entry.1010684221", equipoActual);
+    formData.append("entry.1004271819", tipoActual);
+    formData.append("entry.152725020", duracionInput.value);
 
-    try {
-      // Envío a Google Forms
-      const formData = new URLSearchParams();
-      formData.append("entry.279691575", fechaInput.value);
-      formData.append("entry.1010684221", equipoActual);
-      formData.append("entry.1004271819", tipoActual);
-      formData.append("entry.152725020", duracionInput.value);
+    fetch("https://docs.google.com/forms/d/1OsUlDQwOkJHkD8w8gIqERg4oP4FulmRmcAx_WoeMs4Y/formResponse", {
+      method: "POST",
+      mode: "no-cors",
+      body: formData
+    }).catch(err => console.error("Error en Google Form", err));
 
-      await fetch("https://docs.google.com/forms/d/1OsUlDQwOkJHkD8w8gIqERg4oP4FulmRmcAx_WoeMs4Y/formResponse", {
-        method: "POST",
-        mode: "no-cors",
-        body: formData
-      });
+    // Envío de la imagen a Google Apps Script
+    if (imagenBase64) {
+      const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
+      
+      let base64Clean = imagenBase64.replace(/^data:image\/[a-z]+;base64,/, "");
+      const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
 
-      // Envío de la imagen a Google Apps Script usando un formulario oculto clásico (el más compatible con navegadores)
-      if (imagenBase64) {
-        const scriptURL = "https://script.google.com/macros/s/AKfycbwhkC91Cu2-swtzov5hC7NCNbSBJFahtGXBl-eLpvAjQA5k9sMtXcbtMLCkFFsb5_S8bg/exec";
-        let base64Clean = imagenBase64.replace(/^data:image\/[a-z]+;base64,/, "");
-        const fileName = `${equipoActual}-${fechaInput.value}.jpg`;
+      const dataToSend = new URLSearchParams();
+      dataToSend.append("data", base64Clean);
+      dataToSend.append("mimetype", "image/jpeg");
+      dataToSend.append("filename", fileName);
+      dataToSend.append("folderId", folderId);
 
-        let iframe = document.getElementById("hidden_iframe");
-        if (!iframe) {
-          iframe = document.createElement("iframe");
-          iframe.name = "hidden_iframe";
-          iframe.id = "hidden_iframe";
-          iframe.style.display = "none";
-          document.body.appendChild(iframe);
-        }
-
-        const form = document.createElement("form");
-        form.method = "POST";
-        form.action = scriptURL;
-        form.target = "hidden_iframe";
-
-        const camposAEnviar = {
-          data: base64Clean,
-          mimetype: "image/jpeg",
-          filename: fileName,
-          folderId: folderId
-        };
-
-        for (const key in camposAEnviar) {
-          const input = document.createElement("input");
-          input.type = "hidden";
-          input.name = key;
-          input.value = camposAEnviar[key];
-          form.appendChild(input);
-        }
-
-        document.body.appendChild(form);
-        form.submit();
-        document.body.removeChild(form);
-      }
-
-      // Pequeña pausa de cortesía para asegurar que el navegador dispare el iframe antes de cambiar de página
-      await new Promise(resolve => setTimeout(resolve, 1500));
-
-      alert("Sesión subida con éxito");
-      window.location.href = "menu_principal.html";
-
-    } catch (error) {
-      console.error("Error en el envío:", error);
-      alert("Hubo un error al subir la sesión.");
-      btnEnviar.disabled = false;
-      btnEnviar.textContent = "Subir sesión";
+      navigator.sendBeacon(scriptURL, dataToSend);
     }
+
+    alert("Sesión subida con éxito");
+    window.location.href = "menu_principal.html";
   });
 
   // 6. Botón Menú Principal
