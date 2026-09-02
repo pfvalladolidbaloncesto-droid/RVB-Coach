@@ -22,10 +22,9 @@ document.addEventListener("DOMContentLoaded", () => {
   etiquetaUsuario.textContent = usuario;
   localStorage.setItem("Usuario", usuario);
 
-  // 2. Preseleccionar Rol por defecto si existe en localStorage
+  // 2. Preseleccionar Rol por defecto si existe
   const rolDefecto = localStorage.getItem("RolPorDefecto");
   if (rolDefecto) {
-    // Normalización por si en la base de datos viene 'Físico' / 'Pista' o 'PF' / 'Entrenador'
     if (rolDefecto.toUpperCase().includes("FISICO") || rolDefecto.toUpperCase().includes("PF")) {
       selectorRol.value = "PF";
     } else if (rolDefecto.toUpperCase().includes("PISTA") || rolDefecto.toUpperCase().includes("ENTRENADOR")) {
@@ -35,10 +34,15 @@ document.addEventListener("DOMContentLoaded", () => {
     }
   }
 
-  // 3. Preseleccionar Equipo por defecto si existe en localStorage
-  const equipoDefecto = localStorage.getItem("EquipoPorDefecto");
+  // 3. Preseleccionar Equipo por defecto
+  const equipoDefecto = localStorage.getItem("equipo") || localStorage.getItem("EquipoPorDefecto") || localStorage.getItem("Equipo");
   if (equipoDefecto) {
-    selectorEquipo.value = equipoDefecto;
+    // Busca coincidencia sin importar mayúsculas/minúsculas
+    const opciones = Array.from(selectorEquipo.options);
+    const opcionEncontrada = opciones.find(opt => opt.value.toUpperCase() === equipoDefecto.toUpperCase());
+    if (opcionEncontrada) {
+      selectorEquipo.value = opcionEncontrada.value;
+    }
   }
 
   // 4. Guardar lista por defecto de Tests
@@ -48,8 +52,13 @@ document.addEventListener("DOMContentLoaded", () => {
   // Función auxiliar para guardar selección de Equipo y Navegar
   function guardarYRedirigir(variableNombre, pantallaDestino) {
     const equipoSeleccionado = selectorEquipo.value;
+    
+    // Guardamos en todas las variaciones de clave para asegurar compatibilidad total
+    localStorage.setItem("equipo", equipoSeleccionado);
     localStorage.setItem("Equipo", equipoSeleccionado);
+    localStorage.setItem("equipoUsuario", equipoSeleccionado);
     localStorage.setItem("Variable", variableNombre);
+    
     window.location.href = pantallaDestino;
   }
 
