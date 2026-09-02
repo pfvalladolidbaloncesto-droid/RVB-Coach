@@ -10,7 +10,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (tituloEquipo) tituloEquipo.textContent = equipoSeleccionado;
 
   try {
-    // 2. Enviar la consulta pasando el equipo como parámetro
+    // 2. Consulta al Apps Script
     const response = await fetch(`${URL_APPS_SCRIPT}?equipo=${encodeURIComponent(equipoSeleccionado)}`);
     const jugadores = await response.json();
 
@@ -18,6 +18,9 @@ document.addEventListener("DOMContentLoaded", async () => {
       contenedor.innerHTML = `<p style="text-align:center; grid-column:1/-1;">No hay jugadores para <b>${equipoSeleccionado}</b></p>`;
       return;
     }
+
+    // Ordenar la lista según la Columna K (posicion)
+    jugadores.sort((a, b) => Number(a.posicion) - Number(b.posicion));
 
     // 3. Renderizar vinculando la imagen desde GitHub (fotos/ID.jpg)
     contenedor.innerHTML = jugadores.map(jugador => {
@@ -33,7 +36,7 @@ document.addEventListener("DOMContentLoaded", async () => {
       `;
     }).join("");
 
-    // 4. Guardar selección al pulsar
+    // 4. Delegación de eventos para capturar el clic
     contenedor.addEventListener("click", (e) => {
       const tarjeta = e.target.closest(".tarjeta-jugador");
       if (!tarjeta) return;
@@ -47,7 +50,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   } catch (error) {
     console.error("Error al cargar la plantilla:", error);
     if (contenedor) {
-      contenedor.innerHTML = "<p style='color:red; text-align:center;'>Error de conexión con la base de datos.</p>";
+      contenedor.innerHTML = "<p style='color:red; text-align:center; grid-column:1/-1;'>Error de conexión con la base de datos.</p>";
     }
   }
 });
