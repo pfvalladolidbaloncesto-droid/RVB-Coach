@@ -235,3 +235,25 @@ button:hover {
   text-align: center;
   word-break: break-all;
 }
+/* Parche para evitar que el contenedor se estreche e intente centrarse de forma inestable */
+.selector-container {
+  max-width: 500px !important;
+  width: 100% !important;
+  align-items: stretch !important; /* Estira los elementos al ancho completo de la caja */
+}
+
+/* Forzar que el grid mantenga ancho relativo al contenedor */
+#grid-jugadores {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 8px;
+  width: 100%;
+  min-height: 300px; /* Reserva el alto de la pantalla de antemano */
+}
+
+.cargando-texto {
+  grid-column: 1 / -1;
+  text-align: center;
+  color: #666;
+  padding: 20px;
+}
