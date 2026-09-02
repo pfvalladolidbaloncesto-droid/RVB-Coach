@@ -3,19 +3,24 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Selección de Jugador</title>
-  <link rel="stylesheet" href="style.css">
+  <title>Selector de Jugadores</title>
+  <link rel="stylesheet" href="styles.css">
 </head>
 <body>
-  <header style="text-align: center; padding: 20px;">
-    <button id="btn-volver" style="padding: 10px 20px; cursor: pointer;">← Volver</button>
-    <h1 id="nombre-equipo">Cargando...</h1>
-  </header>
 
-  <main>
-    <div id="grid-jugadores" class="grid-jugadores"></div>
-  </main>
+  <div class="main-container selector-container">
+    <div class="selector-header">
+      <button class="btn-volver" id="btn-volver">← Volver</button>
+      <h2 id="nombre-equipo">Cargando...</h2>
+    </div>
 
-  <script src="./selector.js" type="module"></script>
+    <!-- EL GRID DEBE QUEDAR AQUÍ ADENTRO CON ANCHO COMPLETO -->
+    <div id="grid-jugadores">
+      <!-- Indicador de carga estático para evitar saltos visuales -->
+      <p class="cargando-texto">Cargando plantilla...</p>
+    </div>
+  </div>
+
+  <script src="selector.js"></script>
 </body>
 </html>
