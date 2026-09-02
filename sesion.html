@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sesión</title>
+  <link rel="stylesheet" href="style.css"> <!-- Opcional para estilos -->
+</head>
+<body>
+  <div class="vertical-arrangement" id="sesion-screen">
+    <div class="horizontal-arrangement">
+      <label for="SelectorDeFecha1">Fecha</label>
+      <input type="date" id="SelectorDeFecha1">
+    </div>
+    
+    <div class="horizontal-arrangement">
+      <label for="Entrenamiento1">Entrenamiento</label>
+      <input type="text" id="Entrenamiento1" disabled>
+    </div>
+    
+    <div class="horizontal-arrangement">
+      <label for="Equipo">Equipo</label>
+      <input type="text" id="Equipo" disabled>
+    </div>
+    
+    <div class="horizontal-arrangement">
+      <label for="Duracion">Duración</label>
+      <input type="number" id="Duracion">
+    </div>
+    
+    <div class="horizontal-arrangement">
+      <label>Archivo</label>
+      <div class="vertical-arrangement">
+        <img id="Imagen1" alt="Preview" style="display:none; max-width: 100px;" />
+        <!-- Input file oculto o adaptado para simular el botón de cámara -->
+        <input type="file" id="inputFileFoto" accept="image/*" capture="environment" style="display:none;">
+        <button id="Foto">Foto</button>
+      </div>
+    </div>
+    
+    <button id="Enviar">Subir sesión</button>
+    <button id="Menú">Menú principal</button>
+  </div>
+
+  <script src="sesion.js"></script>
+</body>
+</html>
