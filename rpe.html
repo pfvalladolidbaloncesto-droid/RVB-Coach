@@ -38,7 +38,7 @@
     }
 
     .btn-back {
-      background-color: #007bff;
+      background-color: #20c997;
       color: #ffffff;
       border: none;
       padding: 8px 16px;
@@ -53,7 +53,7 @@
     }
 
     .btn-back:hover {
-      background-color: #0056b3;
+      background-color: #1ba87e;
     }
 
     .title {
@@ -98,8 +98,8 @@
     .form-group input:focus,
     .form-group select:focus,
     .form-group textarea:focus {
-      border-color: #007bff;
-      box-shadow: 0 0 0 3px rgba(0, 123, 255, 0.1);
+      border-color: #20c997;
+      box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
     }
 
     .form-group textarea {
@@ -156,22 +156,32 @@
       color: #1a1a1a;
     }
 
-    .btn-submit {
-      width: 100%;
+    .actions-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .btn-submit,
+    .btn-menu {
+      flex: 1;
       padding: 13px;
-      background-color: #28a745;
+      background-color: #20c997;
       color: #ffffff;
       border: none;
       border-radius: 10px;
       font-size: 16px;
       font-weight: 700;
       cursor: pointer;
-      margin-top: 10px;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
       transition: background-color 0.2s;
     }
 
-    .btn-submit:hover {
-      background-color: #218838;
+    .btn-submit:hover,
+    .btn-menu:hover {
+      background-color: #1ba87e;
     }
   </style>
 </head>
@@ -238,7 +248,10 @@
         <textarea id="comentarios" rows="3" placeholder="Observaciones..."></textarea>
       </div>
 
-      <button type="submit" class="btn-submit">Enviar</button>
+      <div class="actions-container">
+        <button type="submit" class="btn-submit">Enviar</button>
+        <a href="menu_principal.html" class="btn-menu" id="btn-menu">Menú</a>
+      </div>
     </form>
   </div>
 
