@@ -76,6 +76,13 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  const btnMenu = document.getElementById('btn-menu');
+  if (btnMenu) {
+    btnMenu.onclick = () => {
+      window.location.href = "menu_principal.html";
+    };
+  }
+
   const formRegistrarTest = document.getElementById('form-registrar-test');
   if (formRegistrarTest) {
     formRegistrarTest.addEventListener('submit', async (event) => {
