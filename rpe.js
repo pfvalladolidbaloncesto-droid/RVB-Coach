@@ -42,6 +42,14 @@ document.addEventListener("DOMContentLoaded", () => {
     };
   }
 
+  // Botón Menú principal
+  const btnMenu = document.getElementById('btn-menu');
+  if (btnMenu) {
+    btnMenu.onclick = () => {
+      window.location.href = "menu_principal.html";
+    };
+  }
+
   // Manejo del formulario de envío
   const formRpe = document.getElementById('form-rpe');
   if (formRpe) {
