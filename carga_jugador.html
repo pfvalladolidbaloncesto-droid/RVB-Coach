@@ -10,6 +10,38 @@
   
   <link rel="stylesheet" href="style.css?v=3" />
   <script src="carga_jugador.js?v=3" defer></script>
+  <style>
+    .actions-container {
+      display: flex;
+      gap: 10px;
+      margin-top: 15px;
+    }
+    .actions-container button {
+      flex: 1;
+      margin-top: 0 !important;
+      padding: 13px;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      color: #ffffff;
+      cursor: pointer;
+      text-align: center;
+      transition: background-color 0.2s;
+    }
+    #btnEnviarCargaJugador {
+      background-color: #20c997;
+    }
+    #btnEnviarCargaJugador:hover {
+      background-color: #1ba87e;
+    }
+    #btnVolverSelector {
+      background-color: #20c997 !important;
+    }
+    #btnVolverSelector:hover {
+      background-color: #1ba87e !important;
+    }
+  </style>
 </head>
 <body>
   <div class="main-container menu-container">
@@ -36,11 +68,11 @@
         <input type="date" id="inputFecha" class="input-date" />
       </div>
 
-      <!-- Botón de Enviar -->
-      <button id="btnEnviarCargaJugador" class="btn-action">Enviar</button>
-
-      <!-- Botón para volver al selector -->
-      <button id="btnVolverSelector" class="btn-logout" style="margin-top: 15px; background-color: #6c757d;">Volver al selector</button>
+      <!-- Contenedor para los botones en paralelo -->
+      <div class="actions-container">
+        <button id="btnEnviarCargaJugador" class="btn-action">Enviar</button>
+        <button id="btnVolverSelector" class="btn-logout">Menú</button>
+      </div>
     </main>
   </div>
 </body>
