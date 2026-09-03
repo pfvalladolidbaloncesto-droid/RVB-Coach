@@ -5,60 +5,97 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Consultar Test</title>
   <style>
-    body {
-      font-family: Arial, sans-serif;
-      background-color: #f4f6f9;
+    * {
+      box-sizing: border-box;
       margin: 0;
-      padding: 20px;
+      padding: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background-color: #f2f3f8;
       display: flex;
       justify-content: center;
       align-items: center;
       min-height: 100vh;
+      padding: 20px;
     }
+
     #test-container {
       background: #ffffff;
-      padding: 20px;
-      border-radius: 8px;
-      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      padding: 28px 24px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
       width: 100%;
-      max-width: 400px;
+      max-width: 420px;
       display: flex;
       flex-direction: column;
       gap: 12px;
     }
+
     #Nombre {
-      font-size: 18px;
-      font-weight: bold;
-      color: #333;
+      font-size: 20px;
+      font-weight: 800;
+      color: #000000;
       margin-bottom: 5px;
     }
+
     label {
       font-size: 14px;
-      font-weight: bold;
-      color: #555;
+      font-weight: 700;
+      color: #1a1a1a;
       margin-top: 5px;
     }
-    select, input, button {
-      padding: 10px;
-      font-size: 16px;
-      border: 1px solid #ccc;
-      border-radius: 4px;
+
+    select, input {
+      padding: 11px 14px;
+      font-size: 14px;
+      border: 1px solid #e1e4e8;
+      border-radius: 10px;
+      outline: none;
+      background-color: #ffffff;
+      color: #333333;
       width: 100%;
-      box-sizing: border-box;
+      transition: border-color 0.2s, box-shadow 0.2s;
     }
+
+    select:focus, input:focus {
+      border-color: #20c997;
+      box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+    }
+
     input[readonly] {
-      background-color: #e9ecef;
+      background-color: #f8f9fa;
+      color: #6c757d;
+      cursor: not-allowed;
     }
-    button {
-      background-color: #007bff;
-      color: white;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
+
+    .actions-container {
+      display: flex;
+      gap: 10px;
       margin-top: 10px;
     }
-    button:hover {
-      background-color: #0056b3;
+
+    .btn-consultar,
+    .btn-menu {
+      flex: 1;
+      padding: 13px;
+      background-color: #20c997;
+      color: white;
+      border: none;
+      border-radius: 10px;
+      font-size: 16px;
+      font-weight: 700;
+      cursor: pointer;
+      text-align: center;
+      text-decoration: none;
+      display: inline-block;
+      transition: background-color 0.2s;
+    }
+
+    .btn-consultar:hover,
+    .btn-menu:hover {
+      background-color: #1ba87e;
     }
   </style>
 </head>
@@ -68,7 +105,6 @@
   <span id="Nombre">Atleta no definido</span>
   
   <select id="test-select" required>
-    <option value="">Selecciona un Test</option>
     <option value="SLR">SLR</option>
     <option value="ANKLE">ANKLE</option>
     <option value="DJ">DJ</option>
@@ -81,6 +117,7 @@
   </select>
 
   <select id="lateralidad-select" disabled>
+    <option value="" disabled selected>Lateralidad</option>
     <option value="IZQ">IZQ</option>
     <option value="DCH">DCH</option>
   </select>
@@ -97,7 +134,10 @@
   <label for="CampoDeTexto4">Fecha mejor</label>
   <input type="text" id="CampoDeTexto4" readonly>
 
-  <button id="Enviar">Enviar / Consultar</button>
+  <div class="actions-container">
+    <button id="Enviar" class="btn-consultar">Consultar</button>
+    <a href="menu_principal.html" class="btn-menu" id="btn-menu">Menú</a>
+  </div>
 </div>
 
 <script>
@@ -105,7 +145,7 @@
   function formatearFecha(fechaStr) {
     if (!fechaStr) return "";
     const fecha = new Date(fechaStr);
-    if (isNaN(fecha.getTime())) return fechaStr; // Si no es fecha válida, devuelve original
+    if (isNaN(fecha.getTime())) return fechaStr; 
     const dia = String(fecha.getDate()).padStart(2, '0');
     const mes = String(fecha.getMonth() + 1).padStart(2, '0');
     const anio = fecha.getFullYear();
@@ -113,7 +153,7 @@
   }
 
   document.addEventListener('DOMContentLoaded', () => {
-    const nombreUsuario = localStorage.getItem('User');
+    const nombreUsuario = localStorage.getItem('User') || '';
     if (nombreUsuario) {
       document.getElementById('Nombre').textContent = nombreUsuario;
     }
@@ -122,37 +162,43 @@
     const lateralidadSelect = document.getElementById('lateralidad-select');
 
     // Controlar cuándo se habilita la lateralidad según el test
-    testSelect.addEventListener('change', (e) => {
-      const valorSeleccionado = e.target.value;
+    function actualizarLateralidad() {
+      const valorSeleccionado = testSelect.value;
       const testsConLateralidad = ["SLR", "ANKLE", "DJ"];
       
       if (testsConLateralidad.includes(valorSeleccionado)) {
         lateralidadSelect.disabled = false;
+        lateralidadSelect.style.backgroundColor = '#FFFFFF';
       } else {
         lateralidadSelect.disabled = true;
-        lateralidadSelect.style.backgroundColor = '#FFFFFF';
+        lateralidadSelect.value = ''; 
+        lateralidadSelect.style.backgroundColor = '#f8f9fa';
       }
-    });
+    }
 
-    // Botón Enviar / Consultar
+    // Ejecutar al cargar por si el primer valor por defecto requiere lateralidad
+    actualizarLateralidad();
+    testSelect.addEventListener('change', actualizarLateralidad);
+
+    // Botón Consultar
     document.getElementById('Enviar').addEventListener('click', async () => {
       let isValid = true;
 
       if (!testSelect.value || testSelect.value === "") {
-        testSelect.style.backgroundColor = '#FFCCCC';
+        testSelect.style.borderColor = '#FF0000';
         alert("Comprueba los campos obligatorios");
         isValid = false;
       } else {
-        testSelect.style.backgroundColor = '#FFFFFF';
+        testSelect.style.borderColor = '#e1e4e8';
       }
 
       const testsConLateralidad = ["SLR", "ANKLE", "DJ"];
       if (testsConLateralidad.includes(testSelect.value) && (!lateralidadSelect.value || lateralidadSelect.value === "")) {
-        lateralidadSelect.style.backgroundColor = '#FFCCCC';
+        lateralidadSelect.style.borderColor = '#FF0000';
         alert("Comprueba los campos obligatorios");
         isValid = false;
       } else {
-        lateralidadSelect.style.backgroundColor = '#FFFFFF';
+        lateralidadSelect.style.borderColor = '#e1e4e8';
       }
 
       if (isValid && nombreUsuario) {
