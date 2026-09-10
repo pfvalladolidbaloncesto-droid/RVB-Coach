@@ -6,6 +6,7 @@ document.addEventListener("DOMContentLoaded", () => {
   // Botones
   const btnReadiness = document.getElementById("btnReadiness");
   const btnRPE = document.getElementById("btnRPE");
+  const btnRpePartido = document.getElementById("btnRpePartido");
   const btnRegistrarTest = document.getElementById("btnRegistrarTest");
   const btnConsultarTest = document.getElementById("btnConsultarTest");
   const btnSesion = document.getElementById("btnSesion");
@@ -50,15 +51,29 @@ document.addEventListener("DOMContentLoaded", () => {
   const listaTests = ["SLR", "ANKLE", "PESO", "30-15", "DJ", "CMJ", "ALTURA", "ENVERGADURA"];
   localStorage.setItem("Test", JSON.stringify(listaTests));
 
+  // Función para gestionar la visibilidad del botón RPE partido
+  function actualizarVisibilidadRpePartido() {
+    if (selectorRol.value === "PF") {
+      btnRpePartido.style.display = "block";
+    } else {
+      btnRpePartido.style.display = "none";
+    }
+  }
+
+  // Ejecutar al cargar y al cambiar el rol
+  actualizarVisibilidadRpePartido();
+  selectorRol.addEventListener("change", () => {
+    actualizarVisibilidadRpePartido();
+    localStorage.setItem("rolUsuario", selectorRol.value);
+  });
+
   // Función auxiliar para guardar selección normalizada y Navegar
   function guardarYRedirigir(variableNombre, pantallaDestino) {
     const equipoSeleccionado = selectorEquipo.value;
     const rolSeleccionado = selectorRol.value;
 
-    // Normalización de Equipo -> Equipo
     localStorage.setItem("Equipo", equipoSeleccionado);
     
-    // Normalización de Rol -> Rol (mapeando texto según corresponda)
     let rolFinal = rolSeleccionado;
     if (rolSeleccionado === "PF") {
       rolFinal = "Físico";
@@ -80,6 +95,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   btnRPE.addEventListener("click", () => {
     guardarYRedirigir("RPE", "selector.html");
+  });
+
+  btnRpePartido.addEventListener("click", () => {
+    guardarYRedirigir("RPE Partido", "RpePartido.html");
   });
 
   btnRegistrarTest.addEventListener("click", () => {
