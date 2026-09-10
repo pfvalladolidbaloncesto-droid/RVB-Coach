@@ -24,20 +24,20 @@ document.addEventListener("DOMContentLoaded", async () => {
     inputFecha.value = `${anio}-${mes}-${dia}`;
   }
 
-  // Listas de equipos permitidos
+  // Listas permitidas
   const equiposDisponibles = ["Infantil B", "Infantil A", "Cadete B", "Cadete A", "Junior B", "Junior A", "Tercera"];
   const estadosDisponibles = ["Completo", "Limitado", "Ausente", "Lesionado"];
 
-  // Función para renderizar la cabecera fija del grid y las filas
+  // Función para renderizar la cabecera fija y las filas del grid
   function construirGrid(idsPlantilla) {
     if (!gridContainer) return;
     gridContainer.innerHTML = "";
 
-    // 6. Incluir Headers en el grid
+    // Cabecera del grid
     const headerRow = document.createElement("div");
     headerRow.className = "grid-header";
     headerRow.style.display = "grid";
-    headerRow.style.gridTemplate-columns = "50px 1fr 80px 120px 1fr";
+    headerRow.style.gridTemplateColumns = "50px 1fr 80px 120px 1fr";
     headerRow.style.gap = "8px";
     headerRow.style.fontWeight = "bold";
     headerRow.style.padding = "4px 8px";
@@ -62,14 +62,12 @@ document.addEventListener("DOMContentLoaded", async () => {
       const row = document.createElement("div");
       row.className = `grid-row ${!switchActivo ? 'disabled' : ''}`;
 
-      // Opciones de equipo (3) preseleccionando el equipo actual o el guardado
       let opcionesEquipoHtml = "";
       equiposDisponibles.forEach(eq => {
         const selected = (eq === equipoSeleccionado) ? "selected" : "";
         opcionesEquipoHtml += `<option value="${eq}" ${selected}>${eq}</option>`;
       });
 
-      // Opciones de estado (2) por defecto "Completo"
       let opcionesEstadoHtml = "";
       estadosDisponibles.forEach(est => {
         const selected = (est === "Completo") ? "selected" : "";
@@ -100,9 +98,9 @@ document.addEventListener("DOMContentLoaded", async () => {
 
       const rowSwitch = row.querySelector(".row-switch");
       const inputsFila = row.querySelectorAll("input:not(.row-switch), select");
-
-      // 5. Validación estricta para que la casilla de Minutos solo acepte números enteros positivos
       const inputMinutos = row.querySelector(".input-minutos");
+
+      // Validación estricta para números enteros positivos en Minutos
       inputMinutos.addEventListener("input", (e) => {
         let val = e.target.value;
         val = val.replace(/[^0-9]/g, '');
@@ -127,25 +125,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // 1. Mostrar Charging Spinner inicial mientras se carga la lista
-  if (gridContainer) {
-    gridContainer.innerHTML = `
-      <div style="text-align: center; padding: 30px;">
-        <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px auto;"></div>
-        <span style="color: #6b7280; font-size: 0.9rem;">Cargando plantilla...</span>
-      </div>
-    `;
-  }
-
-  // Estilo dinámico para la animación del spinner
-  if (!document.getElementById("spinner-style")) {
-    const styleSheet = document.createElement("style");
-    styleSheet.id = "spinner-style";
-    styleSheet.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
-    document.head.appendChild(styleSheet);
-  }
-
-  // 3. Lectura de caché local
+  // 3. Lectura inmediata de caché local (carga rápida como antes)
   const cacheClave = `plantilla_${equipoSeleccionado}`;
   const datosCache = localStorage.getItem(cacheClave);
 
@@ -159,10 +139,10 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Render inicial con caché
+  // Render inicial inmediato con caché
   construirGrid(idsPlantilla);
 
-  // 4. Consulta en segundo plano a Google Apps Script
+  // 4. Consulta en segundo plano a Google Apps Script para actualizar datos
   try {
     const response = await fetch(`${URL_APPS_SCRIPT}?equipo=${encodeURIComponent(equipoSeleccionado)}`);
     const jugadoresRed = await response.json();
@@ -183,7 +163,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // 4. Botón renombrado a "Enviar RPE partido"
+  // Botón Guardar / Enviar RPE partido
   if (btnGuardar) {
     btnGuardar.textContent = "Enviar RPE partido";
     btnGuardar.addEventListener("click", () => {
