@@ -7,7 +7,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnGuardar = document.getElementById("btnGuardar");
   const btnVolver = document.getElementById("btnVolver");
 
-  // 1. Usuario y Equipo desde localStorage (con cortocircuito exacto)
+  // 1. Usuario y Equipo desde localStorage con cortocircuito
   const usuarioActual = localStorage.getItem("Usuario") || "Usuario";
   const equipoSeleccionado = localStorage.getItem("Equipo") || localStorage.getItem("equipoUsuario") || "Junior A";
 
@@ -15,7 +15,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     etiquetaUsuario.textContent = `Usuario: ${usuarioActual} (PF) - Equipo: ${equipoSeleccionado}`;
   }
 
-  // 2. Fecha actual en formato YYYY-MM-DD para el input date
+  // 2. Fecha actual en formato YYYY-MM-DD
   if (inputFecha) {
     const hoy = new Date();
     const anio = hoy.getFullYear();
@@ -24,10 +24,33 @@ document.addEventListener("DOMContentLoaded", async () => {
     inputFecha.value = `${anio}-${mes}-${dia}`;
   }
 
-  // Función para renderizar el grid a partir de la lista de jugadores obtenida
+  // Listas de equipos permitidos
+  const equiposDisponibles = ["Infantil B", "Infantil A", "Cadete B", "Cadete A", "Junior B", "Junior A", "Tercera"];
+  const estadosDisponibles = ["Completo", "Limitado", "Ausente", "Lesionado"];
+
+  // Función para renderizar la cabecera fija del grid y las filas
   function construirGrid(idsPlantilla) {
     if (!gridContainer) return;
     gridContainer.innerHTML = "";
+
+    // 6. Incluir Headers en el grid
+    const headerRow = document.createElement("div");
+    headerRow.className = "grid-header";
+    headerRow.style.display = "grid";
+    headerRow.style.gridTemplate-columns = "50px 1fr 80px 120px 1fr";
+    headerRow.style.gap = "8px";
+    headerRow.style.fontWeight = "bold";
+    headerRow.style.padding = "4px 8px";
+    headerRow.style.fontSize = "0.85rem";
+    headerRow.style.color = "#4b5563";
+    headerRow.innerHTML = `
+      <div></div>
+      <div>ID</div>
+      <div>Min</div>
+      <div>Estatus</div>
+      <div>Equipo</div>
+    `;
+    gridContainer.appendChild(headerRow);
 
     const totalFilas = idsPlantilla.length + 3;
 
@@ -39,6 +62,20 @@ document.addEventListener("DOMContentLoaded", async () => {
       const row = document.createElement("div");
       row.className = `grid-row ${!switchActivo ? 'disabled' : ''}`;
 
+      // Opciones de equipo (3) preseleccionando el equipo actual o el guardado
+      let opcionesEquipoHtml = "";
+      equiposDisponibles.forEach(eq => {
+        const selected = (eq === equipoSeleccionado) ? "selected" : "";
+        opcionesEquipoHtml += `<option value="${eq}" ${selected}>${eq}</option>`;
+      });
+
+      // Opciones de estado (2) por defecto "Completo"
+      let opcionesEstadoHtml = "";
+      estadosDisponibles.forEach(est => {
+        const selected = (est === "Completo") ? "selected" : "";
+        opcionesEstadoHtml += `<option value="${est}" ${selected}>${est}</option>`;
+      });
+
       row.innerHTML = `
         <div style="text-align: center;">
           <input type="checkbox" class="row-switch" ${switchActivo ? 'checked' : ''} />
@@ -47,22 +84,33 @@ document.addEventListener("DOMContentLoaded", async () => {
           <input type="text" class="input-id" value="${idValor}" placeholder="ID Jugador" ${!switchActivo ? 'disabled' : ''} />
         </div>
         <div>
-          <input type="number" class="input-minutos" placeholder="Min" ${!switchActivo ? 'disabled' : ''} />
+          <input type="number" class="input-minutos" min="0" step="1" placeholder="Min" ${!switchActivo ? 'disabled' : ''} />
         </div>
         <div>
           <select class="input-status" ${!switchActivo ? 'disabled' : ''}>
-            <option value="Titular">Titular</option>
-            <option value="Suplente">Suplente</option>
-            <option value="No convocado">No convocado</option>
+            ${opcionesEstadoHtml}
           </select>
         </div>
         <div>
-          <input type="text" class="input-equipo" value="${equipoSeleccionado}" readonly />
+          <select class="input-equipo" ${!switchActivo ? 'disabled' : ''}>
+            ${opcionesEquipoHtml}
+          </select>
         </div>
       `;
 
       const rowSwitch = row.querySelector(".row-switch");
       const inputsFila = row.querySelectorAll("input:not(.row-switch), select");
+
+      // 5. Validación estricta para que la casilla de Minutos solo acepte números enteros positivos
+      const inputMinutos = row.querySelector(".input-minutos");
+      inputMinutos.addEventListener("input", (e) => {
+        let val = e.target.value;
+        val = val.replace(/[^0-9]/g, '');
+        if (val !== "" && parseInt(val, 10) < 0) {
+          val = "0";
+        }
+        e.target.value = val;
+      });
 
       rowSwitch.addEventListener("change", () => {
         const activo = rowSwitch.checked;
@@ -79,7 +127,25 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // 3. Lectura de caché local usando plantilla_${equipoSeleccionado} igual que la otra pestaña
+  // 1. Mostrar Charging Spinner inicial mientras se carga la lista
+  if (gridContainer) {
+    gridContainer.innerHTML = `
+      <div style="text-align: center; padding: 30px;">
+        <div class="spinner" style="border: 4px solid #f3f3f3; border-top: 4px solid #3b82f6; border-radius: 50%; width: 30px; height: 30px; animation: spin 1s linear infinite; margin: 0 auto 10px auto;"></div>
+        <span style="color: #6b7280; font-size: 0.9rem;">Cargando plantilla...</span>
+      </div>
+    `;
+  }
+
+  // Estilo dinámico para la animación del spinner
+  if (!document.getElementById("spinner-style")) {
+    const styleSheet = document.createElement("style");
+    styleSheet.id = "spinner-style";
+    styleSheet.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+    document.head.appendChild(styleSheet);
+  }
+
+  // 3. Lectura de caché local
   const cacheClave = `plantilla_${equipoSeleccionado}`;
   const datosCache = localStorage.getItem(cacheClave);
 
@@ -87,17 +153,16 @@ document.addEventListener("DOMContentLoaded", async () => {
   if (datosCache) {
     try {
       const jugadoresCache = JSON.parse(datosCache);
-      // Extraemos las propiedades de usuario igual que en la otra vista si viene como objetos
       idsPlantilla = jugadoresCache.map(j => (typeof j === 'string' ? j : (j.usuario || j.id || '')));
     } catch (e) {
       console.error("Error al leer caché:", e);
     }
   }
 
-  // Renderizamos inicialmente con caché si existe
+  // Render inicial con caché
   construirGrid(idsPlantilla);
 
-  // 4. Consulta en segundo plano a Google Apps Script para asegurar datos frescos
+  // 4. Consulta en segundo plano a Google Apps Script
   try {
     const response = await fetch(`${URL_APPS_SCRIPT}?equipo=${encodeURIComponent(equipoSeleccionado)}`);
     const jugadoresRed = await response.json();
@@ -118,10 +183,11 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Botón Guardar
+  // 4. Botón renombrado a "Enviar RPE partido"
   if (btnGuardar) {
+    btnGuardar.textContent = "Enviar RPE partido";
     btnGuardar.addEventListener("click", () => {
-      const filas = gridContainer.querySelectorAll(".grid-row");
+      const filas = gridContainer.querySelectorAll(".grid-row:not(.grid-header)");
       const datosPartido = [];
 
       filas.forEach(row => {
@@ -137,8 +203,8 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       });
 
-      console.log("Datos a guardar:", datosPartido);
-      alert("Datos de RPE partido capturados correctamente en consola.");
+      console.log("Datos a enviar:", datosPartido);
+      alert("Datos de RPE partido preparados para enviar.");
     });
   }
 });
