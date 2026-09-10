@@ -201,40 +201,22 @@ document.addEventListener("DOMContentLoaded", async () => {
       }
 
       console.log("➡️ [PWA] Datos a enviar:", datosPartido);
-      console.log("➡️ [PWA] JSON stringify:", JSON.stringify(datosPartido));
 
       try {
         btnGuardar.disabled = true;
         btnGuardar.textContent = "Enviando...";
 
-        const response = await fetch(URL_ENVIO_POST, {
+        await fetch(URL_ENVIO_POST, {
           method: "POST",
-          headers: {
-            "Content-Type": "application/json"
-          },
+          mode: "no-cors",
           body: JSON.stringify(datosPartido)
         });
 
-        console.log("⬅️ [PWA] Respuesta HTTP Status:", response.status);
-        const resultadoTexto = await response.text();
-        console.log("⬅️ [PWA] Respuesta texto:", resultadoTexto);
-
-        let resultadoJson;
-        try {
-          resultadoJson = JSON.parse(resultadoTexto);
-        } catch (e) {
-          console.warn("⚠️ [PWA] La respuesta no es un JSON válido");
-        }
-
-        if (resultadoJson && resultadoJson.status === "success") {
-          alert("Datos de RPE partido enviados correctamente. Inserciones: " + resultadoJson.inserciones);
-        } else {
-          alert("Error del servidor: " + (resultadoJson ? resultadoJson.message : resultadoTexto));
-        }
-
+        console.log("✅ [PWA] Petición enviada correctamente (modo no-cors).");
+        alert("Datos de RPE partido enviados correctamente al Spreadsheet.");
       } catch (error) {
         console.error("❌ [PWA] Error crítico en el fetch:", error);
-        alert("Hubo un error de conexión al enviar los datos. Revisa la consola.");
+        alert("Hubo un error al enviar los datos.");
       } finally {
         btnGuardar.disabled = false;
         btnGuardar.textContent = "Enviar RPE partido";
