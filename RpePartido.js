@@ -28,12 +28,30 @@ document.addEventListener("DOMContentLoaded", async () => {
   const equiposDisponibles = ["Infantil B", "Infantil A", "Cadete B", "Cadete A", "Junior B", "Junior A", "Tercera"];
   const estadosDisponibles = ["Completo", "Limitado", "Ausente", "Lesionado"];
 
+  // Función para mostrar el spinner de carga completo (estilo imagen 2)
+  function mostrarSpinnerCarga() {
+    if (!gridContainer) return;
+    gridContainer.innerHTML = `
+      <div style="display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 50px 0; gap: 15px;">
+        <div class="spinner" style="border: 4px solid #e5e7eb; border-top: 4px solid #3b82f6; border-radius: 50%; width: 45px; height: 45px; animation: spin 1s linear infinite;"></div>
+        <span style="color: #1e3a8a; font-weight: 600; font-size: 0.95rem;">Cargando datos principales...</span>
+      </div>
+    `;
+  }
+
+  // Estilo dinámico para la animación del spinner si no existe
+  if (!document.getElementById("spinner-style")) {
+    const styleSheet = document.createElement("style");
+    styleSheet.id = "spinner-style";
+    styleSheet.textContent = `@keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }`;
+    document.head.appendChild(styleSheet);
+  }
+
   // Función para renderizar la cabecera fija y las filas del grid
   function construirGrid(idsPlantilla) {
     if (!gridContainer) return;
     gridContainer.innerHTML = "";
 
-    // Cabecera del grid
     const headerRow = document.createElement("div");
     headerRow.className = "grid-header";
     headerRow.style.display = "grid";
@@ -100,7 +118,6 @@ document.addEventListener("DOMContentLoaded", async () => {
       const inputsFila = row.querySelectorAll("input:not(.row-switch), select");
       const inputMinutos = row.querySelector(".input-minutos");
 
-      // Validación estricta para números enteros positivos en Minutos
       inputMinutos.addEventListener("input", (e) => {
         let val = e.target.value;
         val = val.replace(/[^0-9]/g, '');
@@ -125,24 +142,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // 3. Lectura inmediata de caché local (carga rápida como antes)
+  // Mostrar el spinner de carga inicial obligado antes de obtener datos de red
+  mostrarSpinnerCarga();
+
   const cacheClave = `plantilla_${equipoSeleccionado}`;
-  const datosCache = localStorage.getItem(cacheClave);
-
   let idsPlantilla = [];
-  if (datosCache) {
-    try {
-      const jugadoresCache = JSON.parse(datosCache);
-      idsPlantilla = jugadoresCache.map(j => (typeof j === 'string' ? j : (j.usuario || j.id || '')));
-    } catch (e) {
-      console.error("Error al leer caché:", e);
-    }
-  }
+  let datosCargados = false;
 
-  // Render inicial inmediato con caché
-  construirGrid(idsPlantilla);
-
-  // 4. Consulta en segundo plano a Google Apps Script para actualizar datos
+  // Intentar primero consultar de red para respetar que espere al script
   try {
     const response = await fetch(`${URL_APPS_SCRIPT}?equipo=${encodeURIComponent(equipoSeleccionado)}`);
     const jugadoresRed = await response.json();
@@ -150,11 +157,27 @@ document.addEventListener("DOMContentLoaded", async () => {
     if (Array.isArray(jugadoresRed) && jugadoresRed.length > 0) {
       localStorage.setItem(cacheClave, JSON.stringify(jugadoresRed));
       idsPlantilla = jugadoresRed.map(j => (typeof j === 'string' ? j : (j.usuario || j.id || '')));
-      construirGrid(idsPlantilla);
+      datosCargados = true;
     }
   } catch (error) {
-    console.error("Error al consultar Google Apps Script:", error);
+    console.error("Error al consultar Google Apps Script en red:", error);
   }
+
+  // Si falló la red, recurrimos a la caché local para no dejar la pantalla vacía
+  if (!datosCargados) {
+    const datosCache = localStorage.getItem(cacheClave);
+    if (datosCache) {
+      try {
+        const jugadoresCache = JSON.parse(datosCache);
+        idsPlantilla = jugadoresCache.map(j => (typeof j === 'string' ? j : (j.usuario || j.id || '')));
+      } catch (e) {
+        console.error("Error al leer caché:", e);
+      }
+    }
+  }
+
+  // Renderizar el grid definitivo una vez obtenido el resultado del script o caché de respaldo
+  construirGrid(idsPlantilla);
 
   // Botón Volver
   if (btnVolver) {
@@ -163,7 +186,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     });
   }
 
-  // Botón Guardar / Enviar RPE partido
+  // Botón Enviar RPE partido
   if (btnGuardar) {
     btnGuardar.textContent = "Enviar RPE partido";
     btnGuardar.addEventListener("click", () => {
