@@ -8,7 +8,6 @@ document.addEventListener("DOMContentLoaded", async () => {
   const btnGuardar = document.getElementById("btnGuardar");
   const btnVolver = document.getElementById("btnVolver");
 
-  // 1. Usuario y Equipo desde localStorage con cortocircuito
   const usuarioActual = localStorage.getItem("Usuario") || "Usuario";
   const equipoSeleccionado = localStorage.getItem("Equipo") || localStorage.getItem("equipoUsuario") || "Junior A";
 
@@ -16,7 +15,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     etiquetaUsuario.textContent = `Usuario: ${usuarioActual} (PF) - Equipo: ${equipoSeleccionado}`;
   }
 
-  // 2. Fecha actual en formato YYYY-MM-DD
   if (inputFecha) {
     const hoy = new Date();
     const anio = hoy.getFullYear();
@@ -25,11 +23,9 @@ document.addEventListener("DOMContentLoaded", async () => {
     inputFecha.value = `${anio}-${mes}-${dia}`;
   }
 
-  // Listas permitidas
   const equiposDisponibles = ["Infantil B", "Infantil A", "Cadete B", "Cadete A", "Junior B", "Junior A", "Tercera"];
   const estadosDisponibles = ["Completo", "Limitado", "Ausente", "Lesionado"];
 
-  // Función para mostrar el spinner de carga completo
   function mostrarSpinnerCarga() {
     if (!gridContainer) return;
     gridContainer.innerHTML = `
@@ -40,7 +36,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     `;
   }
 
-  // Estilo dinámico para la animación del spinner si no existe
   if (!document.getElementById("spinner-style")) {
     const styleSheet = document.createElement("style");
     styleSheet.id = "spinner-style";
@@ -48,7 +43,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     document.head.appendChild(styleSheet);
   }
 
-  // Función para renderizar la cabecera fija y las filas del grid
   function construirGrid(idsPlantilla) {
     if (!gridContainer) return;
     gridContainer.innerHTML = "";
@@ -143,14 +137,12 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Mostrar el spinner de carga inicial
   mostrarSpinnerCarga();
 
   const cacheClave = `plantilla_${equipoSeleccionado}`;
   let idsPlantilla = [];
   let datosCargados = false;
 
-  // Consultar red
   try {
     const response = await fetch(`${URL_APPS_SCRIPT}?equipo=${encodeURIComponent(equipoSeleccionado)}`);
     const jugadoresRed = await response.json();
@@ -164,7 +156,6 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error al consultar Google Apps Script en red:", error);
   }
 
-  // Caché de respaldo si falla la red
   if (!datosCargados) {
     const datosCache = localStorage.getItem(cacheClave);
     if (datosCache) {
@@ -177,17 +168,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Renderizar el grid definitivo
   construirGrid(idsPlantilla);
 
-  // Botón Volver
   if (btnVolver) {
     btnVolver.addEventListener("click", () => {
       window.location.href = "menu_principal.html";
     });
   }
 
-  // Botón Enviar RPE partido
   if (btnGuardar) {
     btnGuardar.textContent = "Enviar RPE partido";
     btnGuardar.addEventListener("click", async () => {
@@ -212,23 +200,41 @@ document.addEventListener("DOMContentLoaded", async () => {
         return;
       }
 
+      console.log("➡️ [PWA] Datos a enviar:", datosPartido);
+      console.log("➡️ [PWA] JSON stringify:", JSON.stringify(datosPartido));
+
       try {
         btnGuardar.disabled = true;
         btnGuardar.textContent = "Enviando...";
 
-        await fetch(URL_ENVIO_POST, {
+        const response = await fetch(URL_ENVIO_POST, {
           method: "POST",
-          mode: "no-cors",
           headers: {
             "Content-Type": "application/json"
           },
           body: JSON.stringify(datosPartido)
         });
 
-        alert("Datos de RPE partido enviados correctamente al Spreadsheet.");
+        console.log("⬅️ [PWA] Respuesta HTTP Status:", response.status);
+        const resultadoTexto = await response.text();
+        console.log("⬅️ [PWA] Respuesta texto:", resultadoTexto);
+
+        let resultadoJson;
+        try {
+          resultadoJson = JSON.parse(resultadoTexto);
+        } catch (e) {
+          console.warn("⚠️ [PWA] La respuesta no es un JSON válido");
+        }
+
+        if (resultadoJson && resultadoJson.status === "success") {
+          alert("Datos de RPE partido enviados correctamente. Inserciones: " + resultadoJson.inserciones);
+        } else {
+          alert("Error del servidor: " + (resultadoJson ? resultadoJson.message : resultadoTexto));
+        }
+
       } catch (error) {
-        console.error("Error al enviar los datos:", error);
-        alert("Hubo un error al enviar los datos.");
+        console.error("❌ [PWA] Error crítico en el fetch:", error);
+        alert("Hubo un error de conexión al enviar los datos. Revisa la consola.");
       } finally {
         btnGuardar.disabled = false;
         btnGuardar.textContent = "Enviar RPE partido";
