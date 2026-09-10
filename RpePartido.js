@@ -1,4 +1,5 @@
 const URL_APPS_SCRIPT = "https://script.google.com/macros/s/AKfycbxjNjsoJvliC8sZPLhLYUS9pcJ19d5uu49szu7RjnPBBMmAM6ZgD515hNhHulAxbsMCwQ/exec";
+const URL_ENVIO_POST = "https://script.google.com/macros/s/AKfycbyZHW0N19vSMNDvH15MJE5eXVdlQ6D4PMJu_s-b9HmChEtAs4djMZietcngKARx6LJX1A/exec";
 
 document.addEventListener("DOMContentLoaded", async () => {
   const etiquetaUsuario = document.getElementById("etiquetaUsuario");
@@ -28,7 +29,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   const equiposDisponibles = ["Infantil B", "Infantil A", "Cadete B", "Cadete A", "Junior B", "Junior A", "Tercera"];
   const estadosDisponibles = ["Completo", "Limitado", "Ausente", "Lesionado"];
 
-  // Función para mostrar el spinner de carga completo (estilo imagen 2)
+  // Función para mostrar el spinner de carga completo
   function mostrarSpinnerCarga() {
     if (!gridContainer) return;
     gridContainer.innerHTML = `
@@ -142,14 +143,14 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Mostrar el spinner de carga inicial obligado antes de obtener datos de red
+  // Mostrar el spinner de carga inicial
   mostrarSpinnerCarga();
 
   const cacheClave = `plantilla_${equipoSeleccionado}`;
   let idsPlantilla = [];
   let datosCargados = false;
 
-  // Intentar primero consultar de red para respetar que espere al script
+  // Consultar red
   try {
     const response = await fetch(`${URL_APPS_SCRIPT}?equipo=${encodeURIComponent(equipoSeleccionado)}`);
     const jugadoresRed = await response.json();
@@ -163,7 +164,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     console.error("Error al consultar Google Apps Script en red:", error);
   }
 
-  // Si falló la red, recurrimos a la caché local para no dejar la pantalla vacía
+  // Caché de respaldo si falla la red
   if (!datosCargados) {
     const datosCache = localStorage.getItem(cacheClave);
     if (datosCache) {
@@ -176,7 +177,7 @@ document.addEventListener("DOMContentLoaded", async () => {
     }
   }
 
-  // Renderizar el grid definitivo una vez obtenido el resultado del script o caché de respaldo
+  // Renderizar el grid definitivo
   construirGrid(idsPlantilla);
 
   // Botón Volver
@@ -189,7 +190,7 @@ document.addEventListener("DOMContentLoaded", async () => {
   // Botón Enviar RPE partido
   if (btnGuardar) {
     btnGuardar.textContent = "Enviar RPE partido";
-    btnGuardar.addEventListener("click", () => {
+    btnGuardar.addEventListener("click", async () => {
       const filas = gridContainer.querySelectorAll(".grid-row:not(.grid-header)");
       const datosPartido = [];
 
@@ -206,8 +207,32 @@ document.addEventListener("DOMContentLoaded", async () => {
         }
       });
 
-      console.log("Datos a enviar:", datosPartido);
-      alert("Datos de RPE partido preparados para enviar.");
+      if (datosPartido.length === 0) {
+        alert("No hay filas activas para enviar.");
+        return;
+      }
+
+      try {
+        btnGuardar.disabled = true;
+        btnGuardar.textContent = "Enviando...";
+
+        await fetch(URL_ENVIO_POST, {
+          method: "POST",
+          mode: "no-cors",
+          headers: {
+            "Content-Type": "application/json"
+          },
+          body: JSON.stringify(datosPartido)
+        });
+
+        alert("Datos de RPE partido enviados correctamente al Spreadsheet.");
+      } catch (error) {
+        console.error("Error al enviar los datos:", error);
+        alert("Hubo un error al enviar los datos.");
+      } finally {
+        btnGuardar.disabled = false;
+        btnGuardar.textContent = "Enviar RPE partido";
+      }
     });
   }
 });
