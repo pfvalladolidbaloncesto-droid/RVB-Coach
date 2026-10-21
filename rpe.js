@@ -34,6 +34,17 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectEquipo) selectEquipo.value = equipoSeleccionado;
   }
 
+  // Autoasignar el tipo de entrenamiento según el rol almacenado
+  const rolActual = (localStorage.getItem("Rol") || localStorage.getItem("rolUsuario") || "").toUpperCase();
+  const selectEntrenamiento = document.getElementById('entrenamiento');
+  if (selectEntrenamiento) {
+    if (rolActual.includes("FISICO") || rolActual.includes("PF")) {
+      selectEntrenamiento.value = "Físico";
+    } else if (rolActual.includes("PISTA") || rolActual.includes("ENTRENADOR")) {
+      selectEntrenamiento.value = "Pista";
+    }
+  }
+
   // Botón Volver
   const btnVolver = document.getElementById('btn-volver');
   if (btnVolver) {
