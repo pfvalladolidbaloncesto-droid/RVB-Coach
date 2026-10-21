@@ -34,8 +34,10 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectEquipo) selectEquipo.value = equipoSeleccionado;
   }
 
-  // Autoasignar el tipo de entrenamiento según el rol almacenado
-  const rolActual = (localStorage.getItem("Rol") || localStorage.getItem("rolUsuario") || "").toUpperCase();
+  // Autoasignar el tipo de entrenamiento ignorando tildes y mayúsculas
+  const rolCrudo = localStorage.getItem("Rol") || localStorage.getItem("rolUsuario") || "";
+  const rolActual = rolCrudo.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  
   const selectEntrenamiento = document.getElementById('entrenamiento');
   if (selectEntrenamiento) {
     if (rolActual.includes("FISICO") || rolActual.includes("PF")) {
