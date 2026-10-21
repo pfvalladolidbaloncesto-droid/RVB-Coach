@@ -19,11 +19,14 @@ document.addEventListener("DOMContentLoaded", () => {
     duracionInput.value = 55;
   }
 
-  // Diccionario exacto de IDs de Google Drive
+  // Diccionario exacto de IDs de Google Drive actualizado
   const carpetasDriveIDs = {
-    "EBA_Pista": "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT",
-    "EBA_Físico": "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ",
-    "EBA_Fisico": "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ",
+    "Filial_Pista": "1-7UDm_-m7CqnqDhYfCjzT8WF57KRCSJT",
+    "Filial_Físico": "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ",
+    "Filial_Fisico": "1cLib9Sq4OeB_zFreR-S72cA7b5-GCcGJ",
+    "Desarrollo_Pista": "1AIcgSlgSKzzV4Vf_mqHFAvQ_bmuFMv48",
+    "Desarrollo_Físico": "1V5xaBsWPeo8jDdvrQeo33_bT1CCOaZSX",
+    "Desarrollo_Fisico": "1V5xaBsWPeo8jDdvrQeo33_bT1CCOaZSX",
     "Junior A_Pista": "1popwCXqp2NRuGDHPLqGUGavYZcjHoF4d",
     "Junior A_Físico": "17KMZF1tKwZYZB5fg2lpNdVN0F8g1jSle",
     "Junior A_Fisico": "17KMZF1tKwZYZB5fg2lpNdVN0F8g1jSle",
