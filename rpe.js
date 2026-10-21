@@ -34,15 +34,15 @@ document.addEventListener("DOMContentLoaded", () => {
     if (selectEquipo) selectEquipo.value = equipoSeleccionado;
   }
 
-  // Autoasignar el tipo de entrenamiento ignorando tildes y mayúsculas
-  const rolCrudo = localStorage.getItem("Rol") || localStorage.getItem("rolUsuario") || "";
-  const rolActual = rolCrudo.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
+  // AUTOASIGNAR ENTRENAMIENTO ROBUSTO (PF / Físico -> Físico | Entrenador / Pista -> Pista)
+  const rolCrudo = (localStorage.getItem("Rol") || localStorage.getItem("rolUsuario") || localStorage.getItem("RolPorDefecto") || "").trim();
+  const rolNormalizado = rolCrudo.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toUpperCase();
   
   const selectEntrenamiento = document.getElementById('entrenamiento');
   if (selectEntrenamiento) {
-    if (rolActual.includes("FISICO") || rolActual.includes("PF")) {
+    if (rolNormalizado === "PF" || rolNormalizado.includes("FISICO")) {
       selectEntrenamiento.value = "Físico";
-    } else if (rolActual.includes("PISTA") || rolActual.includes("ENTRENADOR")) {
+    } else if (rolNormalizado.includes("ENTRENADOR") || rolNormalizado.includes("PISTA")) {
       selectEntrenamiento.value = "Pista";
     }
   }
