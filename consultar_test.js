@@ -1,12 +1,13 @@
 
 /*
-  CONSULTAR TEST - COACH RVB
+===========================================
+CONSULTAR TEST - COACH RVB
+===========================================
 
-  Comparación de una o dos variables
-  utilizando la hoja TESTS.
+Usa el Apps Script de fuerza y tests.
 
-  Comparte el Apps Script de consultas
-  con la aplicación de jugadores.
+El atleta seleccionado se lee de
+localStorage.User.
 */
 
 const URL_CONSULTAS =
@@ -17,17 +18,14 @@ const COLORES = [
   "#3858bb"
 ];
 
+const $ = id => document.getElementById(id);
+
 let contadorPeticiones = 0;
 let consultando = false;
 
-const $ = id => document.getElementById(id);
-
 // ============================================
-// IDENTIFICAR ATLETA
+// FUNCIONES GENERALES
 // ============================================
-
-// En la app de entrenadores, "User"
-// identifica al atleta seleccionado.
 
 function atletaActual() {
   return (
@@ -36,14 +34,14 @@ function atletaActual() {
 }
 
 function crear(tag, contenido, clase = "") {
-  const nodo = document.createElement(tag);
-  nodo.textContent = contenido;
+  const n = document.createElement(tag);
+  n.textContent = contenido;
 
   if (clase) {
-    nodo.className = clase;
+    n.className = clase;
   }
 
-  return nodo;
+  return n;
 }
 
 function estado(mensaje) {
@@ -62,17 +60,15 @@ function fechaEsp(iso) {
 }
 
 function numeroEsp(n) {
-  return Number(n).toLocaleString("es-ES", {
-    maximumFractionDigits: 3
-  });
+  return Number(n).toLocaleString(
+    "es-ES",
+    { maximumFractionDigits: 3 }
+  );
 }
 
 // ============================================
 // CONEXIÓN CON APPS SCRIPT
 // ============================================
-
-// JSONP con crossOrigin anonymous,
-// probado previamente en Chrome Android.
 
 function pedirDatos(accion, parametros) {
 
@@ -83,51 +79,76 @@ function pedirDatos(accion, parametros) {
       Date.now() +
       (++contadorPeticiones);
 
+    const url = new URL(URL_CONSULTAS);
+
     const script =
       document.createElement("script");
 
-    const url = new URL(URL_CONSULTAS);
-
-    let finalizado = false;
+    let terminado = false;
     let temporizador;
 
-    function terminar() {
-      if (finalizado) return false;
+    function limpiar() {
 
-      finalizado = true;
+      if (terminado) return false;
+
+      terminado = true;
 
       clearTimeout(temporizador);
+
       script.remove();
+
       delete window[callback];
 
       return true;
     }
 
+    function fallar(mensaje) {
+
+      if (limpiar()) {
+        reject(new Error(mensaje));
+      }
+    }
+
     window[callback] = datos => {
-      if (terminar()) {
+
+      if (limpiar()) {
         resolve(datos);
       }
     };
 
+    // Error de conexión o CORS
     script.onerror = () => {
-      if (terminar()) {
-        reject(
-          new Error(
-            "No se pudo conectar con Apps Script."
-          )
+
+      fallar(
+        "Chrome ha bloqueado la conexión. " +
+        "Comprueba que Apps Script esté publicado " +
+        "y que esta página utilice su versión actual."
+      );
+    };
+
+    // El recurso carga, pero no llama al callback
+    script.onload = () => {
+
+      if (!terminado) {
+
+        fallar(
+          "Apps Script respondió, pero no devolvió " +
+          "el callback de tests. Comprueba que hayas " +
+          "implementado una nueva versión con " +
+          "listaTests y consultarTests."
         );
       }
     };
 
+    // Evitar espera indefinida
     temporizador = setTimeout(() => {
-      if (terminar()) {
-        reject(
-          new Error(
-            "Tiempo de espera agotado."
-          )
-        );
-      }
-    }, 20000);
+
+      fallar(
+        "La consulta ha superado 15 segundos. " +
+        "Revisa la implementación de Apps Script."
+      );
+
+    }, 15000);
 
     url.searchParams.set(
       "accion",
@@ -135,10 +156,11 @@ function pedirDatos(accion, parametros) {
     );
 
     Object.entries(parametros).forEach(
-      ([clave, valor]) => {
+      ([k, v]) => {
+
         url.searchParams.set(
-          clave,
-          String(valor)
+          k,
+          String(v)
         );
       }
     );
@@ -153,7 +175,7 @@ function pedirDatos(accion, parametros) {
       String(Date.now())
     );
 
-    // Solución de compatibilidad Chrome Android
+    // Solución comprobada con Chrome Android
     script.crossOrigin = "anonymous";
 
     script.src = url.toString();
@@ -163,58 +185,109 @@ function pedirDatos(accion, parametros) {
 }
 
 // ============================================
-// CARGAR TESTS DEL ATLETA
+// RELLENAR SELECTORES
 // ============================================
 
-function llenarSelectores(tests) {
+function rellenarTests(
+  tests,
+  mensaje = "Seleccionar test"
+) {
 
   const unicos = new Map();
 
   tests.forEach(t => {
 
-    const nombre = String(t || "").trim();
-
-    const clave =
-      nombre.toLocaleUpperCase("es");
+    const nombre =
+      String(t || "").trim();
 
     if (
       nombre &&
-      !unicos.has(clave)
+      !unicos.has(nombre.toUpperCase())
     ) {
-      unicos.set(clave, nombre);
+
+      unicos.set(
+        nombre.toUpperCase(),
+        nombre
+      );
     }
   });
 
-  const opciones = [...unicos.values()]
+  const ordenados = [...unicos.values()]
     .sort(
-      (a, b) =>
-        a.localeCompare(b, "es")
+      (a, b) => a.localeCompare(b, "es")
     );
 
   ["test1", "test2"].forEach(id => {
 
     const selector = $(id);
-    const valorAnterior = selector.value;
+    const anterior = selector.value;
 
     selector.replaceChildren(
-      new Option("Seleccionar test", "")
+      new Option(mensaje, "")
     );
 
-    opciones.forEach(test => {
+    ordenados.forEach(t => {
+
       selector.add(
-        new Option(test, test)
+        new Option(t, t)
       );
     });
 
     if (
       [...selector.options].some(
-        opt => opt.value === valorAnterior
+        op => op.value === anterior
       )
     ) {
-      selector.value = valorAnterior;
+      selector.value = anterior;
     }
+
+    selector.disabled = !ordenados.length;
   });
+
+  $("Enviar").disabled = !ordenados.length;
 }
+
+// ============================================
+// MOSTRAR ERROR CON BOTÓN REINTENTAR
+// ============================================
+
+function mostrarErrorCarga(error) {
+
+  rellenarTests(
+    [],
+    "No se pudieron cargar"
+  );
+
+  const resultados = $("resultados");
+
+  resultados.replaceChildren(
+    crear(
+      "p",
+      "Error al cargar los tests: " +
+        error.message,
+      "mensaje"
+    )
+  );
+
+  const boton = crear(
+    "button",
+    "Reintentar carga",
+    "btn-reintentar"
+  );
+
+  boton.type = "button";
+
+  boton.addEventListener(
+    "click",
+    cargarTests
+  );
+
+  resultados.appendChild(boton);
+}
+
+// ============================================
+// CARGAR TESTS DEL ATLETA
+// ============================================
 
 async function cargarTests() {
 
@@ -225,54 +298,65 @@ async function cargarTests() {
 
   if (!id) {
 
-    estado(
-      "No hay ningún atleta seleccionado. " +
-      "Vuelve al menú y selecciona uno."
+    mostrarErrorCarga(
+      new Error(
+        "No hay jugador seleccionado " +
+        "en la clave User."
+      )
     );
 
-    llenarSelectores([]);
     return;
   }
 
+  $("Enviar").disabled = true;
+
+  ["test1", "test2"].forEach(k => {
+
+    $(k).disabled = true;
+
+    $(k).replaceChildren(
+      new Option(
+        "Cargando tests...",
+        ""
+      )
+    );
+  });
+
+  estado(
+    "Conectando con Apps Script para " +
+    "recuperar los tests de " + id + "..."
+  );
+
   try {
 
-    const respuesta = await pedirDatos(
+    const r = await pedirDatos(
       "listaTests",
       { id }
     );
 
-    if (
-      !respuesta ||
-      !respuesta.ok
-    ) {
+    if (!r || !r.ok) {
+
       throw new Error(
-        respuesta?.error ||
-        "No se pudo recuperar la lista."
+        r?.error ||
+        "Respuesta inválida del servidor."
       );
     }
 
-    const tests =
-      Array.isArray(respuesta.tests)
-        ? respuesta.tests
-        : [];
+    const tests = Array.isArray(r.tests)
+      ? r.tests
+      : [];
 
-    llenarSelectores(tests);
+    rellenarTests(tests);
 
-    if (!tests.length) {
-      estado(
-        "Este atleta no tiene tests " +
-        "registrados en la hoja TESTS."
-      );
-    }
+    estado(
+      tests.length
+        ? "Selecciona una o dos variables y pulsa «Consultar test»."
+        : "El atleta no tiene tests registrados en la hoja TESTS."
+    );
 
   } catch (error) {
 
-    llenarSelectores([]);
-
-    estado(
-      "Error al cargar los tests: " +
-      error.message
-    );
+    mostrarErrorCarga(error);
   }
 }
 
@@ -299,12 +383,14 @@ async function consultar() {
     $("lateralidad2").value;
 
   if (!id) {
+
     return estado(
-      "No se ha identificado al atleta."
+      "No hay atleta seleccionado."
     );
   }
 
   if (!test1) {
+
     return estado(
       "Selecciona un test en la variable 1."
     );
@@ -315,9 +401,9 @@ async function consultar() {
     (test1 + lateralidad1).toUpperCase() ===
     (test2 + lateralidad2).toUpperCase()
   ) {
+
     return estado(
-      "Las dos variables son idénticas. " +
-      "Elige otra combinación."
+      "Has seleccionado dos variables idénticas."
     );
   }
 
@@ -341,9 +427,10 @@ async function consultar() {
     );
 
     if (!r || !r.ok) {
+
       throw new Error(
         r?.error ||
-        "Error en la consulta."
+        "Respuesta inválida del servidor."
       );
     }
 
@@ -373,7 +460,7 @@ async function consultar() {
   } catch (error) {
 
     estado(
-      "Error al consultar: " +
+      "No se pudo consultar: " +
       error.message
     );
 
@@ -386,51 +473,48 @@ async function consultar() {
 }
 
 // ============================================
-// AGRUPAR RESULTADOS POR FECHA
+// AGRUPAR POR FECHA
 // ============================================
 
 function agrupar(registros) {
 
   const mapa = new Map();
 
-  for (const r of registros) {
+  registros.forEach(r => {
 
     const fecha =
       String(r.fecha || "");
 
+    const valor = r.resultado;
+
     if (
       !/^\d{4}-\d{2}-\d{2}$/.test(fecha) ||
-      r.resultado === "" ||
-      r.resultado === null ||
-      r.resultado === undefined
+      valor === "" ||
+      valor == null
     ) {
-      continue;
+      return;
     }
 
-    const numero =
-      Number(r.resultado);
+    const n = Number(valor);
 
-    if (!Number.isFinite(numero)) {
-      continue;
+    if (!Number.isFinite(n)) {
+      return;
     }
 
     if (!mapa.has(fecha)) {
       mapa.set(fecha, []);
     }
 
-    mapa.get(fecha).push(numero);
-  }
+    mapa.get(fecha).push(n);
+  });
 
   return mapa;
 }
 
 function escala(valores) {
 
-  const min =
-    Math.min(...valores);
-
-  const max =
-    Math.max(...valores);
+  const min = Math.min(...valores);
+  const max = Math.max(...valores);
 
   const amplitud = Math.max(
     max - min,
@@ -438,8 +522,7 @@ function escala(valores) {
     1
   );
 
-  const margen =
-    amplitud * 0.14;
+  const margen = amplitud * 0.14;
 
   return {
     min: min - margen,
@@ -453,31 +536,25 @@ function escala(valores) {
 
 function representar(series) {
 
-  const destino =
-    $("resultados");
+  const destino = $("resultados");
 
   destino.replaceChildren(
     crear("h2", "Evolución de tests")
   );
 
   series.forEach(s => {
-    s.dias = agrupar(
-      s.registros
-    );
+
+    s.dias = agrupar(s.registros);
   });
 
-  // Eje X común: fechas con al menos
-  // un registro de cualquiera de las variables.
+  const omitidas = series
+    .filter(s => !s.dias.size)
+    .map(s => s.nombre);
 
-  const fechas = [
-    ...new Set(
-      series.flatMap(
-        s => [...s.dias.keys()]
-      )
-    )
-  ].sort();
+  const conDatos = series
+    .filter(s => s.dias.size);
 
-  if (!fechas.length) {
+  if (!conDatos.length) {
 
     destino.appendChild(
       crear(
@@ -490,6 +567,15 @@ function representar(series) {
     return;
   }
 
+  // Fechas comunes
+  const fechas = [
+    ...new Set(
+      conDatos.flatMap(
+        s => [...s.dias.keys()]
+      )
+    )
+  ].sort();
+
   // ==========================================
   // LEYENDA
   // ==========================================
@@ -499,7 +585,7 @@ function representar(series) {
 
   leyenda.className = "leyenda";
 
-  series.forEach(s => {
+  conDatos.forEach(s => {
 
     const item = crear(
       "span",
@@ -515,7 +601,7 @@ function representar(series) {
   destino.appendChild(leyenda);
 
   // ==========================================
-  // CONFIGURACIÓN DE LA GRÁFICA
+  // CONFIGURACIÓN SVG
   // ==========================================
 
   const NS =
@@ -523,14 +609,14 @@ function representar(series) {
 
   const W = Math.max(
     680,
-    150 + fechas.length * 68
+    145 + fechas.length * 68
   );
 
   const H = 355;
 
   const M = {
     izquierda: 72,
-    derecha: series.length === 2
+    derecha: conDatos.length === 2
       ? 82
       : 28,
     arriba: 38,
@@ -543,9 +629,6 @@ function representar(series) {
   const areaH =
     H - M.arriba - M.abajo;
 
-  // Posición horizontal común para
-  // las dos variables.
-
   const x = i =>
     M.izquierda +
     (
@@ -555,10 +638,7 @@ function representar(series) {
           (fechas.length - 1)
     );
 
-  // Escala vertical independiente
-  // para cada variable.
-
-  const escalas = series.map(
+  const escalas = conDatos.map(
     s => escala(
       [...s.dias.values()].flat()
     )
@@ -576,30 +656,20 @@ function representar(series) {
       "svg"
     );
 
-  svg.setAttribute(
-    "width",
-    W
-  );
-
-  svg.setAttribute(
-    "height",
-    H
-  );
+  svg.setAttribute("width", W);
+  svg.setAttribute("height", H);
 
   svg.setAttribute(
     "viewBox",
     `0 0 ${W} ${H}`
   );
 
-  svg.setAttribute(
-    "role",
-    "img"
-  );
+  svg.setAttribute("role", "img");
 
   svg.setAttribute(
     "aria-label",
-    "Resultados de " +
-    series.map(s => s.nombre).join(" y ")
+    "Evolución de " +
+    conDatos.map(s => s.nombre).join(" y ")
   );
 
   function dibujar(
@@ -609,11 +679,15 @@ function representar(series) {
   ) {
 
     const n =
-      document.createElementNS(NS, tag);
+      document.createElementNS(
+        NS,
+        tag
+      );
 
     Object.entries(
       atributos || {}
     ).forEach(([k, v]) => {
+
       n.setAttribute(
         k,
         String(v)
@@ -630,10 +704,10 @@ function representar(series) {
   }
 
   // ==========================================
-  // EJES VERTICALES Y CUADRÍCULA
+  // EJES VERTICALES
   // ==========================================
 
-  for (let i = 0; i <= 4; i++) {
+  for (let i = 0; i < 5; i++) {
 
     const yy =
       M.arriba +
@@ -641,14 +715,13 @@ function representar(series) {
 
     dibujar("line", {
       x1: M.izquierda,
-      y1: yy,
       x2: W - M.derecha,
+      y1: yy,
       y2: yy,
-      stroke: "#e5eaf0",
-      "stroke-width": 1
+      stroke: "#e5eaf0"
     });
 
-    series.forEach((s, j) => {
+    conDatos.forEach((s, j) => {
 
       const e = escalas[j];
 
@@ -670,9 +743,8 @@ function representar(series) {
     });
   }
 
-  // Nombre de cada eje Y
-
-  series.forEach((s, j) => {
+  // Nombre de cada eje
+  conDatos.forEach((s, j) => {
 
     dibujar("text", {
       x: j === 0
@@ -689,15 +761,13 @@ function representar(series) {
   });
 
   // ==========================================
-  // FECHAS DEL EJE X
+  // EJE X COMÚN
   // ==========================================
 
   fechas.forEach((fecha, i) => {
 
     const xx = x(i);
-
-    const yy =
-      H - M.abajo + 19;
+    const yy = H - M.abajo + 19;
 
     dibujar("text", {
       x: xx,
@@ -710,11 +780,9 @@ function representar(series) {
     }, fechaEsp(fecha));
   });
 
-  // Panel para ver el valor de cada punto
-
   const detalle = crear(
     "div",
-    "Toca un punto para consultar su valor.",
+    "Toca un punto para ver el valor.",
     "detalle-punto"
   );
 
@@ -722,11 +790,9 @@ function representar(series) {
   // DIBUJAR SERIES
   // ==========================================
 
-  series.forEach((s, j) => {
+  conDatos.forEach((s, j) => {
 
     const medias = [];
-
-    // Calcular media de cada fecha
 
     fechas.forEach((fecha, i) => {
 
@@ -748,14 +814,12 @@ function representar(series) {
       });
     });
 
-    // Línea entre las medias diarias
-
+    // Línea entre medias diarias
     if (medias.length > 1) {
 
       dibujar("polyline", {
-        points: medias.map(
-          p =>
-            `${x(p.i)},${y(p.media, escalas[j])}`
+        points: medias.map(p =>
+          `${x(p.i)},${y(p.media, escalas[j])}`
         ).join(" "),
         fill: "none",
         stroke: s.color,
@@ -766,7 +830,6 @@ function representar(series) {
     }
 
     // Todas las mediciones individuales
-
     fechas.forEach((fecha, i) => {
 
       const valores =
@@ -775,9 +838,6 @@ function representar(series) {
       if (!valores) return;
 
       valores.forEach((v, n) => {
-
-        // Desplazamiento horizontal
-        // para separar valores del mismo día.
 
         const desplazamiento =
           (
@@ -799,7 +859,7 @@ function representar(series) {
           }
         );
 
-        const leyendaPunto =
+        const etiqueta =
           `${s.nombre} · ` +
           `${fechaEsp(fecha)} · ` +
           `medición ${n + 1}/${valores.length}: ` +
@@ -811,15 +871,14 @@ function representar(series) {
             "title"
           );
 
-        titulo.textContent = leyendaPunto;
+        titulo.textContent = etiqueta;
 
         punto.appendChild(titulo);
 
         punto.addEventListener(
           "click",
           () => {
-            detalle.textContent =
-              leyendaPunto;
+            detalle.textContent = etiqueta;
           }
         );
 
@@ -831,22 +890,19 @@ function representar(series) {
               e.key === "Enter" ||
               e.key === " "
             ) {
-              e.preventDefault();
 
-              detalle.textContent =
-                leyendaPunto;
+              e.preventDefault();
+              detalle.textContent = etiqueta;
             }
           }
         );
       });
     });
 
-    // Rombos: media de cada fecha
-
+    // Rombos: medias diarias
     medias.forEach(p => {
 
       const xx = x(p.i);
-
       const yy =
         y(p.media, escalas[j]);
 
@@ -861,12 +917,12 @@ function representar(series) {
           fill: s.color,
           stroke: "white",
           "stroke-width": 1,
-          style: "cursor:pointer",
-          tabindex: 0
+          tabindex: 0,
+          style: "cursor:pointer"
         }
       );
 
-      const textoMedia =
+      const etiqueta =
         `${s.nombre} · ` +
         `${fechaEsp(p.fecha)} · ` +
         `media: ${numeroEsp(p.media)}`;
@@ -874,8 +930,7 @@ function representar(series) {
       rombo.addEventListener(
         "click",
         () => {
-          detalle.textContent =
-            textoMedia;
+          detalle.textContent = etiqueta;
         }
       );
 
@@ -887,10 +942,9 @@ function representar(series) {
             e.key === "Enter" ||
             e.key === " "
           ) {
-            e.preventDefault();
 
-            detalle.textContent =
-              textoMedia;
+            e.preventDefault();
+            detalle.textContent = etiqueta;
           }
         }
       );
@@ -898,34 +952,31 @@ function representar(series) {
   });
 
   // ==========================================
-  // RESULTADOS FINALES
+  // RESULTADO
   // ==========================================
 
-  const desplazable =
+  const scroll =
     document.createElement("div");
 
-  desplazable.className =
-    "grafica-scroll";
+  scroll.className = "grafica-scroll";
 
-  desplazable.appendChild(svg);
+  scroll.appendChild(svg);
 
   destino.append(
-    desplazable,
+    scroll,
     detalle
   );
 
-  const resumen = series.map(s => {
+  const resumen = conDatos.map(s => {
 
-    const total = [...s.dias.values()]
+    const n = [...s.dias.values()]
       .reduce(
-        (suma, v) =>
-          suma + v.length,
+        (total, a) => total + a.length,
         0
       );
 
     return (
-      `${s.nombre}: ` +
-      `${total} mediciones ` +
+      `${s.nombre}: ${n} mediciones ` +
       `en ${s.dias.size} fechas`
     );
 
@@ -935,11 +986,36 @@ function representar(series) {
     crear(
       "p",
       resumen +
-      ". Círculos: mediciones individuales. " +
-      "Rombos y líneas: medias por fecha.",
+      (
+        omitidas.length
+          ? `. Sin registros: ${omitidas.join(", ")}.`
+          : "."
+      ) +
+      " Círculos = mediciones individuales; " +
+      "rombos y línea = medias diarias.",
       "nota"
     )
   );
+}
+
+// ============================================
+// VOLVER AL SELECTOR
+// ============================================
+
+function volverAlSelector() {
+
+  // Regresar a la pantalla desde
+  // la que se seleccionó el jugador.
+  if (window.history.length > 1) {
+
+    window.history.back();
+
+  } else {
+
+    // Si esta página se abrió directamente
+    window.location.href =
+      "menu_principal.html";
+  }
 }
 
 // ============================================
@@ -949,6 +1025,11 @@ function representar(series) {
 document.addEventListener(
   "DOMContentLoaded",
   () => {
+
+    $("volver-selector").addEventListener(
+      "click",
+      volverAlSelector
+    );
 
     $("Enviar").addEventListener(
       "click",
