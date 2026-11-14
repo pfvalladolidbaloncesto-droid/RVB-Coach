@@ -1,158 +1,318 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#20c997">
   <title>Consultar Test - Coach RVB</title>
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     body {
-      background-color: #f2f3f8;
+      background: #f2f3f8;
       display: flex;
       justify-content: center;
-      align-items: center;
+      align-items: flex-start;
       min-height: 100vh;
       padding: 20px;
+      color: #243345;
     }
 
     #test-container {
-      background: #ffffff;
-      padding: 28px 24px;
-      border-radius: 20px;
-      box-shadow: 0 10px 25px rgba(0, 0, 0, 0.03);
+      background: white;
       width: 100%;
-      max-width: 420px;
-      display: flex;
-      flex-direction: column;
-      gap: 12px;
+      max-width: 850px;
+      padding: 26px 24px;
+      border-radius: 20px;
+      box-shadow: 0 10px 25px rgba(0, 0, 0, .04);
     }
 
     #Nombre {
-      font-size: 20px;
+      display: block;
+      font-size: 22px;
       font-weight: 800;
-      color: #000000;
+      color: #111;
       margin-bottom: 5px;
     }
 
-    label {
-      font-size: 14px;
-      font-weight: 700;
-      color: #1a1a1a;
-      margin-top: 5px;
+    .subtitulo {
+      color: #77818b;
+      font-size: 13px;
+      margin-bottom: 22px;
     }
 
-    select, input {
-      padding: 11px 14px;
-      font-size: 14px;
-      border: 1px solid #e1e4e8;
-      border-radius: 10px;
-      outline: none;
-      background-color: #ffffff;
-      color: #333333;
-      width: 100%;
-      transition: border-color 0.2s, box-shadow 0.2s;
+    .variables {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
     }
 
-    select:focus, input:focus {
-      border-color: #20c997;
-      box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+    .variable {
+      padding: 14px;
+      border: 1px solid #e1e5eb;
+      border-radius: 12px;
     }
 
-    input[readonly] {
-      background-color: #f8f9fa;
-      color: #6c757d;
-      cursor: not-allowed;
+    .variable.primera {
+      border-top: 4px solid #168d70;
     }
 
-    .test-row {
-      display: flex;
+    .variable.segunda {
+      border-top: 4px solid #3858bb;
+    }
+
+    .variable h2 {
+      font-size: 16px;
+      margin-bottom: 14px;
+    }
+
+    .selectores {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 110px;
       gap: 10px;
     }
 
-    .test-row select {
-      flex: 1;
+    label {
+      display: block;
+      font-size: 13px;
+      font-weight: 700;
+      color: #1a1a1a;
+      margin-bottom: 6px;
+    }
+
+    select {
+      padding: 10px;
+      font-size: 14px;
+      border: 1px solid #e1e4e8;
+      border-radius: 10px;
+      background: #fff;
+      color: #333;
+      width: 100%;
+      min-width: 0;
+      height: 44px;
+    }
+
+    select:focus {
+      outline: none;
+      border-color: #20c997;
+      box-shadow: 0 0 0 3px rgba(32, 201, 151, .13);
     }
 
     .actions-container {
       display: flex;
       gap: 10px;
-      margin-top: 10px;
+      margin: 18px 0;
     }
 
     .btn-consultar,
     .btn-menu {
       flex: 1;
       padding: 13px;
-      background-color: #20c997;
+      background: #20c997;
       color: white;
-      border: none;
+      border: 0;
       border-radius: 10px;
-      font-size: 16px;
+      font-size: 15px;
       font-weight: 700;
-      cursor: pointer;
       text-align: center;
       text-decoration: none;
-      display: inline-block;
-      transition: background-color 0.2s;
+      cursor: pointer;
     }
 
-    .btn-consultar:hover,
+    .btn-menu {
+      background: #627281;
+    }
+
+    .btn-consultar:hover {
+      background: #1ba87e;
+    }
+
     .btn-menu:hover {
-      background-color: #1ba87e;
+      background: #51606d;
+    }
+
+    .btn-consultar:disabled {
+      opacity: .55;
+      cursor: wait;
+    }
+
+    #resultados {
+      min-height: 265px;
+      background: #fafbfc;
+      border: 1px solid #e2e8ed;
+      border-radius: 12px;
+      padding: 16px;
+    }
+
+    #resultados h2 {
+      font-size: 18px;
+      margin-bottom: 12px;
+    }
+
+    .mensaje {
+      color: #627183;
+      font-size: 14px;
+      line-height: 1.5;
+    }
+
+    .leyenda {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px 20px;
+      font-size: 13px;
+      font-weight: 700;
+      margin-bottom: 14px;
+    }
+
+    .leyenda-item::before {
+      content: "";
+      display: inline-block;
+      width: 16px;
+      height: 0;
+      border-top: 3px solid currentColor;
+      vertical-align: middle;
+      margin-right: 8px;
+    }
+
+    .grafica-scroll {
+      width: 100%;
+      overflow-x: auto;
+      background: white;
+      border: 1px solid #e1e5eb;
+      border-radius: 8px;
+    }
+
+    .grafica-scroll svg {
+      display: block;
+      max-width: none;
+    }
+
+    .detalle-punto {
+      min-height: 22px;
+      font-size: 13px;
+      margin-top: 12px;
+    }
+
+    .nota {
+      margin-top: 10px;
+      color: #697c89;
+      font-size: 12px;
+      line-height: 1.4;
+    }
+
+    @media (max-width: 630px) {
+      body {
+        padding: 10px;
+      }
+
+      #test-container {
+        padding: 19px 14px;
+      }
+
+      .variables {
+        grid-template-columns: 1fr;
+      }
+
+      .actions-container {
+        flex-direction: column;
+      }
     }
   </style>
 </head>
+
 <body>
+  <main id="test-container">
 
-<div id="test-container">
-  <span id="Nombre">Atleta no definido</span>
-  
-  <div class="test-row">
-    <select id="test-select" required>
-      <option value="SLR">SLR</option>
-      <option value="ANKLE">ANKLE</option>
-      <option value="DJ">DJ</option>
-      <option value="CMJ">CMJ</option>
-      <option value="SJ">SJ</option>
-      <option value="30-15">30-15</option>
-      <option value="PESO">PESO</option>
-      <option value="ENVERGADURA">ENVERGADURA</option>
-      <option value="ALTURA">ALTURA</option>
-    </select>
+    <span id="Nombre">Atleta no definido</span>
+    <p class="subtitulo">
+      Evolución y comparación de tests
+    </p>
 
-    <select id="lateralidad-select" disabled>
-      <option value="" disabled selected>Lateralidad</option>
-      <option value="IZQ">IZQ</option>
-      <option value="DCH">DCH</option>
-    </select>
-  </div>
+    <div class="variables">
 
-  <label for="CampoDeTexto1">Valor último</label>
-  <input type="text" id="CampoDeTexto1" readonly>
+      <section class="variable primera">
+        <h2>Variable 1</h2>
 
-  <label for="CampoDeTexto2">Fecha último</label>
-  <input type="text" id="CampoDeTexto2" readonly>
+        <div class="selectores">
+          <div>
+            <label for="test1">Test</label>
+            <select id="test1">
+              <option value="">Cargando tests...</option>
+            </select>
+          </div>
 
-  <label for="CampoDeTexto3">Valor mejor</label>
-  <input type="text" id="CampoDeTexto3" readonly>
+          <div>
+            <label for="lateralidad1">
+              Lateralidad
+            </label>
+            <select id="lateralidad1">
+              <option value="" selected>—</option>
+              <option value="IZQ">IZQ</option>
+              <option value="DCH">DCH</option>
+            </select>
+          </div>
+        </div>
+      </section>
 
-  <label for="CampoDeTexto4">Fecha mejor</label>
-  <input type="text" id="CampoDeTexto4" readonly>
+      <section class="variable segunda">
+        <h2>Variable 2 (opcional)</h2>
 
-  <div class="actions-container">
-    <button id="Enviar" class="btn-consultar">Consultar</button>
-    <a href="menu_principal.html" class="btn-menu" id="btn-menu">Menú</a>
-  </div>
-</div>
+        <div class="selectores">
+          <div>
+            <label for="test2">Test</label>
+            <select id="test2">
+              <option value="">Cargando tests...</option>
+            </select>
+          </div>
 
-<!-- Enlace al archivo JavaScript externo -->
-<script src="consultar_test.js" defer></script>
+          <div>
+            <label for="lateralidad2">
+              Lateralidad
+            </label>
+            <select id="lateralidad2">
+              <option value="" selected>—</option>
+              <option value="IZQ">IZQ</option>
+              <option value="DCH">DCH</option>
+            </select>
+          </div>
+        </div>
+      </section>
 
+    </div>
+
+    <div class="actions-container">
+      <button
+        id="Enviar"
+        class="btn-consultar"
+        type="button"
+      >
+        Consultar test
+      </button>
+
+      <a
+        href="menu_principal.html"
+        class="btn-menu"
+        id="btn-menu"
+      >
+        Menú
+      </a>
+    </div>
+
+    <section id="resultados" aria-live="polite">
+      <p class="mensaje">
+        Selecciona una o dos variables y pulsa
+        «Consultar test» para ver sus resultados.
+      </p>
+    </section>
+
+  </main>
+
+  <script src="consultar_test.js?v=2" defer></script>
 </body>
 </html>
