@@ -1,15 +1,18 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Registrar Test - Coach RVB</title>
+
   <style>
     * {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      font-family: -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
     }
 
     body {
@@ -34,6 +37,7 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
       margin-bottom: 22px;
     }
 
@@ -49,7 +53,6 @@
       text-decoration: none;
       display: inline-flex;
       align-items: center;
-      transition: background-color 0.2s;
     }
 
     .btn-back:hover {
@@ -78,6 +81,7 @@
     .form-group input,
     .form-group select {
       width: 100%;
+      min-width: 0;
       padding: 11px 14px;
       font-size: 14px;
       border: 1px solid #e1e4e8;
@@ -85,7 +89,8 @@
       outline: none;
       background-color: #ffffff;
       color: #333333;
-      transition: border-color 0.2s, box-shadow 0.2s;
+      transition: border-color 0.2s,
+                  box-shadow 0.2s;
     }
 
     .form-group input:read-only {
@@ -97,24 +102,36 @@
     .form-group input:focus,
     .form-group select:focus {
       border-color: #20c997;
-      box-shadow: 0 0 0 3px rgba(32, 201, 151, 0.1);
+      box-shadow: 0 0 0 3px
+        rgba(32, 201, 151, 0.1);
     }
 
     .test-row {
-      display: flex;
+      display: grid;
+      grid-template-columns: minmax(0, 1fr) 115px;
       gap: 10px;
     }
 
     .test-row select {
-      flex: 1;
+      width: 100%;
     }
 
-    #etiqueta4 {
-      font-size: 13px;
-      color: #666;
-      margin-top: -8px;
-      margin-bottom: 12px;
-      font-weight: 600;
+    .help-text {
+      margin-top: 6px;
+      font-size: 12px;
+      color: #6c757d;
+      line-height: 1.5;
+    }
+
+    .sync-status {
+      margin-top: 8px;
+      font-size: 12px;
+      color: #667785;
+      line-height: 1.4;
+    }
+
+    .sync-status.error {
+      color: #ac493b;
     }
 
     .actions-container {
@@ -144,55 +161,165 @@
     .btn-menu:hover {
       background-color: #1ba87e;
     }
+
+    .btn-submit:disabled {
+      opacity: 0.6;
+      cursor: wait;
+    }
+
+    @media (max-width: 420px) {
+      body {
+        padding: 10px;
+      }
+
+      .card {
+        padding: 22px 16px;
+      }
+    }
   </style>
 </head>
+
 <body>
 
   <div class="card">
+
     <div class="header-bar">
-      <button class="btn-back" id="btn-volver">← Volver</button>
+      <button
+        type="button"
+        class="btn-back"
+        id="btn-volver"
+      >
+        ← Volver
+      </button>
+
       <h2 class="title">Registrar Test</h2>
     </div>
-    
+
     <form id="form-registrar-test">
+
+      <!-- JUGADOR -->
       <div class="form-group">
         <label for="nombre">Usuario</label>
-        <input type="text" id="nombre" readonly required placeholder="Cargando usuario...">
+
+        <input
+          type="text"
+          id="nombre"
+          readonly
+          required
+          placeholder="Cargando usuario..."
+        >
       </div>
 
+      <!-- FECHA -->
       <div class="form-group">
         <label for="fecha">Fecha</label>
-        <input type="date" id="fecha" required>
+
+        <input
+          type="date"
+          id="fecha"
+          required
+        >
       </div>
 
+      <!-- SELECTORES -->
       <div class="form-group">
+
         <label for="test">Test</label>
+
         <div class="test-row">
-          <select id="test" required>
-            <option value="" disabled selected>Selecciona un test...</option>
+
+          <select id="test">
+            <option value="" selected>
+              Selecciona un test...
+            </option>
           </select>
-          <select id="lateralidad" disabled>
-            <option value="" disabled selected>Lateralidad</option>
+
+          <select id="lateralidad">
+            <option value="" selected>
+              —
+            </option>
+
             <option value="IZQ">IZQ</option>
             <option value="DCH">DCH</option>
           </select>
+
         </div>
+
+        <p
+          class="sync-status"
+          id="estado-tests"
+          aria-live="polite"
+        >
+          Cargando tests del jugador...
+        </p>
+
       </div>
 
-      <div id="etiqueta4"></div>
-
+      <!-- NUEVO CAMPO EDITABLE -->
       <div class="form-group">
-        <label for="resultado">Resultado</label>
-        <input type="number" id="resultado" step="any" required placeholder="Ingresa el resultado">
+
+        <label for="testRefinado">
+          Test refinado
+        </label>
+
+        <input
+          type="text"
+          id="testRefinado"
+          required
+          autocomplete="off"
+          placeholder="Ej.: ANKLEIZQ o NUEVOTEST"
+        >
+
+        <p class="help-text">
+          Se completa automáticamente con los
+          selectores, pero puedes modificarlo
+          o escribir un test nuevo.
+          Este será el valor utilizado al registrar.
+        </p>
+
       </div>
 
-      <div class="actions-container">
-        <button type="submit" class="btn-submit">Registrar</button>
-        <a href="menu_principal.html" class="btn-menu" id="btn-menu">Menú</a>
+      <!-- RESULTADO -->
+      <div class="form-group">
+
+        <label for="resultado">Resultado</label>
+
+        <input
+          type="number"
+          id="resultado"
+          step="any"
+          required
+          placeholder="Ingresa el resultado"
+        >
+
       </div>
+
+      <!-- BOTONES -->
+      <div class="actions-container">
+
+        <button
+          type="submit"
+          class="btn-submit"
+          id="btn-registrar"
+        >
+          Registrar
+        </button>
+
+        <a
+          href="menu_principal.html"
+          class="btn-menu"
+          id="btn-menu"
+        >
+          Menú
+        </a>
+
+      </div>
+
     </form>
+
   </div>
 
-  <script src="registrar_test.js" defer></script>
+  <script src="registrar_test.js?v=2" defer></script>
+
 </body>
 </html>
