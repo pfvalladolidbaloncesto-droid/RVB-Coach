@@ -3,34 +3,54 @@
 <html lang="es">
 <head>
   <meta charset="UTF-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#20c997">
+
   <title>Consultar Test - Coach RVB</title>
+
   <style>
     * {
       box-sizing: border-box;
-      margin: 0;
-      padding: 0;
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     body {
-      background: #f2f3f8;
-      display: flex;
-      justify-content: center;
-      align-items: flex-start;
-      min-height: 100vh;
+      margin: 0;
       padding: 20px;
+      min-height: 100vh;
+      background: #f2f3f8;
       color: #243345;
+      font-family: -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, Arial, sans-serif;
     }
 
     #test-container {
-      background: white;
       width: 100%;
       max-width: 850px;
-      padding: 26px 24px;
+      margin: 0 auto;
+      padding: 25px 24px;
+      background: #fff;
       border-radius: 20px;
       box-shadow: 0 10px 25px rgba(0, 0, 0, .04);
+    }
+
+    .cabecera {
+      display: flex;
+      align-items: flex-start;
+      gap: 12px;
+      margin-bottom: 22px;
+    }
+
+    .btn-volver {
+      flex: 0 0 34px;
+      width: 34px;
+      height: 34px;
+      padding: 0;
+      border: 1px solid #dce3e8;
+      border-radius: 9px;
+      background: #f6f8fa;
+      color: #324454;
+      font-size: 21px;
+      cursor: pointer;
     }
 
     #Nombre {
@@ -38,43 +58,45 @@
       font-size: 22px;
       font-weight: 800;
       color: #111;
-      margin-bottom: 5px;
     }
 
     .subtitulo {
-      color: #77818b;
+      margin: 4px 0 0;
       font-size: 13px;
-      margin-bottom: 22px;
+      color: #77818b;
     }
 
     .variables {
       display: grid;
-      grid-template-columns: repeat(2, minmax(0, 1fr));
+      grid-template-columns:
+        repeat(2, minmax(0, 1fr));
       gap: 12px;
     }
 
     .variable {
+      min-width: 0;
       padding: 14px;
       border: 1px solid #e1e5eb;
       border-radius: 12px;
     }
 
-    .variable.primera {
+    .primera {
       border-top: 4px solid #168d70;
     }
 
-    .variable.segunda {
+    .segunda {
       border-top: 4px solid #3858bb;
     }
 
     .variable h2 {
+      margin: 0 0 14px;
       font-size: 16px;
-      margin-bottom: 14px;
     }
 
     .selectores {
       display: grid;
-      grid-template-columns: minmax(0, 1fr) 110px;
+      grid-template-columns:
+        minmax(0, 1fr) 110px;
       gap: 10px;
     }
 
@@ -87,21 +109,27 @@
     }
 
     select {
+      width: 100%;
+      min-width: 0;
+      height: 44px;
       padding: 10px;
-      font-size: 14px;
       border: 1px solid #e1e4e8;
       border-radius: 10px;
       background: #fff;
       color: #333;
-      width: 100%;
-      min-width: 0;
-      height: 44px;
+      font-size: 14px;
     }
 
     select:focus {
       outline: none;
       border-color: #20c997;
-      box-shadow: 0 0 0 3px rgba(32, 201, 151, .13);
+      box-shadow: 0 0 0 3px
+        rgba(32, 201, 151, .13);
+    }
+
+    select:disabled {
+      background: #f6f7f9;
+      color: #77818b;
     }
 
     .actions-container {
@@ -114,27 +142,22 @@
     .btn-menu {
       flex: 1;
       padding: 13px;
-      background: #20c997;
-      color: white;
       border: 0;
       border-radius: 10px;
+      color: white;
       font-size: 15px;
       font-weight: 700;
-      text-align: center;
       text-decoration: none;
+      text-align: center;
       cursor: pointer;
+    }
+
+    .btn-consultar {
+      background: #20c997;
     }
 
     .btn-menu {
       background: #627281;
-    }
-
-    .btn-consultar:hover {
-      background: #1ba87e;
-    }
-
-    .btn-menu:hover {
-      background: #51606d;
     }
 
     .btn-consultar:disabled {
@@ -144,40 +167,53 @@
 
     #resultados {
       min-height: 265px;
+      padding: 16px;
       background: #fafbfc;
       border: 1px solid #e2e8ed;
       border-radius: 12px;
-      padding: 16px;
     }
 
     #resultados h2 {
+      margin: 0 0 12px;
       font-size: 18px;
-      margin-bottom: 12px;
     }
 
     .mensaje {
+      margin: 0;
       color: #627183;
       font-size: 14px;
       line-height: 1.5;
+    }
+
+    .btn-reintentar {
+      display: inline-block;
+      margin-top: 14px;
+      padding: 9px 13px;
+      border: 1px solid #20c997;
+      border-radius: 8px;
+      background: white;
+      color: #168d70;
+      font-weight: 700;
+      cursor: pointer;
     }
 
     .leyenda {
       display: flex;
       flex-wrap: wrap;
       gap: 10px 20px;
+      margin-bottom: 14px;
       font-size: 13px;
       font-weight: 700;
-      margin-bottom: 14px;
     }
 
     .leyenda-item::before {
       content: "";
       display: inline-block;
-      width: 16px;
+      width: 17px;
       height: 0;
+      margin-right: 8px;
       border-top: 3px solid currentColor;
       vertical-align: middle;
-      margin-right: 8px;
     }
 
     .grafica-scroll {
@@ -195,15 +231,15 @@
 
     .detalle-punto {
       min-height: 22px;
-      font-size: 13px;
       margin-top: 12px;
+      font-size: 13px;
     }
 
     .nota {
       margin-top: 10px;
       color: #697c89;
       font-size: 12px;
-      line-height: 1.4;
+      line-height: 1.5;
     }
 
     @media (max-width: 630px) {
@@ -227,23 +263,48 @@
 </head>
 
 <body>
+
   <main id="test-container">
 
-    <span id="Nombre">Atleta no definido</span>
-    <p class="subtitulo">
-      Evolución y comparación de tests
-    </p>
+    <header class="cabecera">
+
+      <button
+        id="volver-selector"
+        class="btn-volver"
+        type="button"
+        title="Volver al selector"
+        aria-label="Volver al selector de jugadores"
+      >
+        ←
+      </button>
+
+      <div>
+        <span id="Nombre">
+          Atleta no definido
+        </span>
+
+        <p class="subtitulo">
+          Evolución y comparación de tests
+        </p>
+      </div>
+
+    </header>
 
     <div class="variables">
 
       <section class="variable primera">
+
         <h2>Variable 1</h2>
 
         <div class="selectores">
+
           <div>
             <label for="test1">Test</label>
-            <select id="test1">
-              <option value="">Cargando tests...</option>
+
+            <select id="test1" disabled>
+              <option value="">
+                Cargando tests...
+              </option>
             </select>
           </div>
 
@@ -251,23 +312,30 @@
             <label for="lateralidad1">
               Lateralidad
             </label>
+
             <select id="lateralidad1">
               <option value="" selected>—</option>
               <option value="IZQ">IZQ</option>
               <option value="DCH">DCH</option>
             </select>
           </div>
+
         </div>
       </section>
 
       <section class="variable segunda">
+
         <h2>Variable 2 (opcional)</h2>
 
         <div class="selectores">
+
           <div>
             <label for="test2">Test</label>
-            <select id="test2">
-              <option value="">Cargando tests...</option>
+
+            <select id="test2" disabled>
+              <option value="">
+                Cargando tests...
+              </option>
             </select>
           </div>
 
@@ -275,22 +343,26 @@
             <label for="lateralidad2">
               Lateralidad
             </label>
+
             <select id="lateralidad2">
               <option value="" selected>—</option>
               <option value="IZQ">IZQ</option>
               <option value="DCH">DCH</option>
             </select>
           </div>
+
         </div>
       </section>
 
     </div>
 
     <div class="actions-container">
+
       <button
         id="Enviar"
         class="btn-consultar"
         type="button"
+        disabled
       >
         Consultar test
       </button>
@@ -298,21 +370,27 @@
       <a
         href="menu_principal.html"
         class="btn-menu"
-        id="btn-menu"
       >
         Menú
       </a>
+
     </div>
 
-    <section id="resultados" aria-live="polite">
+    <section
+      id="resultados"
+      aria-live="polite"
+    >
       <p class="mensaje">
-        Selecciona una o dos variables y pulsa
-        «Consultar test» para ver sus resultados.
+        Cargando lista de tests...
       </p>
     </section>
 
   </main>
 
-  <script src="consultar_test.js?v=2" defer></script>
+  <script
+    src="consultar_test.js?v=3"
+    defer
+  ></script>
+
 </body>
 </html>
