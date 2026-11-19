@@ -15,6 +15,8 @@ function obtenerPantallaDestino() {
       return "rpe.html";
     case "Registrar test":
       return "registrar_test.html";
+    case "Registrar lesión":
+      return "registrar_lesion.html";
     case "Consultar test":
       return "consultar_test.html";
     case "Carga Jugador":

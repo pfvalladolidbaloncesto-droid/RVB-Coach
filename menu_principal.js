@@ -122,7 +122,7 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   btnLesion.addEventListener("click", () => {
-    window.open("https://docs.google.com/forms/d/e/1FAIpQLScLzsu7Ta7AZL7fojMHBcDcMAqpLKMrCHoHuftQUdOOpvlYZQ/viewform?usp=sf_link", "_blank");
+    guardarYRedirigir("Registrar lesión", "selector.html");
   });
 
   btnLogOut.addEventListener("click", () => {
