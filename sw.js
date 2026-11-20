@@ -1,4 +1,4 @@
-const CACHE_NAME = "coach-rvb-v9";
+const CACHE_NAME = "coach-rvb-v10-informes";
 
 const ASSETS = [
   "./",
@@ -13,6 +13,11 @@ const ASSETS = [
   "./registrar_lesion.js",
   "./bodymap_lesiones.png",
   "./menu_principal.js",
+  "./informes_api.js",
+  "./carga.html",
+  "./carga.js",
+  "./carga_jugador.html",
+  "./carga_jugador.js",
   "./manifest.json",
   "./cbc.png"
 ];

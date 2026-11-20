@@ -1,65 +1,84 @@
+/* Coach RVB · Carga Jugador - vista previa PDF y descarga manual. */
 document.addEventListener("DOMContentLoaded", () => {
-  const inputEquipo = document.getElementById("inputEquipo");
-  const inputJugador = document.getElementById("inputJugador");
-  const inputFecha = document.getElementById("inputFecha");
-  const btnEnviar = document.getElementById("btnEnviarCargaJugador");
-  const btnVolver = document.getElementById("btnVolverSelector");
+  const $ = id => document.getElementById(id);
+  const equipo = String(localStorage.getItem("Equipo") || "").trim();
+  const jugador = String(localStorage.getItem("User") ||
+    localStorage.getItem("jugadorSeleccionado") || "").trim();
 
-  // 1. Recuperar los datos guardados desde el selector y menú principal
-  const equipoActual = localStorage.getItem("Equipo") || "";
-  const usuarioActual = localStorage.getItem("User") || localStorage.getItem("jugadorSeleccionado") || "";
+  $("inputEquipo").value = equipo;
+  $("inputJugador").value = jugador;
+  $("inputFecha").value = RVBInformes.fechaHoy();
 
-  // Mostrar los valores en los campos correspondientes
-  inputEquipo.value = equipoActual;
-  inputJugador.value = usuarioActual;
+  const boton = $("btnEnviarCargaJugador");
+  const mensaje = $("estadoCargaJugador");
+  const preview = $("vistaPdfJugador");
+  const panel = $("panelPdfJugador");
+  const abrir = $("abrirPdfJugador");
+  const descargar = $("descargarPdfJugador");
+  let ocupado = false;
 
-  // 2. Configurar la fecha actual por defecto (YYYY-MM-DD)
-  const hoy = new Date();
-  const year = hoy.getFullYear();
-  const month = String(hoy.getMonth() + 1).padStart(2, '0');
-  const day = String(hoy.getDate()).padStart(2, '0');
-  inputFecha.value = `${year}-${month}-${day}`;
+  function ocultarPreview() {
+    panel.hidden = true;
+    preview.removeAttribute("src");
+    $("contenedorCargaJugador").classList.remove("vista-abierta");
+  }
 
-  // 3. Lógica del Botón Enviar
-  btnEnviar.addEventListener("click", async () => {
-    const fechaSeleccionada = inputFecha.value;
+  $("inputFecha").addEventListener("change", ocultarPreview);
 
-    if (!equipoActual || !usuarioActual || !fechaSeleccionada) {
-      alert("Faltan datos obligatorios (Equipo, Jugador o Fecha).");
+  boton.addEventListener("click", async () => {
+    if (ocupado) return;
+    const fechaISO = $("inputFecha").value;
+    if (!equipo || !jugador || !fechaISO) {
+      mensaje.textContent = "Faltan equipo, jugador o fecha.";
       return;
     }
 
-    // Convertir la fecha a formato DD/MM/YYYY para que coincida con tu Apps Script original
-    const partesFecha = fechaSeleccionada.split("-");
-    const fechaFormateada = `${partesFecha[2]}/${partesFecha[1]}/${partesFecha[0]}`;
+    let fecha;
+    try { fecha = RVBInformes.fechaParaHoja(fechaISO); }
+    catch (e) { mensaje.textContent = e.message; return; }
 
-    // URL de Apps Script específica para "Carga Jugador" extraída de tus bloques originales
-    const urlWeb = `https://script.google.com/macros/s/AKfycbwXRzLttUWIv82OeF1OI2UU06EADWvwBtcFKbck-fkdXesMKLTZUHbhrT9sP_40HhMexA/exec?textbox1=${encodeURIComponent(equipoActual)}&textbox2=${encodeURIComponent(usuarioActual)}&textbox3=${encodeURIComponent(fechaFormateada)}`;
+    ocupado = true;
+    boton.disabled = true;
+    boton.textContent = "Preparando...";
+    mensaje.textContent = "Actualizando el informe de jugador...";
+    ocultarPreview();
 
     try {
-      btnEnviar.textContent = "Enviando...";
-      btnEnviar.disabled = true;
+      const resultado = await RVBInformes.solicitar({
+        accion: "jugador", textbox1: equipo,
+        textbox2: jugador, textbox3: fecha
+      });
+      if (!resultado || !resultado.ok || resultado.informe !== "jugador") {
+        throw new Error(resultado?.error ||
+          "Apps Script no confirmó la actualización del informe.");
+      }
+      if (resultado.numG13 !== equipo ||
+          resultado.numG14 !== jugador || resultado.numG15 !== fecha) {
+        throw new Error("Los valores confirmados por el servidor no coinciden.");
+      }
 
-      // Realizar la petición GET al servidor (equivalente a Web1.Get en App Inventor)
-      await fetch(urlWeb);
-
-      // Enlace del PDF específico para "Carga Jugador" extraído de tus bloques originales
-      const urlPdf = "https://docs.google.com/spreadsheets/d/1waAXuyLOYY7yp0WQzv17OTOPvcZ4uvuhKGkp1YdlOrQ/export?format=pdf&gid=1857963185&range=E1:S110&size=A4&portrait=true&fitw=true&top_margin=0.5&bottom_margin=0.5&left_margin=0.5&right_margin=0.5";
-
-      // Abrir el PDF generado en una pestaña nueva
-      window.open(urlPdf, "_blank");
-
+      const urlVista = RVBInformes.urlPdf("jugador", false);
+      const urlDescarga = RVBInformes.urlPdf("jugador", true);
+      abrir.href = urlVista;
+      descargar.href = urlDescarga;
+      panel.hidden = false;
+      $("contenedorCargaJugador").classList.add("vista-abierta");
+      mensaje.textContent = "Informe actualizado. Puedes verlo abajo o abrirlo en otra pestaña.";
+      // Permitir el recálculo de fórmulas antes de consultar el PDF.
+      await new Promise(resolve => setTimeout(resolve, 700));
+      preview.src = urlVista;
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
-      console.error("Error al enviar los datos:", error);
-      alert("Hubo un error al conectar con el servidor.");
+      console.error("Carga Jugador:", error);
+      mensaje.textContent = error.message || "No se pudo preparar el informe.";
     } finally {
-      btnEnviar.textContent = "Enviar";
-      btnEnviar.disabled = false;
+      ocupado = false;
+      boton.disabled = false;
+      boton.textContent = "Ver informe";
     }
   });
 
-  // Botón para regresar al selector de jugadores
-  btnVolver.addEventListener("click", () => {
+  $("btnVolverSelector").addEventListener("click", () => {
     window.location.href = "selector.html";
   });
 });

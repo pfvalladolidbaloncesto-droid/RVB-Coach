@@ -1,0 +1,34 @@
+COACH RVB · CARGA JUGADOR Y CARGA EQUIPO · VISTA PREVIA PDF
+
+FRONTEND (GitHub Pages):
+Sustituye: carga_jugador.html, carga_jugador.js, carga.html, carga.js, sw.js.
+Añade: informes_api.js.
+No modifiques el login, selector, tests, registro de lesiones ni RPE.
+
+GOOGLE APPS SCRIPT:
+En el proyecto al que pertenece la URL:
+https://script.google.com/macros/s/AKfycbwXRzLttUWIv82OeF1OI2UU06EADWvwBtcFKbck-fkdXesMKLTZUHbhrT9sP_40HhMexA/exec
+elimina las DOS funciones doGet(e) antiguas (en los archivos 3 y 4),
+y pega AppsScript_Informes.gs.
+Conserva las funciones PC(), PP(), Imprimir().
+Implementar > Gestionar implementaciones > Editar > Nueva versión > Implementar.
+La URL /exec existente se conserva.
+
+FUNCIONAMIENTO:
+Carga Jugador: escribe G13=equipo, G14=jugador, G15=fecha en Informe jugadores.
+Carga Equipo: escribe B9=equipo, B10=fecha en Informe equipo.
+La PWA verifica la respuesta JSONP (evita fallos CORS) y presenta el PDF
+sin descarga automática. Dos enlaces: abrir en pestaña y descargar.
+La vista previa utiliza attachment=false; el botón Descargar, attachment=true.
+
+NOTAS IMPORTANTES:
+- Para ver el PDF se necesita permiso para consultar el Google Spreadsheet.
+- Si el navegador no permite incrustar el PDF en un iframe, usar el enlace
+  «Abrir PDF en otra pestaña» (y descargar desde el visor si se desea).
+- Estos informes son hojas de cálculo COMPARTIDAS que cambian sus celdas de filtro.
+  Dos entrenadores generando informes simultáneos pueden interferirse;
+  para aislar por usuario habrá que generar archivos PDF por petición.
+- El endpoint heredado sigue actualizando celdas por GET sin comprobar la
+  autenticación del login. No utilizar para información sensible hasta
+  incorporar una validación de autorización en el servidor.
+- No probado contra Google Sheets en vivo; verificar con un jugador ficticio.
