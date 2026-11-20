@@ -1,75 +1,365 @@
-document.addEventListener("DOMContentLoaded", () => {
-  const labelID = document.getElementById("labelID");
-  const btnVolver = document.getElementById("btnVolver");
-  const btnEnviar = document.getElementById("btnEnviar");
-  const btnMenuPrincipal = document.getElementById("btnMenuPrincipal");
 
-  // Elementos de sliders y sus etiquetas de valor
-  const sliderSoreness = document.getElementById("deslizadorSoreness");
-  const respuestaSoreness = document.getElementById("respuestaSoreness");
-  
-  const sliderFatiga = document.getElementById("deslizadorFatiga");
-  const respuestaFatiga = document.getElementById("respuestaFatiga");
+/*
+ * Coach RVB · Registro Readiness
+ *
+ * Envío directo a Google Forms.
+ *
+ * Campos:
+ * - ID
+ * - Dolor muscular
+ * - Fatiga
+ * - Sueño
+ * - Estrés
+ *
+ * Los cuatro sliders comienzan sin
+ * ninguna respuesta seleccionada.
+ */
 
-  const sliderSueno = document.getElementById("deslizadorSueno");
-  const respuestaSueno = document.getElementById("respuestaSueno");
+// ============================================
+// GOOGLE FORMS
+// ============================================
 
-  const sliderEstres = document.getElementById("deslizadorEstres");
-  const respuestaEstres = document.getElementById("respuestaEstres");
+const URL_READINESS =
+  "https://docs.google.com/forms/d/e/1FAIpQLSf-xdXvGr9i_uofbSLhHrcyTcOalS6lBC4UK1iANSJf2atM4Q/formResponse";
 
-  // Lectura normalizada de LocalStorage usando las claves correctas
-  const jugadorSeleccionado = localStorage.getItem("User") || localStorage.getItem("jugadorSeleccionado") || "Jugador";
-  const equipoSeleccionado = localStorage.getItem("Equipo") || localStorage.getItem("equipoUsuario") || "Junior A";
+const ENTRY_ID = "entry.467683432";
 
-  if (labelID) {
-    labelID.textContent = `${jugadorSeleccionado}`;
-  }
+const ENTRY_DOLOR = "entry.148315985";
 
-  // Sincronizar cambios en los sliders en tiempo real
-  if (sliderSoreness) sliderSoreness.addEventListener("input", (e) => { respuestaSoreness.textContent = e.target.value; });
-  if (sliderFatiga) sliderFatiga.addEventListener("input", (e) => { respuestaFatiga.textContent = e.target.value; });
-  if (sliderSueno) sliderSueno.addEventListener("input", (e) => { respuestaSueno.textContent = e.target.value; });
-  if (sliderEstres) sliderEstres.addEventListener("input", (e) => { respuestaEstres.textContent = e.target.value; });
+const ENTRY_FATIGA = "entry.1935157596";
 
-  // Botón Volver al selector
-  if (btnVolver) {
-    btnVolver.addEventListener("click", () => {
-      window.location.href = "selector.html";
-    });
-  }
+const ENTRY_SUENO = "entry.1299849898";
 
-  // Botón Menú Principal
-  if (btnMenuPrincipal) {
-    btnMenuPrincipal.addEventListener("click", () => {
-      window.location.href = "menu_principal.html";
-    });
-  }
+const ENTRY_ESTRES = "entry.1016767713";
 
-  // Envío de datos de Readiness
-  if (btnEnviar) {
-    btnEnviar.addEventListener("click", async () => {
-      const fecha = new Date().toISOString().split('T')[0];
+// ============================================
+// INICIALIZACIÓN
+// ============================================
 
-      // URL de tu formulario/script de Google para Readiness (ajusta los entry.X si procede)
-      const baseUrl = "https://docs.google.com/forms/d/e/TU_FORM_ID/formResponse";
-      
-      const params = new URLSearchParams({
-        "entry.FECHA": fecha,
-        "entry.USUARIO": jugadorSeleccionado,
-        "entry.EQUIPO": equipoSeleccionado,
-        "entry.SORENESS": sliderSoreness.value,
-        "entry.FATIGA": sliderFatiga.value,
-        "entry.SUENO": sliderSueno.value,
-        "entry.ESTRES": sliderEstres.value
-      });
+document.addEventListener(
+  "DOMContentLoaded",
+  () => {
 
-      try {
-        await fetch(`${baseUrl}?${params.toString()}`, { method: 'POST', mode: 'no-cors' });
-        alert("Readiness registrado con éxito");
-        window.location.href = "selector.html";
-      } catch (error) {
-        alert("Error al enviar los datos: " + error);
+    const $ = id =>
+      document.getElementById(id);
+
+    // ======================================
+    // JUGADOR SELECCIONADO
+    // ======================================
+
+    const jugador = String(
+      localStorage.getItem("User") ||
+      localStorage.getItem("jugadorSeleccionado") ||
+      ""
+    ).trim();
+
+    $("labelID").textContent =
+      jugador || "Sin jugador seleccionado";
+
+    // ======================================
+    // CONFIGURACIÓN DE LOS SLIDERS
+    // ======================================
+
+    const escalas = [
+      {
+        entrada: ENTRY_DOLOR,
+        slider: $("deslizadorSoreness"),
+        salida: $("respuestaSoreness"),
+        nombre: "dolor muscular",
+        valor: null
+      },
+
+      {
+        entrada: ENTRY_FATIGA,
+        slider: $("deslizadorFatiga"),
+        salida: $("respuestaFatiga"),
+        nombre: "fatiga",
+        valor: null
+      },
+
+      {
+        entrada: ENTRY_SUENO,
+        slider: $("deslizadorSueno"),
+        salida: $("respuestaSueno"),
+        nombre: "sueño",
+        valor: null
+      },
+
+      {
+        entrada: ENTRY_ESTRES,
+        slider: $("deslizadorEstres"),
+        salida: $("respuestaEstres"),
+        nombre: "estrés",
+        valor: null
       }
-    });
+    ];
+
+    const btnEnviar = $("btnEnviar");
+
+    let enviando = false;
+
+    // ======================================
+    // MENSAJES DE ESTADO
+    // ======================================
+
+    function informar(mensaje, clase = "") {
+
+      const estado = $("estadoEnvio");
+
+      estado.textContent = mensaje;
+
+      estado.className = clase;
+    }
+
+    // ======================================
+    // INICIALIZACIÓN SIN RESPUESTAS
+    // ======================================
+
+    for (const escala of escalas) {
+
+      /*
+       * Un input de tipo range necesita un
+       * valor numérico interno.
+       *
+       * Aunque el HTML utiliza value="5",
+       * ese valor NO se considera seleccionado.
+       *
+       * Solo se guardará un número cuando
+       * el entrenador interactúe con la escala.
+       */
+
+      escala.valor = null;
+
+      escala.salida.textContent = "-";
+
+      escala.slider
+        .closest(".slider-group")
+        .classList.remove("seleccionado");
+
+      // Guardar el valor tras la interacción
+
+      const seleccionar = () => {
+
+        escala.valor =
+          Number(escala.slider.value);
+
+        escala.salida.textContent =
+          String(escala.valor);
+
+        escala.slider
+          .closest(".slider-group")
+          .classList.add("seleccionado");
+
+        informar("");
+      };
+
+      // Cambio mediante arrastre o teclado
+
+      escala.slider.addEventListener(
+        "input",
+        seleccionar
+      );
+
+      // Permite seleccionar 5 tocando
+      // directamente el centro del slider.
+
+      escala.slider.addEventListener(
+        "pointerup",
+        seleccionar
+      );
+    }
+
+    // ======================================
+    // BOTÓN VOLVER
+    // ======================================
+
+    $("btnVolver").addEventListener(
+      "click",
+      () => {
+
+        window.location.href =
+          "selector.html";
+      }
+    );
+
+    // ======================================
+    // BOTÓN MENÚ
+    // ======================================
+
+    $("btnMenuPrincipal").addEventListener(
+      "click",
+      () => {
+
+        window.location.href =
+          "menu_principal.html";
+      }
+    );
+
+    // ======================================
+    // COMPROBAR JUGADOR
+    // ======================================
+
+    if (!jugador) {
+
+      btnEnviar.disabled = true;
+
+      informar(
+        "Selecciona un jugador antes de registrar el Readiness.",
+        "error"
+      );
+    }
+
+    // ======================================
+    // BOTÓN ENVIAR
+    // ======================================
+
+    btnEnviar.addEventListener(
+      "click",
+      async () => {
+
+        if (enviando || !jugador) {
+          return;
+        }
+
+        // ==================================
+        // VALIDAR LAS CUATRO RESPUESTAS
+        // ==================================
+
+        const pendientes =
+          escalas.filter(
+            escala => escala.valor === null
+          );
+
+        if (pendientes.length) {
+
+          const nombres =
+            pendientes.map(
+              escala => escala.nombre
+            );
+
+          informar(
+            "Falta indicar: " +
+            nombres.join(", ") +
+            ".",
+            "error"
+          );
+
+          return;
+        }
+
+        // ==================================
+        // PREPARAR DATOS PARA GOOGLE FORMS
+        // ==================================
+
+        const parametros =
+          new URLSearchParams();
+
+        // ID del jugador
+
+        parametros.set(
+          ENTRY_ID,
+          jugador
+        );
+
+        // Los cuatro valores de Readiness
+
+        for (const escala of escalas) {
+
+          parametros.set(
+            escala.entrada,
+            String(escala.valor)
+          );
+        }
+
+        /*
+         * Equivalente a:
+         *
+         * entry.467683432 = jugador
+         * entry.148315985 = dolor muscular
+         * entry.1935157596 = fatiga
+         * entry.1299849898 = sueño
+         * entry.1016767713 = estrés
+         */
+
+        // ==================================
+        // BLOQUEAR ENVÍOS DUPLICADOS
+        // ==================================
+
+        enviando = true;
+
+        btnEnviar.disabled = true;
+
+        btnEnviar.textContent =
+          "Enviando...";
+
+        informar(
+          "Enviando Readiness a Google Forms..."
+        );
+
+        // ==================================
+        // ENVÍO
+        // ==================================
+
+        try {
+
+          await fetch(
+            URL_READINESS,
+            {
+              method: "POST",
+              mode: "no-cors",
+              credentials: "omit",
+              cache: "no-store",
+              body: parametros
+            }
+          );
+
+          /*
+           * Con no-cors no se puede leer
+           * la respuesta de Google Forms.
+           *
+           * Por tanto, no podemos asegurar
+           * que el registro se haya guardado.
+           */
+
+          informar(
+            "Solicitud enviada. Comprueba " +
+            "la hoja de respuestas para " +
+            "confirmar el registro.",
+            "exito"
+          );
+
+          btnEnviar.textContent =
+            "Solicitud enviada";
+
+          /*
+           * Se mantiene deshabilitado el
+           * botón para evitar duplicados.
+           *
+           * Para otro registro, vuelve
+           * al selector de jugadores.
+           */
+
+        } catch (error) {
+
+          console.error(
+            "Error enviando Readiness:",
+            error
+          );
+
+          informar(
+            "No se pudo completar el envío. " +
+            "Comprueba la hoja antes de " +
+            "intentarlo de nuevo.",
+            "error"
+          );
+
+          enviando = false;
+
+          btnEnviar.disabled = false;
+
+          btnEnviar.textContent = "Enviar";
+        }
+      }
+    );
   }
-});
+);
