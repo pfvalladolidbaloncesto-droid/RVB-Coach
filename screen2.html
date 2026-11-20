@@ -1,12 +1,13 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
   <script src="sesion_guard.js?v=1"></script>
-
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Registro Readiness - Coach RVB</title>
   <link rel="stylesheet" href="style.css?v=3" />
+
   <style>
     .readiness-container {
       background: #ffffff;
@@ -21,7 +22,13 @@
       display: flex;
       justify-content: space-between;
       align-items: center;
+      gap: 12px;
       margin-bottom: 20px;
+    }
+
+    .header-readiness h2 {
+      margin: 0;
+      overflow-wrap: anywhere;
     }
 
     .slider-group {
@@ -41,9 +48,10 @@
     .slider-value {
       color: #20c997;
       font-size: 1.1rem;
+      min-width: 1.5em;
+      text-align: right;
     }
 
-    /* Estilos base de los Sliders */
     input[type="range"] {
       -webkit-appearance: none;
       appearance: none;
@@ -54,17 +62,24 @@
       cursor: pointer;
     }
 
-    /* Sliders 1, 2 y 4: Verde (0) a Rojo (10) */
     .slider-green-to-red {
-      background: linear-gradient(to right, #28a745, #ffc107, #dc3545);
+      background: linear-gradient(
+        to right,
+        #28a745,
+        #ffc107,
+        #dc3545
+      );
     }
 
-    /* Slider 3 (Sueño): Rojo (0) a Verde (10) */
     .slider-red-to-green {
-      background: linear-gradient(to right, #dc3545, #ffc107, #28a745);
+      background: linear-gradient(
+        to right,
+        #dc3545,
+        #ffc107,
+        #28a745
+      );
     }
 
-    /* Personalización del tirador (Thumb) */
     input[type="range"]::-webkit-slider-thumb {
       -webkit-appearance: none;
       appearance: none;
@@ -73,7 +88,7 @@
       border-radius: 50%;
       background: #ffffff;
       border: 2px solid #333;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
     }
 
     input[type="range"]::-moz-range-thumb {
@@ -82,7 +97,31 @@
       border-radius: 50%;
       background: #ffffff;
       border: 2px solid #333;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+      box-shadow: 0 2px 4px rgba(0, 0, 0, .2);
+    }
+
+    /* Sin selección no mostramos el tirador */
+
+    .slider-group:not(.seleccionado)
+    input[type="range"]::-webkit-slider-thumb {
+      opacity: 0;
+    }
+
+    .slider-group:not(.seleccionado)
+    input[type="range"]::-moz-range-thumb {
+      opacity: 0;
+    }
+
+    input[type="range"]:focus-visible {
+      outline: 3px solid #1ba87e;
+      outline-offset: 6px;
+    }
+
+    .ayuda-readiness {
+      margin: -5px 0 20px;
+      font-size: 13px;
+      color: #637487;
+      line-height: 1.4;
     }
 
     .actions-group {
@@ -103,12 +142,17 @@
       background-color: #20c997;
       cursor: pointer;
       text-align: center;
-      transition: background-color 0.2s;
+      transition: background-color .2s;
     }
 
     .actions-group button:hover,
     .header-readiness button:hover {
       background-color: #1ba87e;
+    }
+
+    .actions-group button:disabled {
+      opacity: .55;
+      cursor: wait;
     }
 
     .header-readiness button {
@@ -117,57 +161,168 @@
       font-size: 14px !important;
       flex: initial !important;
     }
+
+    #estadoEnvio {
+      min-height: 1.2em;
+      margin: 12px 0 0;
+      font-size: 13px;
+      color: #637487;
+      line-height: 1.4;
+    }
+
+    #estadoEnvio.error {
+      color: #b13636;
+    }
+
+    #estadoEnvio.exito {
+      color: #147b56;
+    }
   </style>
 </head>
+
 <body>
   <div class="main-container">
     <div class="readiness-container">
-      
+
       <div class="header-readiness">
-        <button id="btnVolver">← Atrás</button>
+        <button id="btnVolver" type="button">
+          ← Atrás
+        </button>
+
         <h2 id="labelID">Cargando...</h2>
       </div>
 
-      <div class="slider-group">
-        <div class="slider-label-header">
-          <label for="deslizadorSoreness">Dolor muscular</label>
-          <span id="respuestaSoreness" class="slider-value">5</span>
-        </div>
-        <input type="range" id="deslizadorSoreness" class="slider-green-to-red" min="0" max="10" value="5" />
-      </div>
+      <p class="ayuda-readiness">
+        Selecciona un valor de 0 a 10 en cada escala.
+        «-» significa que todavía no has indicado
+        una respuesta.
+      </p>
+
+      <!-- DOLOR MUSCULAR -->
 
       <div class="slider-group">
         <div class="slider-label-header">
-          <label for="deslizadorFatiga">Fatiga</label>
-          <span id="respuestaFatiga" class="slider-value">5</span>
+          <label for="deslizadorSoreness">
+            Dolor muscular
+          </label>
+
+          <output
+            id="respuestaSoreness"
+            class="slider-value"
+            for="deslizadorSoreness"
+          >-</output>
         </div>
-        <input type="range" id="deslizadorFatiga" class="slider-green-to-red" min="0" max="10" value="5" />
+
+        <input
+          type="range"
+          id="deslizadorSoreness"
+          class="slider-green-to-red"
+          min="0"
+          max="10"
+          step="1"
+          value="5"
+        />
       </div>
+
+      <!-- FATIGA -->
 
       <div class="slider-group">
         <div class="slider-label-header">
-          <label for="deslizadorSueno">Sueño</label>
-          <span id="respuestaSueno" class="slider-value">5</span>
+          <label for="deslizadorFatiga">
+            Fatiga
+          </label>
+
+          <output
+            id="respuestaFatiga"
+            class="slider-value"
+            for="deslizadorFatiga"
+          >-</output>
         </div>
-        <input type="range" id="deslizadorSueno" class="slider-red-to-green" min="0" max="10" value="5" />
+
+        <input
+          type="range"
+          id="deslizadorFatiga"
+          class="slider-green-to-red"
+          min="0"
+          max="10"
+          step="1"
+          value="5"
+        />
       </div>
+
+      <!-- SUEÑO -->
 
       <div class="slider-group">
         <div class="slider-label-header">
-          <label for="deslizadorEstres">Estrés</label>
-          <span id="respuestaEstres" class="slider-value">5</span>
+          <label for="deslizadorSueno">
+            Sueño
+          </label>
+
+          <output
+            id="respuestaSueno"
+            class="slider-value"
+            for="deslizadorSueno"
+          >-</output>
         </div>
-        <input type="range" id="deslizadorEstres" class="slider-green-to-red" min="0" max="10" value="5" />
+
+        <input
+          type="range"
+          id="deslizadorSueno"
+          class="slider-red-to-green"
+          min="0"
+          max="10"
+          step="1"
+          value="5"
+        />
       </div>
+
+      <!-- ESTRÉS -->
+
+      <div class="slider-group">
+        <div class="slider-label-header">
+          <label for="deslizadorEstres">
+            Estrés
+          </label>
+
+          <output
+            id="respuestaEstres"
+            class="slider-value"
+            for="deslizadorEstres"
+          >-</output>
+        </div>
+
+        <input
+          type="range"
+          id="deslizadorEstres"
+          class="slider-green-to-red"
+          min="0"
+          max="10"
+          step="1"
+          value="5"
+        />
+      </div>
+
+      <!-- BOTONES -->
 
       <div class="actions-group">
-        <button id="btnEnviar">Enviar</button>
-        <button id="btnMenuPrincipal">Menú</button>
+        <button id="btnEnviar" type="button">
+          Enviar
+        </button>
+
+        <button id="btnMenuPrincipal" type="button">
+          Menú
+        </button>
       </div>
+
+      <p
+        id="estadoEnvio"
+        role="status"
+        aria-live="polite"
+      ></p>
 
     </div>
   </div>
 
-  <script src="screen2.js" defer></script>
+  <script src="screen2.js?v=2" defer></script>
 </body>
 </html>
