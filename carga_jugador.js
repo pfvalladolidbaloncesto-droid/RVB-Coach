@@ -1,73 +1,122 @@
-/* Coach RVB · Carga Jugador (mismo flujo de App Inventor).
- * Actualiza G13, G14, G15 y abre directamente el PDF original de PP().
- * No crea un PDF nuevo ni utiliza iframe o URL /export.
+/*
+ * Coach RVB · Carga Jugador
+ * Escribe G13/G14/G15 y recibe un PDF REAL generado por Apps Script.
+ * Hoja Informe jugadores, rango E1:S110. Sin fechas restringidas.
+ * Reutiliza informes_api.js ya instalado y funcionando para Carga Equipo.
  */
 document.addEventListener("DOMContentLoaded", () => {
   const $ = id => document.getElementById(id);
   const equipo = String(localStorage.getItem("Equipo") || "").trim();
-  const jugador = String(localStorage.getItem("User") ||
-    localStorage.getItem("jugadorSeleccionado") || "").trim();
-  $("inputEquipo").value = equipo;
-  $("inputJugador").value = jugador;
-  $("inputFecha").value = RVBInformes.fechaHoy();
+  const jugador = String(
+    localStorage.getItem("User") ||
+    localStorage.getItem("jugadorSeleccionado") || ""
+  ).trim();
 
   const boton = $("btnEnviarCargaJugador");
   const estado = $("estadoCargaJugador");
-  const panel = $("panelEnlaceJugador");
-  const enlace = $("enlacePdfJugadorManual");
-  let trabajando = false;
+  const panel = $("panelPdfJugador");
+  const iframe = $("vistaPdfJugador");
+  const abrir = $("abrirPdfJugador");
+  const descargar = $("descargarPdfJugador");
+
+  let ocupado = false;
+  let urlPdfLocal = null;
+
+  $("inputEquipo").value = equipo;
+  $("inputJugador").value = jugador;
+
+  // El calendario admite cualquier fecha pasada o futura.
+  if (window.RVBInformes && typeof RVBInformes.fechaHoy === "function") {
+    $("inputFecha").value = RVBInformes.fechaHoy();
+  } else {
+    const hoy = new Date();
+    const dos = n => String(n).padStart(2, "0");
+    $("inputFecha").value = `${hoy.getFullYear()}-${dos(hoy.getMonth() + 1)}-${dos(hoy.getDate())}`;
+  }
+
+  function limpiarPdf() {
+    iframe.removeAttribute("src");
+    abrir.removeAttribute("href");
+    descargar.removeAttribute("href");
+    descargar.removeAttribute("download");
+    if (urlPdfLocal) {
+      URL.revokeObjectURL(urlPdfLocal);
+      urlPdfLocal = null;
+    }
+    panel.hidden = true;
+    $("contenedorCargaJugador").classList.remove("vista-abierta");
+  }
 
   $("inputFecha").addEventListener("change", () => {
-    panel.hidden = true;
-    enlace.removeAttribute("href");
+    limpiarPdf();
     estado.textContent = "";
   });
 
   boton.addEventListener("click", async () => {
-    if (trabajando) return;
-    if (!equipo || !jugador || !$("inputFecha").value) {
+    if (ocupado) return;
+
+    const fechaISO = $("inputFecha").value;
+    if (!equipo || !jugador || !fechaISO) {
       estado.textContent = "Faltan equipo, jugador o fecha.";
       return;
     }
-    // El calendario HTML ya proporciona una fecha real en formato AAAA-MM-DD.
-    // No imponemos ninguna restriccion temporal ni usamos la validacion
-    // adicional de informes_api.js: se admiten fechas pasadas y futuras.
-    const fechaISO = $("inputFecha").value;
-    const [anio, mes, dia] = fechaISO.split("-");
-    const fecha = `${dia}/${mes}/${anio}`;
+    if (!window.RVBInformes ||
+        typeof RVBInformes.solicitar !== "function" ||
+        typeof RVBInformes.convertirBase64Pdf !== "function") {
+      estado.textContent = "La comunicación con Apps Script no está actualizada. Recarga la página.";
+      return;
+    }
 
-    const ventana = RVBInformes.prepararVentanaInforme();
-    trabajando = true;
+    // El input date entrega YYYY-MM-DD; se convierte para la hoja.
+    const partes = fechaISO.split("-");
+    if (partes.length !== 3) {
+      estado.textContent = "Selecciona una fecha desde el calendario.";
+      return;
+    }
+    const fecha = `${partes[2]}/${partes[1]}/${partes[0]}`;
+
+    ocupado = true;
     boton.disabled = true;
-    boton.textContent = "Preparando...";
-    estado.textContent = "Actualizando Informe jugadores...";
-    panel.hidden = true;
+    boton.textContent = "Generando PDF...";
+    estado.textContent = "Actualizando Informe jugadores y generando el PDF...";
+    limpiarPdf();
 
     try {
-      const respuesta = await RVBInformes.solicitar({
-        accion: "jugador", textbox1: equipo, textbox2: jugador, textbox3: fecha
+      const resultado = await RVBInformes.solicitar({
+        accion: "pdfJugador",
+        textbox1: equipo,
+        textbox2: jugador,
+        textbox3: fecha
       });
-      if (!respuesta || !respuesta.ok || respuesta.informe !== "jugador") {
-        throw new Error(respuesta?.error || "Apps Script no confirmó la actualización.");
+
+      if (!resultado || !resultado.ok || resultado.informe !== "jugador") {
+        throw new Error(resultado?.error ||
+          "Apps Script no pudo generar el PDF del jugador.");
       }
-      if (respuesta.numG13 !== equipo || respuesta.numG14 !== jugador ||
-          respuesta.numG15 !== fecha) {
-        throw new Error("La hoja no ha confirmado los datos del jugador.");
+      if (resultado.numG13 !== equipo ||
+          resultado.numG14 !== jugador ||
+          resultado.numG15 !== fecha) {
+        throw new Error("El servidor no ha confirmado el equipo, jugador y fecha.");
       }
 
-      await new Promise(resolver => setTimeout(resolver, 700));
-      enlace.href = RVBInformes.urlPdf("jugador");
+      const pdf = RVBInformes.convertirBase64Pdf(resultado.pdfBase64);
+      urlPdfLocal = URL.createObjectURL(pdf);
+
+      abrir.href = urlPdfLocal;
+      descargar.href = urlPdfLocal;
+      descargar.download = resultado.archivo || "Informe_jugador.pdf";
+      iframe.src = urlPdfLocal;
       panel.hidden = false;
-      const abierta = RVBInformes.abrirInforme(ventana, "jugador");
-      estado.textContent = abierta
-        ? "Informe actualizado. Se ha abierto el PDF en el navegador; puedes descargarlo desde su visor."
-        : "Informe actualizado. Pulsa «Abrir PDF» para verlo en el navegador.";
+      $("contenedorCargaJugador").classList.add("vista-abierta");
+
+      estado.textContent = "PDF del jugador generado correctamente (" +
+        Math.round(pdf.size / 1024) + " KB). Puedes verlo o descargarlo.";
+      panel.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
-      RVBInformes.cerrarVentanaInforme(ventana);
       console.error("Carga Jugador:", error);
-      estado.textContent = error.message || "Error al preparar el informe.";
+      estado.textContent = error.message || "No se ha podido generar el informe.";
     } finally {
-      trabajando = false;
+      ocupado = false;
       boton.disabled = false;
       boton.textContent = "Ver informe";
     }
@@ -75,5 +124,9 @@ document.addEventListener("DOMContentLoaded", () => {
 
   $("btnVolverSelector").addEventListener("click", () => {
     window.location.href = "selector.html";
+  });
+
+  window.addEventListener("pagehide", () => {
+    if (urlPdfLocal) URL.revokeObjectURL(urlPdfLocal);
   });
 });
