@@ -1,12 +1,9 @@
-COACH RVB · CARGA JUGADOR: CUALQUIER FECHA
+CORRECCION BOTON CARGA JUGADOR
 
-En GitHub Pages reemplaza carga_jugador.js, carga_jugador.html y sw.js.
-En Apps Script reemplaza SOLO visorjuagdor.gs (sin cambiar los demas archivos).
-Implementar > Gestionar implementaciones > Editar > Nueva version > Implementar.
-No cambiar code.gs, VISOR.gs, PDF_Equipo.gs, informe equipo ni altalesion.gs.
-
-El calendario admite cualquier fecha pasada o futura que el navegador
-considere una fecha real, sin limite de antiguedad ni limite futuro.
-
-Esta revision se ha realizado a partir del ultimo flujo de Carga Jugador
-compartido: JSONP + enlace de impresion de jugador.
+GitHub Pages: sustituye solo carga_jugador.html, carga_jugador.js y sw.js.
+Apps Script: no hay cambios nuevos respecto al que tenia code.gs con accion=pdfJugador y PDF_Jugador.gs.
+En la pagina debe verse inmediatamente el mensaje: Carga Jugador preparada ... (v30).
+Si no se ve, la version servida es antigua o el JS no se esta cargando.
+Si pulsas Ver informe, debe salir Boton detectado... y despues un mensaje de progreso o error.
+El PDF se genera desde Apps Script; rango E1:S110 de Informe jugadores.
+NO subas ningun .gs a GitHub.

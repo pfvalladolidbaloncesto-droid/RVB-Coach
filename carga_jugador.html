@@ -11,8 +11,7 @@
   <meta name="theme-color" content="#ffffff" />
   
   <link rel="stylesheet" href="style.css?v=3" />
-  <script src="informes_api.js?v=25" defer></script>
-  <script src="carga_jugador.js?v=25" defer></script>
+  <script src="carga_jugador.js?v=30" defer></script>
   <style>
     .actions-container {
       display: flex;
@@ -48,6 +47,8 @@
     .actions-container{display:flex;gap:10px;margin-top:15px}
     .actions-container button{flex:1;margin-top:0!important}
     .estado-informe{margin:12px 0 0;font-size:13px;line-height:1.5;white-space:pre-wrap}
+    .estado-informe.error{color:#ac3131}
+    .estado-informe.exito{color:#0f795b}
     .panel-pdf{margin-top:18px;width:100%;border-top:1px solid #e1e7e9;padding-top:17px}
     .main-container.vista-abierta{max-width:1000px;width:min(100%,1000px)}
     .main-container.vista-abierta .menu-content{width:100%}
@@ -93,7 +94,7 @@
         <button id="btnVolverSelector" class="btn-logout">Menú</button>
       </div>
 
-      <p id="estadoCargaJugador" class="estado-informe" role="status" aria-live="polite"></p>
+      <p id="estadoCargaJugador" class="estado-informe" role="status" aria-live="polite">Iniciando Carga Jugador...</p>
       <section id="panelPdfJugador" class="panel-pdf" hidden>
         <h2>Informe del jugador preparado</h2>
         <div class="pdf-acciones">
