@@ -1,4 +1,4 @@
-const CACHE_NAME = "coach-rvb-v11-informes-unificado";
+const CACHE_NAME = "coach-rvb-v12-pdf-equipo-original";
 
 const ASSETS = [
   "./",

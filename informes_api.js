@@ -77,7 +77,21 @@
     });
   }
 
+  // Enlace original de impresión de Informe equipo proporcionado
+  // por el usuario. Evita construir un /export genérico para este informe.
+  const URL_PDF_EQUIPO_ORIGINAL =
+    "https://docs.google.com/spreadsheets/d/1waAXuyLOYY7yp0WQzv17OTOPvcZ4uvuhKGkp1YdlOrQ/pdf?id=1waAXuyLOYY7yp0WQzv17OTOPvcZ4uvuhKGkp1YdlOrQ&esid=73d091b67a0800ea&a=true&pc=%5Bnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C0%2C%5B%5B%221855641404%22%2C0%2C208%2C0%2C17%5D%5D%2C10000000%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C45554.41125608796%2Cnull%2Cnull%2C%5B1%2Cnull%2C0%2C0%2C0%2C0%2C0%2C0%2C1%2C1%2C2%2C1%2Cnull%2Cnull%2C2%2C1%5D%2C%5B%22A4%22%2C1%2C2%2C1%2C%5B0.75%2C0.75%2C0.7%2C0.7%5D%5D%2Cnull%2C0%5D&gf=%5B%5D&lds=%5B%5D";
+
   function urlPdf(tipo, descargar = false) {
+    if (tipo === "equipo") {
+      // Para descargar, Google puede ofrecer directamente el PDF o
+      // mostrar su visor; en ambos casos el navegador permite guardarlo.
+      const url = new URL(URL_PDF_EQUIPO_ORIGINAL);
+      if (descargar) url.searchParams.set("attachment", "true");
+      return url.toString();
+    }
+
+    // El enlace de jugador se deja como estaba.
     const informe = INFORMES[tipo];
     if (!informe) throw new Error("Tipo de informe desconocido.");
     const url = new URL(
