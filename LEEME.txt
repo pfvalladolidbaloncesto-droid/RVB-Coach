@@ -1,34 +1,12 @@
-Coach RVB - PDF real de Carga Equipo
+COACH RVB · CARGA JUGADOR: CUALQUIER FECHA
 
-CAMBIO IMPORTANTE: esta versión NO abre enlaces /pdf ni /export desde GitHub Pages para Carga Equipo.
-El Apps Script genera y devuelve el documento PDF real de "Informe equipo" A1:Q208.
+En GitHub Pages reemplaza carga_jugador.js, carga_jugador.html y sw.js.
+En Apps Script reemplaza SOLO visorjuagdor.gs (sin cambiar los demas archivos).
+Implementar > Gestionar implementaciones > Editar > Nueva version > Implementar.
+No cambiar code.gs, VISOR.gs, PDF_Equipo.gs, informe equipo ni altalesion.gs.
 
-1) En Apps Script del proyecto de informes (URL /exec acabada en WbrT9sP_40HhMexA):
-   - Sustituye SOLO code.gs por el que hay en APPS_SCRIPT_NO_SUBIR/code.gs.
-   - Añade un archivo NUEVO llamado PDF_Equipo.gs copiando APPS_SCRIPT_NO_SUBIR/PDF_Equipo.gs.
-   - Conservar los actuales VISOR.gs y visorjuagdor.gs si ya son los corregidos,
-     con las funciones actualizarInformeEquipo_ y actualizarInformeJugador_.
-     Hay copias de referencia en APPS_SCRIPT_NO_SUBIR por si aún estaban los doGet antiguos.
-   - NO toques altalesion.gs ni las macros.
-   - Publica NUEVA VERSIÓN de la misma implementación web; autoriza UrlFetchApp cuando se solicite.
-   - En la implementación, ejecutar como la cuenta con acceso al Spreadsheet.
+El calendario admite cualquier fecha pasada o futura que el navegador
+considere una fecha real, sin limite de antiguedad ni limite futuro.
 
-2) En el repositorio de GitHub Pages, sustituye:
-   - informes_api.js
-   - carga.js
-   - carga.html
-   - sw.js
-
-3) Abre Carga Equipo -> fecha/equipo -> Ver informe. Debe aparecer el PDF generado
-   sin redireccionar al Spreadsheet. El botón Descargar usa un Blob URL local.
-   Prueba con datos ficticios. La vista integrada puede no estar disponible en móviles;
-   usa Abrir PDF para verlo fuera del iframe.
-
-IMPORTANTE: este endpoint del Apps Script actualmente no verifica las credenciales
-individuales del entrenador; no despliegues públicamente informes con datos personales
-sin implantar autorización también en el backend.
-
-Limite preventivo: 5 MB para PDF transmitido en base64 via JSONP.
-
-Advertencia: esta revisión no cambia Carga Jugador ni Alta lesiones. La implementación
-web que recibe las peticiones debe tener acceso al Spreadsheet como propietario.
+Esta revision se ha realizado a partir del ultimo flujo de Carga Jugador
+compartido: JSONP + enlace de impresion de jugador.

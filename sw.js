@@ -1,4 +1,4 @@
-const CACHE_NAME = "coach-rvb-v14-pdf-equipo-servidor";
+const CACHE_NAME = "coach-rvb-v22-fecha-jugador-libre";
 
 const ASSETS = [
   "./",
