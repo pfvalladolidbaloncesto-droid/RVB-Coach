@@ -16,7 +16,9 @@ https://script.google.com/macros/s/AKfycbyso6H_FvkRCOu5_y0BxX4pQMPvwpaxH12_lW2MJ
    El registro de lesiones y el menú se incluyen.
 
 3. Iniciar sesión desde index.html con los datos habituales.
-   La contraseña ya NO se guarda en localStorage (Recuérdame solo recuerda usuario).
+   La contraseña NO se guarda en localStorage. Si marcas Recuérdame,
+   se solicita su guardado en el gestor del navegador y se intenta
+   rellenar el campo al volver a abrir index.html; debes pulsar Aceptar.
    La sesión expira en 2 horas y se guarda en sessionStorage.
    Si no hay sesión, cualquier página interior redirige a index.html.
 

@@ -1,0 +1,25 @@
+COACH RVB - RECÚERDAME (usuario + contraseña)
+
+Se han modificado únicamente:
+- index.html: los campos indican al navegador que son de usuario y contraseña.
+- app.js: al marcar Recuérdame se solicita guardar la contraseña en el gestor del navegador;
+  cuando se abre index.html se intenta rellenarla sin iniciar sesión automáticamente.
+- sw.js: versión de caché v9 para forzar la actualización.
+
+El inicio desde el icono de la PWA sigue siendo index.html (manifest.json).
+El resto del proyecto y la protección de sesión no se han alterado.
+
+La contraseña no se guarda en localStorage ni aparece en los archivos.
+Por compatibilidad y seguridad, el navegador puede solicitar permiso para guardarla,
+exigir una interacción para mostrarla o no permitir el relleno silencioso.
+En esos casos se utiliza el gestor nativo de contraseñas del navegador.
+
+Después de subir a GitHub, prueba en el dispositivo habitual:
+1. Abre index.html, introduce usuario y contraseña, marca Recuérdame, pulsa Aceptar.
+2. Acepta el aviso de guardar contraseña del navegador, si aparece.
+3. Cierra la PWA y ábrela otra vez desde su icono: debe abrir index.html.
+4. El navegador rellenará los campos si autoriza el autocompletado; debes pulsar Aceptar.
+5. Si desmarcas Recuérdame, no se solicita guardar de nuevo; si la contraseña
+   ya está almacenada en el gestor, debes eliminarla desde sus ajustes si no deseas conservarla.
+
+No hay cambios en AppsScript_FinalizarLesion.gs ni en los endpoints.

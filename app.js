@@ -1,13 +1,16 @@
 /* Coach RVB - login con sesión de servidor.
-   El usuario introduce sus credenciales habituales UNA vez.
-   Ninguna contraseña se almacena en localStorage. */
+   La app SIEMPRE abre index.html al lanzarse desde el icono instalado.
+   "Recuérdame" conserva el usuario y solicita guardar la contraseña
+   en el gestor de contraseñas del navegador (NO en localStorage).
+   Tras rellenar, el usuario debe pulsar Aceptar: no hay auto-login.
+*/
 const URL_API_COACH = "https://script.google.com/macros/s/AKfycbyso6H_FvkRCOu5_y0BxX4pQMPvwpaxH12_lW2MJWyXgEGp4w49rnkvpy2xTBWbrLI33Q/exec";
 const CLAVE_SESION_COACH = "rvb_coach_sesion";
 let secuenciaLogin = 0;
 
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker.register("./sw.js?v=8")
+    navigator.serviceWorker.register("./sw.js?v=9")
       .then(reg => reg.update())
       .catch(err => console.warn("Service Worker:", err));
   });
@@ -83,6 +86,59 @@ async function loginCoach(usuario, password) {
   throw new Error("No se pudo confirmar el inicio de sesión.");
 }
 
+// Solicita al gestor integrado que recuerde las credenciales tras
+// un login correcto. El navegador decide si guardarlas y puede pedir permiso.
+async function guardarContrasenaEnNavegador(usuario, password) {
+  if (typeof PasswordCredential !== "function" ||
+      !navigator.credentials ||
+      typeof navigator.credentials.store !== "function") {
+    // Otros navegadores pueden ofrecer guardar y rellenar por los
+    // atributos HTML autocomplete="username" y "current-password".
+    return;
+  }
+  try {
+    const credencial = new PasswordCredential({
+      id: usuario,
+      password,
+      name: usuario
+    });
+    await navigator.credentials.store(credencial);
+  } catch (err) {
+    // No impedir el login si el usuario rechaza guardar la contraseña.
+    console.info("El navegador no guardó las credenciales:", err);
+  }
+}
+
+// Al abrir index.html, intenta obtener la contraseña almacenada por el
+// propio navegador. No valida ni inicia sesión automáticamente.
+async function rellenarContrasenaRecordada(usuarioInput, passwordInput) {
+  if (localStorage.getItem("Recuerdame") !== "true") return;
+  if (!navigator.credentials ||
+      typeof navigator.credentials.get !== "function") return;
+  try {
+    const credencial = await navigator.credentials.get({
+      password: true,
+      mediation: "silent"
+    });
+    if (!credencial || credencial.type !== "password" ||
+        typeof credencial.password !== "string") return;
+
+    const usuarioRecordado = (usuarioInput.value || "").trim();
+    if (usuarioRecordado &&
+        usuarioRecordado.toUpperCase() !== String(credencial.id).toUpperCase()) {
+      return;
+    }
+    // No sustituir nada que el usuario ya haya empezado a escribir.
+    if (document.activeElement === passwordInput || passwordInput.value) return;
+    usuarioInput.value = credencial.id;
+    passwordInput.value = credencial.password;
+  } catch (err) {
+    // Algunos navegadores solo permiten rellenar tras una interacción.
+    // En ese caso queda disponible el autocompletado nativo del campo.
+    console.info("Relleno automático no disponible:", err);
+  }
+}
+
 document.addEventListener("DOMContentLoaded", () => {
   const form = document.getElementById("loginForm");
   const usuarioInput = document.getElementById("usuario");
@@ -90,11 +146,16 @@ document.addEventListener("DOMContentLoaded", () => {
   const recuerda = document.getElementById("recuerdame");
   const boton = document.getElementById("btnAceptar");
 
-  // Se mantiene Recuérdame para el nombre, pero no la contraseña.
-  if (localStorage.getItem("Recuerdame") === "true") {
+  // Mantener index.html como pantalla de inicio, también con Recuérdame.
+  // La contraseña solo se recupera del gestor del navegador, nunca de
+  // localStorage. El campo seguirá siendo de tipo password (puntos).
+  const recordado = localStorage.getItem("Recuerdame") === "true";
+  recuerda.checked = recordado;
+  if (recordado) {
     usuarioInput.value = localStorage.getItem("Usuario") || "";
-    recuerda.checked = true;
+    void rellenarContrasenaRecordada(usuarioInput, passwordInput);
   }
+  // Limpiar contraseñas heredadas de versiones antiguas de la app.
   localStorage.removeItem("Password");
 
   form.addEventListener("submit", async e => {
@@ -124,8 +185,16 @@ document.addEventListener("DOMContentLoaded", () => {
       localStorage.setItem("Usuario", datos.usuario);
       if (recuerda.checked) {
         localStorage.setItem("Recuerdame", "true");
+        // Solo guardamos la contraseña después de validar las credenciales.
+        // Se entrega al gestor del navegador; no se copia a localStorage.
+        await guardarContrasenaEnNavegador(datos.usuario || usuario, password);
       } else {
         localStorage.removeItem("Recuerdame");
+        if (navigator.credentials?.preventSilentAccess) {
+          // Deshabilita la recuperación silenciosa cuando no se recuerda.
+          try { await navigator.credentials.preventSilentAccess(); }
+          catch (_) { /* el login continúa con normalidad */ }
+        }
       }
       localStorage.setItem("RolPorDefecto", datos.rol || "");
       localStorage.setItem("EquipoPorDefecto", datos.equipo || "");

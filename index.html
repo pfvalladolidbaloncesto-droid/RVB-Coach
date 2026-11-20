@@ -10,7 +10,7 @@
   <link rel="apple-touch-icon" href="cbc.png" />
   
   <link rel="stylesheet" href="style.css?v=5" />
-  <script src="app.js?v=8" defer></script>
+  <script src="app.js?v=9" defer></script>
 </head>
 <body>
   <div class="main-container">
@@ -19,15 +19,15 @@
       <h1 class="app-title">Coach RVB</h1>
     </div>
 
-    <form id="loginForm" class="login-form">
+    <form id="loginForm" class="login-form" autocomplete="on">
       <div class="input-group">
         <label for="usuario">Usuario</label>
-        <input type="text" id="usuario" required />
+        <input type="text" id="usuario" name="username" autocomplete="username" autocapitalize="none" spellcheck="false" required />
       </div>
 
       <div class="input-group">
         <label for="password">Contraseña</label>
-        <input type="password" id="password" required />
+        <input type="password" id="password" name="password" autocomplete="current-password" required />
       </div>
 
       <div class="checkbox-group">
