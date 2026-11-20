@@ -6,7 +6,7 @@
  */
 
 // Pega aquí la URL /exec de la implementación NUEVA de Apps Script de altas.
-const URL_API_ALTAS = "PEGA_AQUI_URL_EXEC_FINALIZAR_LESIONES";
+const URL_API_ALTAS = "https://script.google.com/macros/s/AKfycbyso6H_FvkRCOu5_y0BxX4pQMPvwpaxH12_lW2MJWyXgEGp4w49rnkvpy2xTBWbrLI33Q/exec";
 
 const $ = id => document.getElementById(id);
 let contadorJSONP = 0;
