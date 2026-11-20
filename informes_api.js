@@ -77,16 +77,9 @@
     });
   }
 
-  // Enlace original de la macro PC(), sin acortar el parámetro "pc".
-  // El mismo enlace se abre para ver y descargar usando el visor del navegador.
-  const URL_PDF_EQUIPO_ORIGINAL =
-    "https://docs.google.com/spreadsheets/d/1waAXuyLOYY7yp0WQzv17OTOPvcZ4uvuhKGkp1YdlOrQ/pdf?id=1waAXuyLOYY7yp0WQzv17OTOPvcZ4uvuhKGkp1YdlOrQ&esid=73d091b67a0800ea&a=true&pc=%5Bnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C0%2C%5B%5B%221855641404%22%2C0%2C208%2C0%2C17%5D%5D%2C10000000%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2Cnull%2C45554.41125608796%2Cnull%2Cnull%2C%5B1%2Cnull%2C0%2C0%2C0%2C0%2C0%2C0%2C1%2C1%2C2%2C1%2Cnull%2Cnull%2C2%2C1%5D%2C%5B%22A4%22%2C1%2C2%2C1%2C%5B0.75%2C0.75%2C0.7%2C0.7%5D%5D%2Cnull%2C0%5D&gf=%5B%5D&lds=%5B%5D";
-
   function urlPdf(tipo, descargar = false) {
     if (tipo === "equipo") {
-      // No añadir attachment=true ni otros parámetros: altera la petición
-      // de impresión original y puede devolver otra pestaña del libro.
-      return URL_PDF_EQUIPO_ORIGINAL;
+      throw new Error("El PDF de equipo se recibe del Apps Script, no se abre por URL externa.");
     }
 
     // Conservar el funcionamiento existente de Carga Jugador.
@@ -113,7 +106,30 @@
     return url.toString();
   }
 
+  // Construye un PDF real a partir de la respuesta binaria del servidor.
+  // No utiliza /pdf ni /export desde el navegador del entrenador.
+  function convertirBase64Pdf(base64) {
+    if (!base64 || typeof base64 !== "string") {
+      throw new Error("El servidor no ha devuelto el documento PDF.");
+    }
+    const binario = atob(base64);
+    if (!binario.startsWith("%PDF")) {
+      throw new Error("El documento recibido no es un PDF válido.");
+    }
+    const partes = [];
+    const tamanoBloque = 8192;
+    for (let i = 0; i < binario.length; i += tamanoBloque) {
+      const segmento = binario.slice(i, i + tamanoBloque);
+      const bytes = new Uint8Array(segmento.length);
+      for (let j = 0; j < segmento.length; j++) {
+        bytes[j] = segmento.charCodeAt(j);
+      }
+      partes.push(bytes);
+    }
+    return new Blob(partes, { type: "application/pdf" });
+  }
+
   window.RVBInformes = Object.freeze({
-    solicitar, urlPdf, fechaHoy, fechaParaHoja
+    solicitar, urlPdf, fechaHoy, fechaParaHoja, convertirBase64Pdf
   });
 })();

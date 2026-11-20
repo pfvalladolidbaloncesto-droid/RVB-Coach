@@ -1,27 +1,34 @@
-COACH RVB — CORRECCIÓN DE PDF DE CARGA EQUIPO
+Coach RVB - PDF real de Carga Equipo
 
-Sustituye SOLO estos cuatro archivos de la raíz de GitHub Pages:
-- informes_api.js
-- carga.js
-- carga.html
-- sw.js
+CAMBIO IMPORTANTE: esta versión NO abre enlaces /pdf ni /export desde GitHub Pages para Carga Equipo.
+El Apps Script genera y devuelve el documento PDF real de "Informe equipo" A1:Q208.
 
-No necesitas modificar Apps Script: la escritura de B9 y B10 ya funciona.
+1) En Apps Script del proyecto de informes (URL /exec acabada en WbrT9sP_40HhMexA):
+   - Sustituye SOLO code.gs por el que hay en APPS_SCRIPT_NO_SUBIR/code.gs.
+   - Añade un archivo NUEVO llamado PDF_Equipo.gs copiando APPS_SCRIPT_NO_SUBIR/PDF_Equipo.gs.
+   - Conservar los actuales VISOR.gs y visorjuagdor.gs si ya son los corregidos,
+     con las funciones actualizarInformeEquipo_ y actualizarInformeJugador_.
+     Hay copias de referencia en APPS_SCRIPT_NO_SUBIR por si aún estaban los doGet antiguos.
+   - NO toques altalesion.gs ni las macros.
+   - Publica NUEVA VERSIÓN de la misma implementación web; autoriza UrlFetchApp cuando se solicite.
+   - En la implementación, ejecutar como la cuenta con acceso al Spreadsheet.
 
-CAMBIOS
-- El enlace del PDF de equipo es el enlace COMPLETO original de la
-  macro PC() (incluidos los 12 valores null posteriores a 10000000).
-- No se añade attachment=true ni parámetros nuevos al enlace original.
-- Se abre el PDF en una pestaña independiente dentro del gesto de clic,
-  evitando los bloqueos de ventanas emergentes después de una petición async.
-- Se evita el iframe para informes de equipo: Google puede redirigirlo
-  al Spreadsheet, mostrando la pestaña inicial/bodymap.
-- Para descargar, se usa la opción de descarga del visor PDF del navegador.
-- El informe de jugador conserva el código anterior.
+2) En el repositorio de GitHub Pages, sustituye:
+   - informes_api.js
+   - carga.js
+   - carga.html
+   - sw.js
 
-LIMITACIONES
-- No es posible confirmar desde aquí que Google devuelva el PDF correcto
-  en la cuenta autenticada del staff. Prueba con un informe real.
-- Los enlaces /pdf de impresión son internos de Google y pueden cambiar.
-- El informe de equipo y el de jugador usan celdas compartidas, por lo
-  que los informes generados simultáneamente pueden interferirse.
+3) Abre Carga Equipo -> fecha/equipo -> Ver informe. Debe aparecer el PDF generado
+   sin redireccionar al Spreadsheet. El botón Descargar usa un Blob URL local.
+   Prueba con datos ficticios. La vista integrada puede no estar disponible en móviles;
+   usa Abrir PDF para verlo fuera del iframe.
+
+IMPORTANTE: este endpoint del Apps Script actualmente no verifica las credenciales
+individuales del entrenador; no despliegues públicamente informes con datos personales
+sin implantar autorización también en el backend.
+
+Limite preventivo: 5 MB para PDF transmitido en base64 via JSONP.
+
+Advertencia: esta revisión no cambia Carga Jugador ni Alta lesiones. La implementación
+web que recibe las peticiones debe tener acceso al Spreadsheet como propietario.

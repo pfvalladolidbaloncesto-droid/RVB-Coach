@@ -11,8 +11,8 @@
   <meta name="theme-color" content="#ffffff" />
   
   <link rel="stylesheet" href="style.css?v=3" />
-  <script src="informes_api.js?v=5" defer></script>
-  <script src="carga.js?v=5" defer></script>
+  <script src="informes_api.js?v=6" defer></script>
+  <script src="carga.js?v=6" defer></script>
   <style>
     .actions-container {
       display: flex;
@@ -106,13 +106,13 @@
       <p id="estadoCargaEquipo" class="estado-informe" role="status" aria-live="polite"></p>
 
       <section id="panelPdfEquipo" class="panel-pdf" hidden>
-        <h2>Informe de equipo preparado</h2>
+        <h2>Informe preparado</h2>
         <div class="pdf-acciones">
           <a id="abrirPdfEquipo" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF</a>
-          <a id="descargarPdfEquipo" class="descargar" href="#" target="_blank" rel="noopener noreferrer">Abrir para descargar</a>
+          <a id="descargarPdfEquipo" class="descargar" href="#" target="_blank" rel="noopener noreferrer">Descargar PDF</a>
         </div>
-        <iframe id="vistaPdfEquipo" class="visor-pdf" title="Vista previa PDF del informe de jugador" referrerpolicy="no-referrer" hidden></iframe>
-        <p class="aviso-pdf">El PDF del equipo se abre en el visor del navegador, no en un marco de la PWA. Para guardarlo, pulsa el icono de descarga del visor. «Abrir para descargar» utiliza exactamente el mismo enlace de impresión.</p>
+        <iframe id="vistaPdfEquipo" class="visor-pdf" title="Vista previa del informe PDF" hidden></iframe>
+        <p class="aviso-pdf">El PDF de equipo lo genera Apps Script con la hoja «Informe equipo». Si el visor integrado no funciona en tu móvil, pulsa «Abrir PDF»; «Descargar PDF» guarda el mismo documento generado.</p>
       </section>
     </main>
   </div>

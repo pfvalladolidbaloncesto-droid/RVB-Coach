@@ -21,10 +21,21 @@ document.addEventListener("DOMContentLoaded", () => {
   const panel = $("panelPdfEquipo");
   const iframe = $("vistaPdfEquipo");
   let ocupado = false;
+  let urlPdfLocal = null;
+
+  function limpiarUrlPdf() {
+    if (urlPdfLocal) {
+      URL.revokeObjectURL(urlPdfLocal);
+      urlPdfLocal = null;
+    }
+  }
 
   function ocultarPreview() {
     panel.hidden = true;
     iframe.removeAttribute("src");
+    $("abrirPdfEquipo").removeAttribute("href");
+    $("descargarPdfEquipo").removeAttribute("href");
+    limpiarUrlPdf();
     $("contenedorCargaEquipo").classList.remove("vista-abierta");
   }
   selectorEquipo.addEventListener("change", ocultarPreview);
@@ -47,25 +58,9 @@ document.addEventListener("DOMContentLoaded", () => {
     const parametros = esJugador ? {
       accion: "jugador", textbox1: equipo, textbox2: jugador, textbox3: fecha
     } : {
-      accion: "equipo", nuevoValorB9: equipo, nuevoValorB10: fecha
+      accion: "pdfEquipo", nuevoValorB9: equipo, nuevoValorB10: fecha
     };
     const tipo = esJugador ? "jugador" : "equipo";
-
-    // Abrir la ventana dentro del clic original para que el navegador
-    // no bloquee el PDF cuando termine la petición asíncrona.
-    // Solo se aplica al informe de equipo.
-    let ventanaPdf = null;
-    if (!esJugador) {
-      ventanaPdf = window.open("about:blank", "_blank");
-      if (ventanaPdf) {
-        try {
-          ventanaPdf.document.title = "Preparando informe de equipo";
-          ventanaPdf.document.body.textContent =
-            "Preparando el informe de equipo...";
-          ventanaPdf.opener = null;
-        } catch (_) { /* La ventana puede haberse cerrado. */ }
-      }
-    }
 
     ocupado = true;
     boton.disabled = true;
@@ -85,33 +80,34 @@ document.addEventListener("DOMContentLoaded", () => {
       if (!esJugador && (respuesta.numB9 !== equipo || respuesta.numB10 !== fecha)) {
         throw new Error("El servidor confirmó valores distintos a los solicitados.");
       }
-      const pdf = RVBInformes.urlPdf(tipo, false);
-      $("abrirPdfEquipo").href = pdf;
-      $("descargarPdfEquipo").href = RVBInformes.urlPdf(tipo, true);
-      panel.hidden = false;
-      $("contenedorCargaEquipo").classList.add("vista-abierta");
-      // Las páginas de impresión /pdf de Google pueden redirigir un
-      // iframe a la primera pestaña. En equipo abrimos el PDF normal.
-      iframe.hidden = !esJugador;
-      iframe.removeAttribute("src");
-      await new Promise(resolve => setTimeout(resolve, 700));
       if (esJugador) {
+        // El informe de jugador conserva el mecanismo actual.
+        const pdf = RVBInformes.urlPdf("jugador", false);
+        $("abrirPdfEquipo").href = pdf;
+        $("descargarPdfEquipo").href = RVBInformes.urlPdf("jugador", true);
+        $("descargarPdfEquipo").removeAttribute("download");
         iframe.src = pdf;
         mensaje.textContent = "Informe de jugador actualizado.";
       } else {
-        if (ventanaPdf && !ventanaPdf.closed) {
-          ventanaPdf.location.replace(pdf);
-          mensaje.textContent =
-            "Informe actualizado. Se ha abierto el PDF en otra pestaña. " +
-            "Desde el visor puedes descargarlo.";
-        } else {
-          mensaje.textContent =
-            "Informe actualizado. Pulsa «Abrir PDF» para visualizarlo.";
-        }
+        // El servidor entrega el PDF ya generado de Informe equipo.
+        const blob = RVBInformes.convertirBase64Pdf(respuesta.pdfBase64);
+        urlPdfLocal = URL.createObjectURL(blob);
+        $("abrirPdfEquipo").href = urlPdfLocal;
+        $("descargarPdfEquipo").href = urlPdfLocal;
+        $("descargarPdfEquipo").setAttribute(
+          "download", respuesta.archivo || "Informe_equipo.pdf"
+        );
+        // Visor integrado: en Android puede no soportar PDF dentro
+        // de un iframe; el botón Abrir PDF muestra el archivo real.
+        iframe.src = urlPdfLocal;
+        mensaje.textContent = "PDF del equipo generado correctamente (" +
+          Math.round(blob.size / 1024) + " KB). Puedes verlo o descargarlo.";
       }
+      panel.hidden = false;
+      iframe.hidden = false;
+      $("contenedorCargaEquipo").classList.add("vista-abierta");
       panel.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
-      if (ventanaPdf && !ventanaPdf.closed) ventanaPdf.close();
       console.error("Carga Equipo:", error);
       mensaje.textContent = error.message || "No se pudo preparar el informe.";
     } finally {
@@ -120,6 +116,8 @@ document.addEventListener("DOMContentLoaded", () => {
       boton.textContent = "Ver informe";
     }
   });
+
+  window.addEventListener("pagehide", limpiarUrlPdf);
 
   $("btnVolverMenu").addEventListener("click", () => {
     window.location.href = "menu_principal.html";
