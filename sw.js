@@ -1,4 +1,4 @@
-const CACHE_NAME = "coach-rvb-v6";
+const CACHE_NAME = "coach-rvb-v8";
 
 const ASSETS = [
   "./",
@@ -6,6 +6,12 @@ const ASSETS = [
   "./menu_principal.html",
   "./style.css",
   "./app.js",
+  "./sesion_guard.js",
+  "./finalizar_lesion.html",
+  "./finalizar_lesion.js",
+  "./registrar_lesion.html",
+  "./registrar_lesion.js",
+  "./bodymap_lesiones.png",
   "./menu_principal.js",
   "./manifest.json",
   "./cbc.png"
@@ -40,10 +46,8 @@ self.addEventListener("activate", (event) => {
 // Intercepción de peticiones
 self.addEventListener("fetch", (event) => {
   // 1. Ignorar llamadas a la API de Google Apps Script (Siempre por red)
-  if (event.request.url.includes("script.google.com")) {
-    event.respondWith(fetch(event.request));
-    return;
-  }
+  // Nunca interceptar servicios de terceros (Apps Script, Google Forms).
+  if (new URL(event.request.url).origin !== self.location.origin) return;
 
   // 2. Estrategia Network-First para HTML y JS (Prioriza cambios nuevos)
   event.respondWith(

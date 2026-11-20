@@ -18,11 +18,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   // === INITIALIZE ===
   // 1. Extraer usuario
-  const urlParams = new URLSearchParams(window.location.search);
-  let usuario = urlParams.get("startValue") || localStorage.getItem("Usuario") || "Usuario";
+  const sesion = JSON.parse(sessionStorage.getItem("rvb_coach_sesion") || "null");
+  let usuario = sesion?.usuario || "Usuario";
   
   etiquetaUsuario.textContent = usuario;
-  localStorage.setItem("Usuario", usuario);
+  // La identidad del entrenador procede de la sesión validada en el servidor.
 
   // 2. Preseleccionar Rol por defecto (normalizado a rolUsuario)
   const rolDefecto = localStorage.getItem("rolUsuario") || localStorage.getItem("RolPorDefecto");
@@ -131,6 +131,20 @@ document.addEventListener("DOMContentLoaded", () => {
   });
 
   btnLogOut.addEventListener("click", () => {
-    window.location.href = "index.html";
+    const datos = JSON.parse(sessionStorage.getItem("rvb_coach_sesion") || "null");
+    sessionStorage.removeItem("rvb_coach_sesion");
+    localStorage.removeItem("User");
+    localStorage.removeItem("jugadorSeleccionado");
+    localStorage.removeItem("Variable");
+    localStorage.removeItem("Password");
+    if (datos?.token && navigator.sendBeacon) {
+      navigator.sendBeacon("https://script.google.com/macros/s/AKfycbyso6H_FvkRCOu5_y0BxX4pQMPvwpaxH12_lW2MJWyXgEGp4w49rnkvpy2xTBWbrLI33Q/exec", new URLSearchParams({
+        accion: "cerrarSesion", token: datos.token
+      }));
+    }
+    if (localStorage.getItem("Recuerdame") !== "true") {
+      localStorage.removeItem("Usuario");
+    }
+    window.location.replace("index.html");
   });
 });

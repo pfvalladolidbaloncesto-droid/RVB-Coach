@@ -1,6 +1,8 @@
 <!DOCTYPE html>
 <html lang="es">
 <head>
+  <script src="sesion_guard.js?v=1"></script>
+
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="theme-color" content="#20c997">
@@ -86,20 +88,15 @@
           <label for="equipo">Equipo seleccionado</label>
           <input id="equipo" readonly>
         </div>
-        <div>
-          <label for="clave">Clave de entrenador del equipo</label>
-          <input id="clave" type="password" autocomplete="off" placeholder="Clave de acceso">
-        </div>
       </div>
-      <button id="btn-cargar" class="btn" style="margin-top:12px" type="button">Cargar lesiones pendientes</button>
-      <p class="nota">La clave se comprueba en el servidor; no debe incluirse en los archivos de GitHub.</p>
+      <button id="btn-cargar" class="btn" style="margin-top:12px" type="button">Actualizar lesiones pendientes</button>
       <p id="estado-carga" class="estado" role="status" aria-live="polite"></p>
     </section>
 
     <section class="bloque" id="bloque-lista">
       <h2>Lesiones pendientes</h2>
       <div id="lista-lesiones" class="listado">
-        <p class="nota">Introduce la clave y pulsa «Cargar lesiones pendientes».</p>
+        <p class="nota">Cargando las lesiones pendientes del equipo...</p>
       </div>
     </section>
 
@@ -139,6 +136,6 @@
       </form>
     </section>
   </main>
-  <script src="finalizar_lesion.js?v=1" defer></script>
+  <script src="finalizar_lesion.js?v=8" defer></script>
 </body>
 </html>

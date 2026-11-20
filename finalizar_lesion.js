@@ -18,6 +18,20 @@ function equipoActual() {
   return String(localStorage.getItem("Equipo") || localStorage.getItem("equipoUsuario") || "").trim();
 }
 
+function tokenSesion() {
+  try {
+    const sesion = JSON.parse(sessionStorage.getItem("rvb_coach_sesion") || "null");
+    if (!sesion || sesion.exp <= Date.now() || !sesion.token) {
+      sessionStorage.removeItem("rvb_coach_sesion");
+      window.location.replace("index.html");
+      throw new Error("La sesión ha caducado. Inicia sesión nuevamente.");
+    }
+    return sesion.token;
+  } catch (error) {
+    throw new Error("No hay sesión activa de entrenador.");
+  }
+}
+
 function hoyLocal() {
   const d = new Date();
   const dos = v => String(v).padStart(2, "0");
@@ -78,6 +92,7 @@ function consultarAPI(accion, parametros = {}) {
     }, 20000);
 
     url.searchParams.set("accion", accion);
+    url.searchParams.set("token", tokenSesion());
     Object.entries(parametros).forEach(([clave, valor]) => {
       url.searchParams.set(clave, String(valor));
     });
@@ -138,9 +153,8 @@ async function cargarPendientes() {
   if (ocupada) return;
 
   const equipo = equipoActual();
-  const clave = $("clave").value.trim();
-  if (!equipo || !clave) {
-    estado("estado-carga", "Selecciona un equipo en el menú e introduce la clave de entrenador.", "error");
+  if (!equipo) {
+    estado("estado-carga", "Selecciona un equipo en el menú principal.", "error");
     return;
   }
 
@@ -148,7 +162,7 @@ async function cargarPendientes() {
   $("btn-cargar").disabled = true;
   estado("estado-carga", "Consultando lesiones pendientes...");
   try {
-    const datos = await consultarAPI("pendientes", { equipo, clave });
+    const datos = await consultarAPI("pendientes", { equipo });
     if (!datos || !datos.ok) throw new Error(datos?.error || "Respuesta incorrecta del servidor.");
     lesionesPendientes = Array.isArray(datos.registros) ? datos.registros : [];
     ocultarFormulario();
@@ -166,9 +180,9 @@ async function cargarPendientes() {
 }
 
 // Los POST no-cors son opacos: verificamos el resultado por una consulta separada.
-async function comprobarEnvio(envioId, equipo, clave) {
+async function comprobarEnvio(envioId, equipo) {
   for (let intento = 0; intento < 12; intento++) {
-    const r = await consultarAPI("estadoAlta", { envioId, equipo, clave });
+    const r = await consultarAPI("estadoAlta", { envioId, equipo });
     if (!r || !r.ok) throw new Error(r?.error || "Error al comprobar la actualización.");
     if (r.estado === "ok") return;
     if (r.estado === "error") throw new Error(r.error || "No se pudo guardar el alta.");
@@ -182,14 +196,14 @@ async function guardarAlta(evento) {
   if (ocupada || !lesionActual) return;
 
   const equipo = equipoActual();
-  const clave = $("clave").value.trim();
+  const token = tokenSesion();
   const gravedad = $("gravedad").value;
   const alta = $("fecha-alta").value;
   const lesion = $("lesion").value.trim();
   const descripcion = $("descripcion").value.trim();
   const observaciones = $("observaciones").value.trim();
 
-  if (!equipo || !clave || !["1", "2", "3", "4", "5"].includes(gravedad) ||
+  if (!equipo || !["1", "2", "3", "4", "5"].includes(gravedad) ||
       !/^\d{4}-\d{2}-\d{2}$/.test(alta) || !lesion || !descripcion) {
     estado("estado-guardar", "Completa gravedad, fecha de alta, lesión y descripción. Solo observaciones es opcional.", "error");
     return;
@@ -209,7 +223,8 @@ async function guardarAlta(evento) {
 
   const envioId = crypto.randomUUID();
   const parametros = new URLSearchParams({
-    accion: "guardarAlta", equipo, clave, envioId,
+    token,
+    accion: "guardarAlta", equipo, envioId,
     fila: String(lesionActual.fila), firma: lesionActual.firma,
     gravedad, alta, lesion, descripcion, observaciones
   });
@@ -219,7 +234,7 @@ async function guardarAlta(evento) {
       method: "POST", mode: "no-cors", credentials: "omit", cache: "no-store", body: parametros
     });
     estado("estado-guardar", "Petición enviada. Verificando el guardado...");
-    await comprobarEnvio(envioId, equipo, clave);
+    await comprobarEnvio(envioId, equipo);
     estado("estado-guardar", "Alta confirmada y guardada en las columnas H–L.", "exito");
     // Recargar desde la hoja para que el registro ya finalizado desaparezca.
     lesionesPendientes = lesionesPendientes.filter(r =>
@@ -242,8 +257,9 @@ document.addEventListener("DOMContentLoaded", () => {
   $("btn-volver").addEventListener("click", () => { location.href = "menu_principal.html"; });
   $("btn-cargar").addEventListener("click", cargarPendientes);
   $("form-alta").addEventListener("submit", guardarAlta);
-  $("clave").addEventListener("keydown", e => {
-    if (e.key === "Enter") { e.preventDefault(); cargarPendientes(); }
-  });
-  if (!equipoActual()) estado("estado-carga", "No hay equipo seleccionado. Vuelve al menú principal.", "error");
+  if (!equipoActual()) {
+    estado("estado-carga", "No hay equipo seleccionado. Vuelve al menú principal.", "error");
+  } else {
+    cargarPendientes();
+  }
 });

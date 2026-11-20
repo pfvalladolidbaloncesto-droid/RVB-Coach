@@ -1,0 +1,44 @@
+COACH RVB — SESIONES + FINALIZAR LESIÓN
+======================================
+
+URL /exec integrada:
+https://script.google.com/macros/s/AKfycbyso6H_FvkRCOu5_y0BxX4pQMPvwpaxH12_lW2MJWyXgEGp4w49rnkvpy2xTBWbrLI33Q/exec
+
+1. Apps Script de altas (el enlace anterior):
+   - Sustituir su código por AppsScript_FinalizarLesion.gs.
+   - Implementar > Gestionar implementaciones > Editar > Nueva versión.
+   - Ejecutar como: propietario del script.
+   - Permitir que la PWA acceda (el script valida el token internamente).
+   - Confirmar que la cuenta propietaria puede acceder al Spreadsheet indicado.
+
+2. Publicar el CONTENIDO de la carpeta en el repositorio de Coach RVB,
+   manteniendo fotos/ e imágenes, y conservando nombres y mayúsculas.
+   El registro de lesiones y el menú se incluyen.
+
+3. Iniciar sesión desde index.html con los datos habituales.
+   La contraseña ya NO se guarda en localStorage (Recuérdame solo recuerda usuario).
+   La sesión expira en 2 horas y se guarda en sessionStorage.
+   Si no hay sesión, cualquier página interior redirige a index.html.
+
+4. En menú principal, elegir equipo y pulsar Finalizar lesión.
+   Las consultas y escrituras exigen token válido emitido al iniciar sesión.
+   No existe una segunda clave de equipo ni una pantalla adicional de login.
+
+5. El Apps Script de altas lee A:D, F, H:L, verifica firma de fila
+   antes de escribir y solamente actualiza H:L; columna G sin tocar.
+
+6. IMPORTANTE: se ha detectado que el backend de LOGIN ANTERIOR (independiente)
+   devolvía contraseñas al cliente. La app Coach actualizada ya no lo usa.
+   Debes despublicar o corregir ese backend antiguo si no lo necesita otra app;
+   de lo contrario, podría seguir exponiendo claves.
+
+7. El token autentica al entrenador, pero no distingue qué equipos puede gestionar:
+   cualquier entrenador autenticado podrá consultar lesiones de equipos
+   seleccionables en Coach RVB. Si la política del club necesita limitar
+   equipos por entrenador, hay que añadir esos permisos en el servidor.
+
+8. CacheService puede desalojar sesiones antes de las 2 horas; si ocurre,
+   bastará iniciar sesión de nuevo. El backend no devuelve datos sin token.
+
+9. Se ha validado la sintaxis. La conexión y escritura reales en Google Sheets
+   deben comprobarse con registros ficticios antes de usar datos sensibles.

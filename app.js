@@ -1,88 +1,142 @@
-// Registrar Service Worker para PWA
+/* Coach RVB - login con sesión de servidor.
+   El usuario introduce sus credenciales habituales UNA vez.
+   Ninguna contraseña se almacena en localStorage. */
+const URL_API_COACH = "https://script.google.com/macros/s/AKfycbyso6H_FvkRCOu5_y0BxX4pQMPvwpaxH12_lW2MJWyXgEGp4w49rnkvpy2xTBWbrLI33Q/exec";
+const CLAVE_SESION_COACH = "rvb_coach_sesion";
+let secuenciaLogin = 0;
+
 if ("serviceWorker" in navigator) {
   window.addEventListener("load", () => {
-    navigator.serviceWorker
-      .register("./sw.js?v=6")
-      .then((reg) => reg.update())
-      .catch((err) => console.error("Error al registrar Service Worker:", err));
+    navigator.serviceWorker.register("./sw.js?v=8")
+      .then(reg => reg.update())
+      .catch(err => console.warn("Service Worker:", err));
   });
 }
 
+function nuevaSolicitudId() {
+  return crypto.randomUUID();
+}
+
+function respuestaLoginJSONP(solicitudId) {
+  return new Promise((resolve, reject) => {
+    const callback = `rvbAlta_${Date.now()}${++secuenciaLogin}`;
+    const script = document.createElement("script");
+    const url = new URL(URL_API_COACH);
+    let finalizado = false;
+    let reloj;
+
+    function limpiar() {
+      if (finalizado) return false;
+      finalizado = true;
+      clearTimeout(reloj);
+      script.remove();
+      delete window[callback];
+      return true;
+    }
+
+    window[callback] = datos => {
+      if (limpiar()) resolve(datos);
+    };
+    script.onerror = () => {
+      if (limpiar()) reject(new Error("No se pudo consultar la sesión."));
+    };
+    script.onload = () => {
+      if (limpiar()) reject(new Error("La respuesta de Apps Script no es válida."));
+    };
+    reloj = setTimeout(() => {
+      if (limpiar()) reject(new Error("Tiempo de espera agotado."));
+    }, 18000);
+
+    url.searchParams.set("accion", "estadoLogin");
+    url.searchParams.set("solicitudId", solicitudId);
+    url.searchParams.set("callback", callback);
+    url.searchParams.set("_", String(Date.now()));
+    script.crossOrigin = "anonymous";
+    script.src = url.toString();
+    document.head.appendChild(script);
+  });
+}
+
+async function loginCoach(usuario, password) {
+  const solicitudId = nuevaSolicitudId();
+  await fetch(URL_API_COACH, {
+    method: "POST",
+    mode: "no-cors",
+    credentials: "omit",
+    cache: "no-store",
+    body: new URLSearchParams({
+      accion: "iniciarSesion", solicitudId, usuario, password
+    })
+  });
+
+  for (let i = 0; i < 13; i++) {
+    const respuesta = await respuestaLoginJSONP(solicitudId);
+    if (!respuesta || !respuesta.ok) {
+      throw new Error(respuesta?.error || "No se ha podido iniciar sesión.");
+    }
+    if (respuesta.estado === "error") {
+      throw new Error(respuesta.error || "Credenciales incorrectas.");
+    }
+    if (respuesta.estado === "ok") return respuesta;
+    await new Promise(resolve => setTimeout(resolve, 650));
+  }
+  throw new Error("No se pudo confirmar el inicio de sesión.");
+}
+
 document.addEventListener("DOMContentLoaded", () => {
-  const loginForm = document.getElementById("loginForm");
+  const form = document.getElementById("loginForm");
   const usuarioInput = document.getElementById("usuario");
   const passwordInput = document.getElementById("password");
-  const recuerdameCheckbox = document.getElementById("recuerdame");
+  const recuerda = document.getElementById("recuerdame");
+  const boton = document.getElementById("btnAceptar");
 
-  const SCRIPT_URL = "https://script.google.com/macros/s/AKfycbxdPBRk_cUzzhT-NkjLkjTIuzs_YUAC3z-R88p7Nh-KZK6YxREiue0ctho1c1pNabndaQ/exec"; 
-
-  const recordado = localStorage.getItem("Recuerdame") === "true";
-  if (recordado) {
+  // Se mantiene Recuérdame para el nombre, pero no la contraseña.
+  if (localStorage.getItem("Recuerdame") === "true") {
     usuarioInput.value = localStorage.getItem("Usuario") || "";
-    passwordInput.value = localStorage.getItem("Password") || "";
-    recuerdameCheckbox.checked = true;
+    recuerda.checked = true;
   }
+  localStorage.removeItem("Password");
 
-  loginForm.addEventListener("submit", async (e) => {
+  form.addEventListener("submit", async e => {
     e.preventDefault();
-
     const usuario = usuarioInput.value.trim().toUpperCase();
     const password = passwordInput.value.trim();
-
     if (!usuario || !password) {
-      alert("Por favor completa todos los campos");
+      alert("Introduce usuario y contraseña.");
       return;
     }
-
-    if (recuerdameCheckbox.checked) {
-      localStorage.setItem("Usuario", usuario);
-      localStorage.setItem("Password", password);
-      localStorage.setItem("Recuerdame", "true");
-    } else {
-      localStorage.removeItem("Usuario");
-      localStorage.removeItem("Password");
-      localStorage.removeItem("Recuerdame");
-    }
-
+    boton.disabled = true;
+    boton.textContent = "Conectando...";
     try {
-      const url = `${SCRIPT_URL}?accion=consultar&num=${encodeURIComponent(usuario)}`;
-      
-      const response = await fetch(url, {
-        method: "GET",
-        redirect: "follow"
-      });
-
-      if (!response.ok) {
-        throw new Error(`Error HTTP: ${response.status}`);
+      const datos = await loginCoach(usuario, password);
+      if (!datos.token || !Number.isFinite(Number(datos.exp))) {
+        throw new Error("El servidor no ha generado una sesión válida.");
       }
-
-      const data = await response.json();
-      let passRemota = "";
-
-      if (Array.isArray(data) && data.length > 0) {
-        const registro = data[0];
-
-        if (registro.columna2 !== undefined && registro.columna2 !== null) {
-          passRemota = String(registro.columna2).trim();
-        }
-
-        // Guardar Rol y Equipo por defecto desde el servidor
-        if (registro.columna3) {
-          localStorage.setItem("RolPorDefecto", String(registro.columna3).trim());
-        }
-        if (registro.columna4) {
-          localStorage.setItem("EquipoPorDefecto", String(registro.columna4).trim());
-        }
-      }
-
-      if (passRemota === password) {
-        window.location.href = `menu_principal.html?startValue=${encodeURIComponent(usuario)}`;
+      sessionStorage.setItem(CLAVE_SESION_COACH, JSON.stringify({
+        token: datos.token,
+        usuario: datos.usuario,
+        rol: datos.rol || "",
+        equipo: datos.equipo || "",
+        exp: Number(datos.exp)
+      }));
+      // Algunas pantallas existentes usan localStorage.Usuario durante
+      // la sesión. Se borra al cerrar si Recuérdame no está activo.
+      localStorage.setItem("Usuario", datos.usuario);
+      if (recuerda.checked) {
+        localStorage.setItem("Recuerdame", "true");
       } else {
-        alert("Verifica tus credenciales");
+        localStorage.removeItem("Recuerdame");
       }
-    } catch (error) {
-      console.error("Error de conexión:", error);
-      alert("Error al conectar con el servidor. Revisa tu conexión a internet.");
+      localStorage.setItem("RolPorDefecto", datos.rol || "");
+      localStorage.setItem("EquipoPorDefecto", datos.equipo || "");
+      passwordInput.value = "";
+      window.location.replace("menu_principal.html");
+    } catch (err) {
+      console.error("Fallo de autenticación:", err);
+      alert(err.message || "Error al iniciar sesión.");
+    } finally {
+      boton.disabled = false;
+      boton.textContent = "Aceptar";
     }
   });
 });
