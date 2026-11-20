@@ -13,6 +13,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCargaEquipo = document.getElementById("btnCargaEquipo");
   const btnCargaJugador = document.getElementById("btnCargaJugador");
   const btnLesion = document.getElementById("btnLesion");
+  const btnFinalizarLesion = document.getElementById("btnFinalizarLesion");
   const btnLogOut = document.getElementById("btnLogOut");
 
   // === INITIALIZE ===
@@ -123,6 +124,10 @@ document.addEventListener("DOMContentLoaded", () => {
 
   btnLesion.addEventListener("click", () => {
     guardarYRedirigir("Registrar lesión", "selector.html");
+  });
+
+  btnFinalizarLesion.addEventListener("click", () => {
+    guardarYRedirigir("Finalizar lesión", "finalizar_lesion.html");
   });
 
   btnLogOut.addEventListener("click", () => {

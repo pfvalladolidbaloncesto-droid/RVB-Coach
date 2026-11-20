@@ -1,0 +1,144 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#20c997">
+  <title>Finalizar lesión - Coach RVB</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0; padding: 15px; min-height: 100vh;
+      background: #f2f3f8; color: #273443;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif;
+    }
+    main {
+      width: 100%; max-width: 860px; margin: 0 auto; padding: 24px;
+      background: white; border-radius: 18px; box-shadow: 0 9px 26px #0000000a;
+    }
+    .cabecera { display: flex; align-items: center; gap: 13px; margin-bottom: 19px; }
+    .volver {
+      width: 35px; height: 35px; border: 1px solid #d8e0e7;
+      background: #f8fafb; border-radius: 9px; font-size: 21px; cursor: pointer;
+    }
+    h1 { margin: 0; font-size: 22px; }
+    .subtitulo { margin: 4px 0 0; font-size: 13px; color: #667687; }
+    h2 { font-size: 17px; margin: 0 0 12px; }
+    .bloque { margin-top: 16px; border: 1px solid #e2e7ed; border-radius: 11px; padding: 16px; }
+    .campos { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+    .ancho-completo { grid-column: 1 / -1; }
+    label { display: block; margin: 0 0 6px; font-size: 13px; font-weight: 700; }
+    input, select, textarea {
+      width: 100%; min-width: 0; border: 1px solid #ccd6e0; border-radius: 9px;
+      background: white; color: #263747; padding: 10px; font-size: 15px;
+    }
+    input, select { height: 44px; }
+    input[readonly] { background: #f5f7f9; }
+    textarea { min-height: 75px; resize: vertical; }
+    input:focus, select:focus, textarea:focus {
+      outline: 2px solid #9ae8cd; outline-offset: 1px;
+    }
+    button { cursor: pointer; }
+    .btn {
+      border: none; border-radius: 9px; padding: 12px 15px;
+      font-weight: 700; font-size: 14px; background: #20c997; color: white;
+    }
+    .btn:disabled { opacity: .5; cursor: wait; }
+    .fila-acceso { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: end; }
+    .nota { font-size: 12px; color: #6a7a8c; line-height: 1.5; margin: 10px 0 0; }
+    .estado { margin: 11px 0 0; color: #596d7d; font-size: 13px; line-height: 1.5; white-space: pre-wrap; }
+    .estado.error { color: #b13636; }
+    .estado.exito { color: #097653; }
+    .listado { display: grid; gap: 9px; }
+    .lesion {
+      width: 100%; padding: 12px; text-align: left; border: 1px solid #dce3e9;
+      border-radius: 10px; background: #fbfcfd; color: #273443;
+    }
+    .lesion:hover { border-color: #20c997; }
+    .lesion.activa { border-color: #13966e; background: #effbf6; box-shadow: inset 3px 0 #13966e; }
+    .lesion strong { display: block; font-size: 14px; margin-bottom: 4px; }
+    .lesion span { color: #637487; font-size: 13px; }
+    .seleccion-actual { color: #15795c; font-weight: 700; margin: 0 0 14px; font-size: 14px; }
+    .oculto { display: none !important; }
+    @media (max-width: 600px) {
+      body { padding: 8px; }
+      main { padding: 15px; }
+      .campos, .fila-acceso { grid-template-columns: 1fr; }
+      .ancho-completo { grid-column: 1; }
+      h1 { font-size: 20px; }
+      .btn { width: 100%; }
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <header class="cabecera">
+      <button class="volver" id="btn-volver" type="button" aria-label="Volver al menú">←</button>
+      <div>
+        <h1>Finalizar lesión</h1>
+        <p class="subtitulo">Coach RVB · Altas de lesiones pendientes</p>
+      </div>
+    </header>
+
+    <section class="bloque">
+      <div class="campos">
+        <div>
+          <label for="equipo">Equipo seleccionado</label>
+          <input id="equipo" readonly>
+        </div>
+        <div>
+          <label for="clave">Clave de entrenador del equipo</label>
+          <input id="clave" type="password" autocomplete="off" placeholder="Clave de acceso">
+        </div>
+      </div>
+      <button id="btn-cargar" class="btn" style="margin-top:12px" type="button">Cargar lesiones pendientes</button>
+      <p class="nota">La clave se comprueba en el servidor; no debe incluirse en los archivos de GitHub.</p>
+      <p id="estado-carga" class="estado" role="status" aria-live="polite"></p>
+    </section>
+
+    <section class="bloque" id="bloque-lista">
+      <h2>Lesiones pendientes</h2>
+      <div id="lista-lesiones" class="listado">
+        <p class="nota">Introduce la clave y pulsa «Cargar lesiones pendientes».</p>
+      </div>
+    </section>
+
+    <section class="bloque oculto" id="bloque-formulario">
+      <h2>Registrar alta</h2>
+      <p id="lesion-seleccionada" class="seleccion-actual"></p>
+      <form id="form-alta">
+        <div class="campos">
+          <div>
+            <label for="gravedad">Gravedad (1–5) *</label>
+            <select id="gravedad" required>
+              <option value="">Selecciona gravedad</option>
+              <option value="1">1</option><option value="2">2</option>
+              <option value="3">3</option><option value="4">4</option>
+              <option value="5">5</option>
+            </select>
+          </div>
+          <div>
+            <label for="fecha-alta">Fecha de alta *</label>
+            <input id="fecha-alta" type="date" required>
+          </div>
+          <div class="ancho-completo">
+            <label for="lesion">Lesión *</label>
+            <input id="lesion" type="text" maxlength="200" required placeholder="Diagnóstico / tipo de lesión">
+          </div>
+          <div class="ancho-completo">
+            <label for="descripcion">Descripción *</label>
+            <textarea id="descripcion" maxlength="2000" required></textarea>
+          </div>
+          <div class="ancho-completo">
+            <label for="observaciones">Observaciones (opcional)</label>
+            <textarea id="observaciones" maxlength="2000"></textarea>
+          </div>
+        </div>
+        <button id="btn-guardar" type="submit" class="btn" style="margin-top:15px">Guardar alta de lesión</button>
+        <p id="estado-guardar" class="estado" role="status" aria-live="polite"></p>
+      </form>
+    </section>
+  </main>
+  <script src="finalizar_lesion.js?v=1" defer></script>
+</body>
+</html>
