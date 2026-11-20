@@ -1,0 +1,27 @@
+COACH RVB — CORRECCIÓN DE PDF DE CARGA EQUIPO
+
+Sustituye SOLO estos cuatro archivos de la raíz de GitHub Pages:
+- informes_api.js
+- carga.js
+- carga.html
+- sw.js
+
+No necesitas modificar Apps Script: la escritura de B9 y B10 ya funciona.
+
+CAMBIOS
+- El enlace del PDF de equipo es el enlace COMPLETO original de la
+  macro PC() (incluidos los 12 valores null posteriores a 10000000).
+- No se añade attachment=true ni parámetros nuevos al enlace original.
+- Se abre el PDF en una pestaña independiente dentro del gesto de clic,
+  evitando los bloqueos de ventanas emergentes después de una petición async.
+- Se evita el iframe para informes de equipo: Google puede redirigirlo
+  al Spreadsheet, mostrando la pestaña inicial/bodymap.
+- Para descargar, se usa la opción de descarga del visor PDF del navegador.
+- El informe de jugador conserva el código anterior.
+
+LIMITACIONES
+- No es posible confirmar desde aquí que Google devuelva el PDF correcto
+  en la cuenta autenticada del staff. Prueba con un informe real.
+- Los enlaces /pdf de impresión son internos de Google y pueden cambiar.
+- El informe de equipo y el de jugador usan celdas compartidas, por lo
+  que los informes generados simultáneamente pueden interferirse.

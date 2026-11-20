@@ -51,6 +51,22 @@ document.addEventListener("DOMContentLoaded", () => {
     };
     const tipo = esJugador ? "jugador" : "equipo";
 
+    // Abrir la ventana dentro del clic original para que el navegador
+    // no bloquee el PDF cuando termine la petición asíncrona.
+    // Solo se aplica al informe de equipo.
+    let ventanaPdf = null;
+    if (!esJugador) {
+      ventanaPdf = window.open("about:blank", "_blank");
+      if (ventanaPdf) {
+        try {
+          ventanaPdf.document.title = "Preparando informe de equipo";
+          ventanaPdf.document.body.textContent =
+            "Preparando el informe de equipo...";
+          ventanaPdf.opener = null;
+        } catch (_) { /* La ventana puede haberse cerrado. */ }
+      }
+    }
+
     ocupado = true;
     boton.disabled = true;
     boton.textContent = "Preparando...";
@@ -74,11 +90,28 @@ document.addEventListener("DOMContentLoaded", () => {
       $("descargarPdfEquipo").href = RVBInformes.urlPdf(tipo, true);
       panel.hidden = false;
       $("contenedorCargaEquipo").classList.add("vista-abierta");
-      mensaje.textContent = "Informe actualizado. Puedes visualizarlo o descargarlo.";
+      // Las páginas de impresión /pdf de Google pueden redirigir un
+      // iframe a la primera pestaña. En equipo abrimos el PDF normal.
+      iframe.hidden = !esJugador;
+      iframe.removeAttribute("src");
       await new Promise(resolve => setTimeout(resolve, 700));
-      iframe.src = pdf;
+      if (esJugador) {
+        iframe.src = pdf;
+        mensaje.textContent = "Informe de jugador actualizado.";
+      } else {
+        if (ventanaPdf && !ventanaPdf.closed) {
+          ventanaPdf.location.replace(pdf);
+          mensaje.textContent =
+            "Informe actualizado. Se ha abierto el PDF en otra pestaña. " +
+            "Desde el visor puedes descargarlo.";
+        } else {
+          mensaje.textContent =
+            "Informe actualizado. Pulsa «Abrir PDF» para visualizarlo.";
+        }
+      }
       panel.scrollIntoView({ behavior: "smooth", block: "start" });
     } catch (error) {
+      if (ventanaPdf && !ventanaPdf.closed) ventanaPdf.close();
       console.error("Carga Equipo:", error);
       mensaje.textContent = error.message || "No se pudo preparar el informe.";
     } finally {

@@ -11,8 +11,8 @@
   <meta name="theme-color" content="#ffffff" />
   
   <link rel="stylesheet" href="style.css?v=3" />
-  <script src="informes_api.js?v=3" defer></script>
-  <script src="carga.js?v=4" defer></script>
+  <script src="informes_api.js?v=5" defer></script>
+  <script src="carga.js?v=5" defer></script>
   <style>
     .actions-container {
       display: flex;
@@ -106,13 +106,13 @@
       <p id="estadoCargaEquipo" class="estado-informe" role="status" aria-live="polite"></p>
 
       <section id="panelPdfEquipo" class="panel-pdf" hidden>
-        <h2>Vista previa del informe de equipo</h2>
+        <h2>Informe de equipo preparado</h2>
         <div class="pdf-acciones">
-          <a id="abrirPdfEquipo" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF en otra pestaña</a>
-          <a id="descargarPdfEquipo" class="descargar" href="#" target="_blank" rel="noopener noreferrer">Descargar PDF</a>
+          <a id="abrirPdfEquipo" href="#" target="_blank" rel="noopener noreferrer">Abrir PDF</a>
+          <a id="descargarPdfEquipo" class="descargar" href="#" target="_blank" rel="noopener noreferrer">Abrir para descargar</a>
         </div>
-        <iframe id="vistaPdfEquipo" class="visor-pdf" title="Vista previa PDF del informe de equipo" referrerpolicy="no-referrer"></iframe>
-        <p class="aviso-pdf">Si el visor aparece en blanco, pulsa «Abrir PDF en otra pestaña». El navegador debe tener acceso al documento de Google Sheets. La descarga es opcional.</p>
+        <iframe id="vistaPdfEquipo" class="visor-pdf" title="Vista previa PDF del informe de jugador" referrerpolicy="no-referrer" hidden></iframe>
+        <p class="aviso-pdf">El PDF del equipo se abre en el visor del navegador, no en un marco de la PWA. Para guardarlo, pulsa el icono de descarga del visor. «Abrir para descargar» utiliza exactamente el mismo enlace de impresión.</p>
       </section>
     </main>
   </div>
