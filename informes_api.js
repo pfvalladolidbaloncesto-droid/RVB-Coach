@@ -68,6 +68,7 @@
       }
       url.searchParams.set("callback", nombre);
       url.searchParams.set("_", String(Date.now()));
+      etiqueta.crossOrigin = "anonymous";
       etiqueta.src = url.toString();
       temporizador = setTimeout(() => terminar(new Error(
         "El Apps Script ha tardado demasiado en responder."
