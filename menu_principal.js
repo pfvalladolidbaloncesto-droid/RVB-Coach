@@ -16,6 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnCargaJugador = document.getElementById("btnCargaJugador");
   const btnLesion = document.getElementById("btnLesion");
   const btnFinalizarLesion = document.getElementById("btnFinalizarLesion");
+  const btnCambiarContrasena = document.getElementById("btnCambiarContrasena");
   const btnLogOut = document.getElementById("btnLogOut");
 
   // === INITIALIZE ===
@@ -138,6 +139,11 @@ document.addEventListener("DOMContentLoaded", () => {
 
   btnFinalizarLesion.addEventListener("click", () => {
     guardarYRedirigir("Finalizar lesión", "finalizar_lesion.html");
+  });
+
+  btnCambiarContrasena.addEventListener("click", () => {
+    // Este cambio usa el usuario autenticado, no el jugador ni el equipo.
+    window.location.href = "cambiar_contrasena.html";
   });
 
   btnLogOut.addEventListener("click", () => {

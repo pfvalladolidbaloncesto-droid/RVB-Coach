@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script src="sesion_guard.js?v=1"></script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="theme-color" content="#20c997" />
+  <title>Cambiar contraseña - Coach RVB</title>
+  <link rel="stylesheet" href="style.css?v=3" />
+  <style>
+    * { box-sizing: border-box; }
+    body { margin: 0; padding: 18px; background: #f2f3f8; color: #253344;
+           font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Arial, sans-serif; }
+    .panel { max-width: 540px; margin: 24px auto; background: #fff;
+             padding: 26px; border-radius: 16px; box-shadow: 0 6px 22px rgba(0,0,0,.08); }
+    h1 { font-size: 23px; color: #fff; background: #3b82f6;
+         padding: 15px; border-radius: 10px; text-align: center; margin: 0 0 20px; }
+    .usuario { margin: 0 0 20px; color: #516273; font-size: 14px; }
+    .campo { margin-bottom: 16px; }
+    label { display: block; font-weight: 700; margin-bottom: 7px; }
+    input { display: block; width: 100%; height: 46px; border: 1px solid #cfd8df;
+            border-radius: 8px; padding: 10px 12px; font-size: 16px; background: white; }
+    input:focus-visible { outline: 2px solid #20c997; outline-offset: 1px; }
+    .ayuda { color: #667889; font-size: 13px; margin: 6px 0 0; }
+    .acciones { display: flex; gap: 12px; margin-top: 24px; }
+    button { background: #20c997; color: white; border: none; border-radius: 9px;
+             padding: 14px; flex: 1; cursor: pointer; font-size: 15px; font-weight: 700; }
+    button:hover { background: #13a77b; }
+    button:disabled { opacity: .6; cursor: wait; }
+    .volver { background: #667889; }
+    .volver:hover { background: #4f6274; }
+    #estadoCambio { min-height: 1.4em; margin-top: 16px; line-height: 1.5; font-size: 14px; }
+    #estadoCambio.error { color: #b33232; }
+    #estadoCambio.exito { color: #116b4d; }
+    @media(max-width: 560px) { body { padding: 8px; } .panel { margin: 6px auto; padding: 17px; }
+                                  .acciones { flex-direction: column; } }
+  </style>
+</head>
+<body>
+  <main class="panel">
+    <h1>Cambiar contraseña</h1>
+    <p class="usuario">Cuenta conectada: <strong id="usuarioConectado">—</strong></p>
+    <form id="formCambiarContrasena" autocomplete="on">
+      <div class="campo">
+        <label for="passwordActual">Contraseña actual</label>
+        <input id="passwordActual" name="current-password" type="password"
+               autocomplete="current-password" required />
+      </div>
+      <div class="campo">
+        <label for="passwordNueva">Nueva contraseña</label>
+        <input id="passwordNueva" name="new-password" type="password"
+               autocomplete="new-password" minlength="8" maxlength="128" required />
+        <p class="ayuda">Mínimo 8 caracteres.</p>
+      </div>
+      <div class="campo">
+        <label for="passwordConfirmar">Repetir nueva contraseña</label>
+        <input id="passwordConfirmar" name="confirm-password" type="password"
+               autocomplete="new-password" minlength="8" maxlength="128" required />
+      </div>
+      <div class="acciones">
+        <button type="submit" id="btnGuardarContrasena">Guardar contraseña</button>
+        <button class="volver" type="button" id="btnVolverMenu">Volver al menú</button>
+      </div>
+      <p id="estadoCambio" role="status" aria-live="polite"></p>
+    </form>
+  </main>
+  <script src="cambiar_contrasena.js?v=1" defer></script>
+</body>
+</html>
