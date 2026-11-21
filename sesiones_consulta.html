@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <script src="sesion_guard.js?v=1"></script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="theme-color" content="#10b981">
+  <title>Consultar sesiones · Coach RVB</title>
+  <style>
+    *{box-sizing:border-box}
+    body{margin:0;background:#f3f4f8;color:#1f2937;font:15px system-ui,Segoe UI,Arial,sans-serif;padding:16px}
+    main{max-width:860px;margin:0 auto;background:white;border-radius:16px;box-shadow:0 8px 30px #1018280c;padding:22px}
+    header{display:flex;align-items:center;gap:14px;margin-bottom:18px}
+    header h1{font-size:23px;line-height:1.1;margin:0}
+    header p{margin:5px 0 0;font-size:13px;color:#667085}
+    .atras{border:1px solid #d4dbe4;border-radius:9px;background:#f8fafc;font-size:19px;padding:6px 12px;cursor:pointer}
+    .filtros{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+    .campo{min-width:0}
+    label{display:block;font-weight:700;font-size:13px;margin-bottom:7px}
+    select,input{width:100%;height:44px;padding:10px;border:1px solid #cbd5e1;border-radius:9px;background:#fff;color:#1f2937;font-size:15px}
+    input[readonly]{background:#f7f9fa}
+    .ayuda{font-size:13px;color:#667085;line-height:1.5;margin:12px 0}
+    .accion{border:0;border-radius:9px;background:#10b981;color:white;font-weight:700;font-size:15px;padding:13px 20px;cursor:pointer}
+    .accion:disabled{opacity:.5;cursor:wait}
+    .estado{font-size:13px;margin:13px 0;color:#475467;min-height:18px}
+    .estado.error{color:#b42318}
+    .estado.ok{color:#027a48}
+    #listado{display:grid;gap:10px;margin-top:16px}
+    article{border:1px solid #e1e7ed;border-radius:11px;padding:15px;background:#fff}
+    .fila{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;flex-wrap:wrap}
+    article strong{font-size:16px}
+    .tipo{display:inline-block;border-radius:99px;background:#e8f7ef;color:#07744d;font-weight:700;font-size:12px;padding:4px 9px}
+    .detalles{color:#5a6679;margin:8px 0 10px;font-size:14px}
+    .archivo{font-weight:700;color:#086d51;text-decoration:none}
+    .archivo:hover{text-decoration:underline}
+    .sinarchivo{color:#89929e;font-size:13px}
+    @media(max-width:640px){body{padding:8px}main{padding:15px}.filtros{grid-template-columns:1fr}header h1{font-size:20px}}
+  </style>
+  <script src="sesiones_consulta.js?v=1" defer></script>
+</head>
+<body>
+<main>
+  <header>
+    <button type="button" class="atras" id="volver" aria-label="Volver">←</button>
+    <div><h1 id="titulo">Sesiones Equipo</h1><p>Consulta las 6 sesiones más recientes</p></div>
+  </header>
+  <form id="filtros">
+    <div class="filtros">
+      <div class="campo"><label for="equipo">Equipo</label>
+        <select id="equipo" required>
+          <option>Infantil B</option><option>Infantil A</option><option>Cadete B</option><option>Cadete A</option>
+          <option>Junior B</option><option>Junior A</option><option>Filial</option><option>Desarrollo</option><option>Primer Equipo</option>
+        </select>
+      </div>
+      <div class="campo"><label for="entrenamiento">Entrenamiento</label>
+        <select id="entrenamiento"><option value="Todos">Todos</option><option value="Pista">Pista</option><option value="Físico">Físico</option></select>
+      </div>
+      <div class="campo"><label for="fecha">Hasta la fecha (incluida)</label><input id="fecha" type="date" required></div>
+    </div>
+    <div id="campo-jugador" class="campo" hidden style="margin-top:14px"><label for="jugador">Jugador</label><input id="jugador" type="text" readonly></div>
+    <p class="ayuda">Se consultan las seis últimas entradas hasta la fecha elegida. «Sesión» enlaza al documento de Drive cuando existe.</p>
+    <button class="accion" id="consultar" type="submit">Consultar sesiones</button>
+  </form>
+  <p id="estado" class="estado" role="status" aria-live="polite"></p>
+  <section id="listado" aria-label="Resultados"></section>
+</main>
+</body>
+</html>

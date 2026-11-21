@@ -1,9 +1,29 @@
-CORRECCION BOTON CARGA JUGADOR
+Coach RVB · Consulta de sesiones
 
-GitHub Pages: sustituye solo carga_jugador.html, carga_jugador.js y sw.js.
-Apps Script: no hay cambios nuevos respecto al que tenia code.gs con accion=pdfJugador y PDF_Jugador.gs.
-En la pagina debe verse inmediatamente el mensaje: Carga Jugador preparada ... (v30).
-Si no se ve, la version servida es antigua o el JS no se esta cargando.
-Si pulsas Ver informe, debe salir Boton detectado... y despues un mensaje de progreso o error.
-El PDF se genera desde Apps Script; rango E1:S110 de Informe jugadores.
-NO subas ningun .gs a GitHub.
+GitHub Pages (solo estos archivos):
+- menu_principal.html
+- menu_principal.js
+- selector.html
+- selector.js
+- sesiones_consulta.html (nuevo)
+- sesiones_consulta.js (nuevo)
+
+Apps Script: proyecto de LOGIN/FINALIZAR LESIONES
+  URL: https://script.google.com/macros/s/AKfycbyso6H_FvkRCOu5_y0BxX4pQMPvwpaxH12_lW2MJWyXgEGp4w49rnkvpy2xTBWbrLI33Q/exec
+- AppsScript_FinalizarLesion.gs: sustituir por la versión del ZIP (doGet incorpora una rama consultarSesiones).
+- SesionesConsulta.gs: añadir como archivo NUEVO al mismo proyecto.
+- Conservar todos los demás archivos .gs sin sustituir.
+- Ejecutar manualmente autorizarConsultaSesiones y conceder los permisos de Drive y Sheets.
+- Gestionar implementaciones > Editar > Nueva versión > Implementar en la MISMA implementación /exec.
+
+NO añadir estos archivos al proyecto de informes que utiliza code.gs y PDF_Equipo.gs; ese proyecto tiene su propio doGet.
+No modificar sesion.js ni las macros PDF.
+
+CRITERIOS DE CONSULTA:
+- Fecha seleccionada es fecha TOPE, inclusiva.
+- 6 registros más recientes de Sesion (A:E), filtrados por equipo y tipo (Todos/Pista/Físico).
+- Busca archivos con nombre EXACTO Equipo-AAAA-MM-DD y cualquier extensión en la carpeta correspondiente.
+- "Sesiones Jugador": interpretación provisional: se muestran sesiones de ese equipo que coincidan en fecha y entrenamiento con un registro de ese ID en RPE (E:H). Si el criterio deseado es distinto, hay que ajustar solo SesionesConsulta.gs.
+- El acceso a documentos depende de los permisos de lectura de Google Drive del entrenador que abre el enlace.
+
+No se ha probado contra la cuenta real de Google. Prueba primero con un equipo, fecha y documento de ejemplo conocidos.

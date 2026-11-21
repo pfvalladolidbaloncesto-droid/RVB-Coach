@@ -21,6 +21,8 @@ function obtenerPantallaDestino() {
       return "consultar_test.html";
     case "Carga Jugador":
       return "carga_jugador.html";
+    case "Sesiones Jugador":
+      return "sesiones_consulta.html?modo=jugador";
     default:
       return "screen2.html";
   }

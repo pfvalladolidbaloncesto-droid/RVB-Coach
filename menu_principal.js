@@ -10,6 +10,8 @@ document.addEventListener("DOMContentLoaded", () => {
   const btnRegistrarTest = document.getElementById("btnRegistrarTest");
   const btnConsultarTest = document.getElementById("btnConsultarTest");
   const btnSesion = document.getElementById("btnSesion");
+  const btnSesionesEquipo = document.getElementById("btnSesionesEquipo");
+  const btnSesionesJugador = document.getElementById("btnSesionesJugador");
   const btnCargaEquipo = document.getElementById("btnCargaEquipo");
   const btnCargaJugador = document.getElementById("btnCargaJugador");
   const btnLesion = document.getElementById("btnLesion");
@@ -120,6 +122,14 @@ document.addEventListener("DOMContentLoaded", () => {
 
   btnSesion.addEventListener("click", () => {
     guardarYRedirigir("Sesión", "sesion.html");
+  });
+
+  btnSesionesEquipo.addEventListener("click", () => {
+    guardarYRedirigir("Sesiones Equipo", "sesiones_consulta.html?modo=equipo");
+  });
+
+  btnSesionesJugador.addEventListener("click", () => {
+    guardarYRedirigir("Sesiones Jugador", "selector.html");
   });
 
   btnLesion.addEventListener("click", () => {
