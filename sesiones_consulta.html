@@ -34,9 +34,15 @@
     .archivo{font-weight:700;color:#086d51;text-decoration:none}
     .archivo:hover{text-decoration:underline}
     .sinarchivo{color:#89929e;font-size:13px}
+    .datos-jugador{display:flex;gap:26px;flex-wrap:wrap;margin:14px 0 12px;align-items:center}
+    .dato-rpe,.dato-duracion{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+    .dato-label{font-size:13px;font-weight:700;color:#667085}
+    .valor-rpe{display:inline-block;padding:5px 10px;border:1px solid #cbd5e1;border-radius:8px;font-weight:800;min-width:55px;text-align:center}
+    .escala-rpe{position:relative;width:115px;height:10px;border-radius:10px;background:linear-gradient(to right,#22c55e 0%,#eab308 50%,#ef4444 100%);margin:0 7px}
+    .marca-rpe{position:absolute;top:50%;width:15px;height:15px;border-radius:50%;border:3px solid #1f2937;background:#fff;transform:translate(-50%,-50%);box-shadow:0 1px 3px #0003}
     @media(max-width:640px){body{padding:8px}main{padding:15px}.filtros{grid-template-columns:1fr}header h1{font-size:20px}}
   </style>
-  <script src="sesiones_consulta.js?v=1" defer></script>
+  <script src="sesiones_consulta.js?v=2" defer></script>
 </head>
 <body>
 <main>
@@ -58,7 +64,7 @@
       <div class="campo"><label for="fecha">Hasta la fecha (incluida)</label><input id="fecha" type="date" required></div>
     </div>
     <div id="campo-jugador" class="campo" hidden style="margin-top:14px"><label for="jugador">Jugador</label><input id="jugador" type="text" readonly></div>
-    <p class="ayuda">Se consultan las seis últimas entradas hasta la fecha elegida. «Sesión» enlaza al documento de Drive cuando existe.</p>
+    <p class="ayuda" id="ayuda-filtros">Se consultan las seis últimas entradas hasta la fecha elegida. «Sesión» enlaza al documento de Drive cuando existe.</p>
     <button class="accion" id="consultar" type="submit">Consultar sesiones</button>
   </form>
   <p id="estado" class="estado" role="status" aria-live="polite"></p>

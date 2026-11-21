@@ -47,43 +47,111 @@ const URL_API_SESIONES =
     });
   }
 
+  function ponerEnlaceDocumento(articulo, r) {
+    if (r.documento && r.documento.url) {
+      const a = document.createElement("a");
+      a.className = "archivo";
+      a.href = r.documento.url;
+      a.target = "_blank";
+      a.rel = "noopener noreferrer";
+      a.textContent = "Abrir sesión · " + r.documento.nombre;
+      articulo.appendChild(a);
+    } else {
+      const span = document.createElement("span");
+      span.className = "sinarchivo";
+      span.textContent = "Sin documento de sesión en Drive";
+      articulo.appendChild(span);
+    }
+  }
+
   function renderizar(registros) {
     const area = $("listado");
     area.replaceChildren();
     if (!registros.length) {
-      const p=document.createElement("p");
-      p.className="ayuda";
-      p.textContent="No hay sesiones que coincidan con los filtros.";
+      const p = document.createElement("p");
+      p.className = "ayuda";
+      p.textContent = "No hay sesiones que coincidan con los filtros.";
       area.appendChild(p);
       return;
     }
-    for(const r of registros) {
-      const articulo=document.createElement("article");
-      const primera=document.createElement("div"); primera.className="fila";
-      const titulo=document.createElement("strong"); titulo.textContent=r.fechaTexto + " · " + r.equipo;
-      const tipo=document.createElement("span"); tipo.className="tipo";tipo.textContent=r.entrenamiento;
-      primera.append(titulo,tipo);
-      const detalles=document.createElement("p");detalles.className="detalles";
-      detalles.textContent="Duración: " + (r.volumen === "" ? "Sin indicar" : r.volumen + " min");
-      articulo.append(primera,detalles);
-      if(r.documento && r.documento.url){
-        const a=document.createElement("a");
-        a.className="archivo";
-        a.href=r.documento.url;
-        a.target="_blank";a.rel="noopener noreferrer";
-        a.textContent="Abrir sesión · " + r.documento.nombre;
-        articulo.appendChild(a);
-      }else{
-        const span=document.createElement("span");span.className="sinarchivo";
-        span.textContent="Sin documento de sesión en Drive";
-        articulo.appendChild(span);
+    for (const r of registros) {
+      const articulo = document.createElement("article");
+      const primera = document.createElement("div");
+      primera.className = "fila";
+      const titulo = document.createElement("strong");
+      titulo.textContent = r.fechaTexto + " · " + r.equipo;
+      const tipo = document.createElement("span");
+      tipo.className = "tipo";
+      tipo.textContent = r.entrenamiento;
+      primera.append(titulo, tipo);
+      articulo.appendChild(primera);
+
+      if (modo === "jugador") {
+        // RPE individual (escala verde -> amarillo -> rojo, 0 a 10).
+        const datos = document.createElement("div");
+        datos.className = "datos-jugador";
+        const bloqueRpe = document.createElement("div");
+        bloqueRpe.className = "dato-rpe";
+        const labelRpe = document.createElement("span");
+        labelRpe.className = "dato-label";
+        labelRpe.textContent = "RPE";
+        const valorRpe = document.createElement("span");
+        valorRpe.className = "valor-rpe";
+        const numero = r.rpe === "" || r.rpe === null || r.rpe === undefined
+          ? NaN : Number(r.rpe);
+
+        if (Number.isFinite(numero) && numero >= 0 && numero <= 10) {
+          const redondeado = Number(numero.toFixed(1));
+          valorRpe.textContent = redondeado + "/10";
+          // Fondo tenue de verde a rojo; el número sigue siendo legible.
+          const tono = 120 * (1 - numero / 10);
+          valorRpe.style.backgroundColor = `hsl(${tono} 75% 91%)`;
+          valorRpe.style.borderColor = `hsl(${tono} 65% 46%)`;
+          valorRpe.style.color = "#1f2937";
+
+          const medidor = document.createElement("div");
+          medidor.className = "escala-rpe";
+          medidor.setAttribute("role", "img");
+          medidor.setAttribute("aria-label", `RPE ${redondeado} de 10`);
+          const marca = document.createElement("span");
+          marca.className = "marca-rpe";
+          marca.style.left = `${numero * 10}%`;
+          medidor.appendChild(marca);
+          bloqueRpe.append(labelRpe, valorRpe, medidor);
+        } else {
+          valorRpe.textContent = r.rpe === "" || r.rpe == null ? "—" : String(r.rpe);
+          bloqueRpe.append(labelRpe, valorRpe);
+        }
+
+        const bloqueDuracion = document.createElement("div");
+        bloqueDuracion.className = "dato-duracion";
+        const labelDuracion = document.createElement("span");
+        labelDuracion.className = "dato-label";
+        labelDuracion.textContent = "Duración";
+        const duracion = document.createElement("strong");
+        duracion.textContent = r.duracion === "" || r.duracion === null || r.duracion === undefined
+          ? "Sin indicar" : r.duracion + " min";
+        bloqueDuracion.append(labelDuracion, duracion);
+        datos.append(bloqueRpe, bloqueDuracion);
+        articulo.appendChild(datos);
+      } else {
+        // Sesiones Equipo: conservar exactamente sus datos anteriores.
+        const detalles = document.createElement("p");
+        detalles.className = "detalles";
+        detalles.textContent = "Duración: " +
+          (r.volumen === "" ? "Sin indicar" : r.volumen + " min");
+        articulo.appendChild(detalles);
       }
+      ponerEnlaceDocumento(articulo, r);
       area.appendChild(articulo);
     }
   }
 
   document.addEventListener("DOMContentLoaded",()=>{
     $("titulo").textContent=modo==="jugador"?"Sesiones Jugador":"Sesiones Equipo";
+    $("ayuda-filtros").textContent = modo === "jugador"
+      ? "Últimos 6 registros de RPE del jugador hasta la fecha elegida. La duración procede de RPE (Pista/Físico) y «Abrir sesión» muestra el archivo colectivo de Drive, si existe."
+      : "Se consultan las seis últimas entradas hasta la fecha elegida. «Sesión» enlaza al documento de Drive cuando existe.";
     const eq=localStorage.getItem("Equipo")||localStorage.getItem("equipoUsuario")||"";
     if([...$("equipo").options].some(o=>o.value===eq)) $("equipo").value=eq;
     $("entrenamiento").value="Todos";
@@ -106,7 +174,9 @@ const URL_API_SESIONES =
       $("consultar").disabled=true;
       $("consultar").textContent="Consultando...";
       $("listado").replaceChildren();
-      mensaje("Buscando las últimas sesiones y sus documentos en Drive...");
+      mensaje(modo === "jugador"
+        ? "Buscando las últimas entradas de RPE y sus documentos en Drive..."
+        : "Buscando las últimas sesiones y sus documentos en Drive...");
       try{
         const respuesta=await pedirSesiones({
           token:sesion.token,
@@ -120,7 +190,7 @@ const URL_API_SESIONES =
         renderizar(respuesta.registros||[]);
         mensaje(`${(respuesta.registros||[]).length} sesión(es) encontrada(s).`,"ok");
       }catch(err){
-        mensaje(err.message||"No se pudo consultar la hoja Sesion.","error");
+        mensaje(err.message||"No se pudieron consultar los registros.","error");
       }finally{
         ocupado=false;
         $("consultar").disabled=false;
