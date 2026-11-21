@@ -132,7 +132,27 @@ const URL_API_SESIONES =
         duracion.textContent = r.duracion === "" || r.duracion === null || r.duracion === undefined
           ? "Sin indicar" : r.duracion + " min";
         bloqueDuracion.append(labelDuracion, duracion);
-        datos.append(bloqueRpe, bloqueDuracion);
+
+        // Estatus procede de la columna J de RPE (no de I, que es el RPE).
+        const bloqueEstatus = document.createElement("div");
+        bloqueEstatus.className = "dato-estatus";
+        const labelEstatus = document.createElement("span");
+        labelEstatus.className = "dato-label";
+        labelEstatus.textContent = "Estatus";
+        const valorEstatus = document.createElement("span");
+        valorEstatus.className = "valor-estatus";
+        const estatusTexto = String(r.estatus == null ? "" : r.estatus).trim();
+        valorEstatus.textContent = estatusTexto || "Sin indicar";
+        const estatusClave = estatusTexto.normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .toLowerCase();
+        if (estatusClave === "completo") valorEstatus.classList.add("estatus-completo");
+        else if (estatusClave === "limitado") valorEstatus.classList.add("estatus-limitado");
+        else if (estatusClave === "lesionado") valorEstatus.classList.add("estatus-lesionado");
+        else if (estatusClave === "ausente") valorEstatus.classList.add("estatus-ausente");
+        bloqueEstatus.append(labelEstatus, valorEstatus);
+
+        datos.append(bloqueRpe, bloqueEstatus, bloqueDuracion);
         articulo.appendChild(datos);
       } else {
         // Sesiones Equipo: conservar exactamente sus datos anteriores.
@@ -150,7 +170,7 @@ const URL_API_SESIONES =
   document.addEventListener("DOMContentLoaded",()=>{
     $("titulo").textContent=modo==="jugador"?"Sesiones Jugador":"Sesiones Equipo";
     $("ayuda-filtros").textContent = modo === "jugador"
-      ? "Últimos 6 registros de RPE del jugador hasta la fecha elegida. La duración procede de RPE (Pista/Físico) y «Abrir sesión» muestra el archivo colectivo de Drive, si existe."
+      ? "Últimos 6 registros de RPE del jugador hasta la fecha elegida. Muestra RPE, estatus (columna J), duración individual y el documento colectivo de Drive, si existe."
       : "Se consultan las seis últimas entradas hasta la fecha elegida. «Sesión» enlaza al documento de Drive cuando existe.";
     const eq=localStorage.getItem("Equipo")||localStorage.getItem("equipoUsuario")||"";
     if([...$("equipo").options].some(o=>o.value===eq)) $("equipo").value=eq;
