@@ -1,5 +1,4 @@
-const CACHE_NAME = "coach-rvb-v31-volumen-lesionados";
-
+const CACHE_NAME = "coach-rvb-v32-volumen-lesionados";
 const ASSETS = [
   "./",
   "./index.html",
