@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="es">
 <head>
@@ -6,6 +7,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Sesión</title>
+
   <style>
     body {
       font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
@@ -17,6 +19,7 @@
       align-items: center;
       min-height: 100vh;
     }
+
     .card {
       background: #ffffff;
       padding: 30px;
@@ -26,18 +29,21 @@
       max-width: 420px;
       box-sizing: border-box;
     }
+
     .header-container {
       display: flex;
       justify-content: space-between;
       align-items: center;
       margin-bottom: 24px;
     }
+
     .header-container h2 {
       margin: 0;
       font-size: 22px;
       font-weight: 700;
       color: #111;
     }
+
     .btn-atras {
       background-color: #10b981;
       color: white;
@@ -48,9 +54,11 @@
       cursor: pointer;
       font-size: 14px;
     }
+
     .form-group {
       margin-bottom: 16px;
     }
+
     .form-group label {
       display: block;
       font-size: 14px;
@@ -58,6 +66,7 @@
       color: #374151;
       margin-bottom: 6px;
     }
+
     .form-group input {
       width: 100%;
       padding: 10px 12px;
@@ -67,25 +76,46 @@
       box-sizing: border-box;
       background-color: #f9fafb;
     }
+
     .form-group input:disabled {
       background-color: #f3f4f6;
       color: #6b7280;
     }
+
     .file-upload-container {
       display: flex;
       align-items: center;
       gap: 12px;
     }
-    .btn-foto {
-      background-color: #3b82f6;
+
+    .btn-foto,
+    .btn-documento {
+      flex: 1;
       color: white;
       border: none;
-      padding: 9px 16px;
+      padding: 10px 12px;
       border-radius: 8px;
       font-weight: 600;
       cursor: pointer;
       font-size: 14px;
     }
+
+    .btn-foto {
+      background-color: #3b82f6;
+    }
+
+    .btn-documento {
+      background-color: #6366f1;
+    }
+
+    .btn-foto:hover {
+      background-color: #2563eb;
+    }
+
+    .btn-documento:hover {
+      background-color: #4f46e5;
+    }
+
     .btn-enviar {
       width: 100%;
       background-color: #10b981;
@@ -98,65 +128,184 @@
       cursor: pointer;
       margin-top: 10px;
     }
+
     .btn-enviar:hover {
       background-color: #059669;
     }
+
+    button:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
     #Imagen1 {
       border-radius: 8px;
-      max-height: 50px;
+      max-height: 80px;
+      max-width: 80px;
+      object-fit: contain;
       border: 1px solid #e5e7eb;
+    }
+
+    .archivo-seleccionado {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      background-color: #f3f4f6;
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      margin-top: 12px;
+      padding: 10px;
+    }
+
+    .archivo-seleccionado[hidden] {
+      display: none;
+    }
+
+    .info-archivo {
+      flex: 1;
+      min-width: 0;
+      overflow-wrap: anywhere;
+      font-size: 13px;
+      color: #374151;
+    }
+
+    #tamanoArchivo {
+      color: #6b7280;
+      font-size: 12px;
+      margin-top: 4px;
+    }
+
+    .btn-eliminar {
+      background: none;
+      border: none;
+      font-size: 20px;
+      color: #ef4444;
+      cursor: pointer;
     }
   </style>
 </head>
+
 <body>
 
   <div class="card" id="sesion-screen">
+
     <div class="header-container">
       <button id="Menú" class="btn-atras">← Atrás</button>
       <h2>SESIÓN</h2>
     </div>
-    
+
     <div class="form-group">
       <label for="SelectorDeFecha1">Fecha</label>
       <input type="date" id="SelectorDeFecha1">
     </div>
-    
+
     <div class="form-group">
       <label for="Entrenamiento1">Entrenamiento</label>
       <input type="text" id="Entrenamiento1" disabled>
     </div>
-    
+
     <div class="form-group">
       <label for="Equipo">Equipo</label>
       <input type="text" id="Equipo" disabled>
     </div>
-    
+
     <div class="form-group">
       <label for="Duracion">Duración (min)</label>
-      <input type="number" id="Duracion">
+      <input type="number" id="Duracion" min="1" step="1">
     </div>
-    
+
     <div class="form-group">
+
       <label>Archivo / Foto</label>
+
       <div class="file-upload-container">
-        <button id="Foto" class="btn-foto">📷 Foto</button>
-        <img id="Imagen1" alt="Preview" style="display:none;" />
-        <input type="file" id="inputFileFoto" accept="image/*" capture="environment" style="display:none;">
+
+        <button id="Foto" class="btn-foto">
+          📷 Foto
+        </button>
+
+        <button id="Documento" class="btn-documento">
+          📄 Documento
+        </button>
+
+        <input
+          type="file"
+          id="inputFileFoto"
+          accept="image/*"
+          capture="environment"
+          style="display:none;"
+        >
+
+        <input
+          type="file"
+          id="inputFileDocumento"
+          accept=".pdf,.doc,.docx,.xls,.xlsx,.ppt,.pptx,.txt,.csv,.odt,.ods,.odp,.rtf"
+          style="display:none;"
+        >
+
       </div>
+
+      <div
+        id="archivoSeleccionadoPanel"
+        class="archivo-seleccionado"
+        hidden
+      >
+
+        <img
+          id="Imagen1"
+          alt="Vista previa"
+          style="display:none;"
+        >
+
+        <span id="iconoDocumento" style="display:none;">
+          📄
+        </span>
+
+        <div class="info-archivo">
+          <div id="nombreArchivo"></div>
+          <div id="tamanoArchivo"></div>
+        </div>
+
+        <button
+          id="eliminarArchivo"
+          class="btn-eliminar"
+          aria-label="Eliminar archivo"
+        >
+          ×
+        </button>
+
+      </div>
+
     </div>
-    
-    <button id="Enviar" class="btn-enviar">Subir sesión</button>
+
+    <button id="Enviar" class="btn-enviar">
+      Subir sesión
+    </button>
+
   </div>
 
-  <!-- ELEMENTOS OCULTOS PARA ENVIAR LA FOTO A GOOGLE DRIVE -->
-  <iframe name="hidden_iframe" id="hidden_iframe" style="display:none;"></iframe>
-  <form id="formOcultoDrive" action="https://script.google.com/macros/s/AKfycbx3F2GN42yBilThhMzm6tURPXvSlS4Sm5NQaKXeRO3VuvQ3aHelvgfjtk0_LkgQfVOWFg/exec" method="POST" target="hidden_iframe" style="display:none;">
-      <input type="hidden" name="data" id="inputDataImg">
-      <input type="hidden" name="filename" id="inputFilename">
-      <input type="hidden" name="mimetype" id="inputMimetype">
-      <input type="hidden" name="folderId" id="inputFolderId" value="">
+  <!-- ENVÍO DEL ARCHIVO A GOOGLE DRIVE -->
+
+  <iframe
+    name="hidden_iframe"
+    id="hidden_iframe"
+    style="display:none;"
+  ></iframe>
+
+  <form
+    id="formOcultoDrive"
+    action="https://script.google.com/macros/s/AKfycbx3F2GN42yBilThhMzm6tURPXvSlS4Sm5NQaKXeRO3VuvQ3aHelvgfjtk0_LkgQfVOWFg/exec"
+    method="POST"
+    target="hidden_iframe"
+    style="display:none;"
+  >
+    <input type="hidden" name="data" id="inputDataImg">
+    <input type="hidden" name="filename" id="inputFilename">
+    <input type="hidden" name="mimetype" id="inputMimetype">
+    <input type="hidden" name="folderId" id="inputFolderId">
   </form>
 
-  <script src="sesion.js"></script>
+  <script src="sesion.js?v=2"></script>
+
 </body>
 </html>
