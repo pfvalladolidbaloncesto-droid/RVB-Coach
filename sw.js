@@ -1,4 +1,4 @@
-const CACHE_NAME = "coach-rvb-v30-pdf-jugador-autonomo";
+const CACHE_NAME = "coach-rvb-v31-volumen-lesionados";
 
 const ASSETS = [
   "./",
@@ -18,6 +18,10 @@ const ASSETS = [
   "./carga.js",
   "./carga_jugador.html",
   "./carga_jugador.js",
+  "./volumen_lesionados.html",
+  "./volumen_lesionados.js",
+  "./sesiones_consulta.html",
+  "./sesiones_consulta.js",
   "./manifest.json",
   "./cbc.png"
 ];

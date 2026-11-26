@@ -178,6 +178,7 @@ const URL_API_SESIONES =
     $("fecha").value=hoyLocal();
     const jugador=String(localStorage.getItem("User")||localStorage.getItem("jugadorSeleccionado")||"").trim();
     if(modo==="jugador"){
+      $("equipo").prepend(new Option("Todos", "Todos"));
       $("campo-jugador").hidden=false;
       $("jugador").value=jugador;
       if(!jugador) mensaje("Selecciona un jugador desde el menú.","error");

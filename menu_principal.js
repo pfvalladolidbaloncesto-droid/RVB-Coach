@@ -133,6 +133,8 @@ document.addEventListener("DOMContentLoaded", () => {
     guardarYRedirigir("Sesiones Jugador", "selector.html");
   });
 
+  document.getElementById("btnVolumenLesionados").addEventListener("click", () => guardarYRedirigir("Volumen lesionados", "selector.html"));
+
   btnLesion.addEventListener("click", () => {
     guardarYRedirigir("Registrar lesión", "selector.html");
   });

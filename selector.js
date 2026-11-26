@@ -21,6 +21,8 @@ function obtenerPantallaDestino() {
       return "consultar_test.html";
     case "Carga Jugador":
       return "carga_jugador.html";
+    case "Volumen lesionados":
+      return "volumen_lesionados.html";
     case "Sesiones Jugador":
       return "sesiones_consulta.html?modo=jugador";
     default:
