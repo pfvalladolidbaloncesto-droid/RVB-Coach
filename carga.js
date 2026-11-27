@@ -165,7 +165,7 @@ document.addEventListener("DOMContentLoaded", () => {
       nuevoValorB10: fecha,
 
       // NUEVO PARÁMETRO
-      nuevoValorC11: ultimosDias
+      nuevoValorB11: ultimosDias
 
     };
 
@@ -224,8 +224,8 @@ document.addEventListener("DOMContentLoaded", () => {
         (
           respuesta.numB9 !== equipo ||
           respuesta.numB10 !== fecha ||
-          respuesta.numC11 === undefined ||
-          String(respuesta.numC11) !== ultimosDias
+          respuesta.numB11 === undefined ||
+          String(respuesta.numB11) !== ultimosDias
         )
       ) {
         throw new Error(
